@@ -9,6 +9,7 @@
                 <GradientStop Color="Black" Offset="0"/>
                 <GradientStop Color="#FF2C0D51" Offset="1"/>
             </LinearGradientBrush>
+            <SolidColorBrush x:Key="ToolBarTrayBackground" Color="#FF19082E"/>
         </ResourceDictionary>
          
     </Application.Resources>
