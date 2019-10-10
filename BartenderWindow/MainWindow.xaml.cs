@@ -24,5 +24,30 @@ namespace BartenderWindow
         {
             InitializeComponent();
         }
+
+        private void NewMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void OpenMenuItme_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void SaveMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void SaveAsMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void ExitMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

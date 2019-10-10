@@ -4,6 +4,12 @@
              xmlns:local="clr-namespace:BartenderWindow"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
+        <ResourceDictionary>
+            <LinearGradientBrush x:Key="PurpleBackgroundBrush" EndPoint="0.5,1" StartPoint="0.5,0">
+                <GradientStop Color="Black" Offset="0"/>
+                <GradientStop Color="#FF2C0D51" Offset="1"/>
+            </LinearGradientBrush>
+        </ResourceDictionary>
          
     </Application.Resources>
 </Application>

@@ -5,8 +5,21 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BartenderWindow"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="NIST Bartender" Height="450" Width="800" Background="{DynamicResource PurpleBackgroundBrush}">
     <Grid>
+        <DockPanel LastChildFill="False">
+            <Menu x:Name="mainMenu" DockPanel.Dock="Top" VerticalAlignment="Top" HorizontalAlignment="Stretch">
+                <MenuItem Header="_File">
+                    <MenuItem x:Name="newMenuItem" Header="New" Click="NewMenuItem_Click"/>
+                    <MenuItem x:Name="openMenuItme" Header="Open" Click="OpenMenuItme_Click"/>
+                    <MenuItem x:Name="saveMenuItem" Header="Save" Click="SaveMenuItem_Click" />
+                    <MenuItem x:Name="saveAsMenuItem" Header="Save As..." Click="SaveAsMenuItem_Click" />
+                    <Separator />
+                    <MenuItem x:Name="exitMenuItem" Header="Exit" Click="ExitMenuItem_Click" />
+                </MenuItem>
+
+            </Menu>
+        </DockPanel>
 
     </Grid>
 </Window>
