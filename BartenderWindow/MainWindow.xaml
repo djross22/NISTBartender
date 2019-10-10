@@ -7,6 +7,11 @@
         mc:Ignorable="d"
         Title="NIST Bartender" Height="450" Width="800" Background="{DynamicResource PurpleBackgroundBrush}">
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="8*"/>
+            <RowDefinition Height="3*"/>
+        </Grid.RowDefinitions>
         <DockPanel LastChildFill="False">
             <Menu x:Name="mainMenu" DockPanel.Dock="Top" VerticalAlignment="Top" HorizontalAlignment="Stretch">
                 <MenuItem Header="_File">
@@ -19,12 +24,43 @@
                 </MenuItem>
 
             </Menu>
-            <ToolBarTray VerticalAlignment="Top" DockPanel.Dock="Top" Background="{DynamicResource ToolBarTrayBackground}">
+            <ToolBarTray DockPanel.Dock="Top" Background="{DynamicResource ToolBarTrayBackground}">
                 <ToolBar VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="10,0,10,0">
-                    <Button x:Name="reverseComplementButton" Content="Copy Reverse Complement" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ToolTip="Copy Reverse Complement sequence to Reverse Read Box"/>
+                    <Button x:Name="reverseComplementButton" Content="Copy Reverse Complement" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ToolTip="Copy Reverse Complement sequence to Reverse Read Sequence box" Click="reverseComplementButton_Click"/>
                 </ToolBar>
             </ToolBarTray>
         </DockPanel>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="18"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="18"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="2*"/>
+                </Grid.RowDefinitions>
+                <RichTextBox x:Name="forwardRichTextBox" Margin="10,0,10,5" FontFamily="Courier New" Grid.Row="1">
+                    <FlowDocument>
+                        <Paragraph>
+                            <Run Text="RichTextBox"/>
+                        </Paragraph>
+                    </FlowDocument>
+                </RichTextBox>
+                <RichTextBox x:Name="reverseRichTextBox" Margin="10,0,10,5" FontFamily="Courier New" Grid.Row="3">
+                    <FlowDocument>
+                        <Paragraph>
+                            <Run Text="RichTextBox"/>
+                        </Paragraph>
+                    </FlowDocument>
+                </RichTextBox>
+                <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Forward Read Sequence:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White"/>
+                <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Reverse Read Sequence:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" Grid.Row="2"/>
+            </Grid>
+        </Grid>
 
     </Grid>
 </Window>

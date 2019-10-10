@@ -25,6 +25,37 @@ namespace BartenderWindow
             InitializeComponent();
         }
 
+        static string ReverseComplement(string inputSequence)
+        {
+            string outputString = inputSequence.TrimEnd('\r', '\n');
+            outputString = RemoveStringWhitespace(outputString);
+
+            outputString = outputString.ToLower();
+
+            outputString = outputString.Replace('a', 'T');
+            outputString = outputString.Replace('t', 'A');
+            outputString = outputString.Replace('g', 'C');
+            outputString = outputString.Replace('c', 'G');
+
+            outputString = outputString.ToUpper();
+
+            char[] charArray = outputString.ToCharArray();
+            Array.Reverse(charArray);
+            return new string(charArray);
+        }
+
+        static string RemoveStringWhitespace(string input)
+        {
+            string output = new string(input.ToCharArray()
+                .Where(c => !Char.IsWhiteSpace(c))
+                .ToArray());
+
+            output = output.Replace("\n", "");
+            output = output.Replace("\r", "");
+
+            return output;
+        }
+
         private void NewMenuItem_Click(object sender, RoutedEventArgs e)
         {
 
@@ -48,6 +79,30 @@ namespace BartenderWindow
         private void ExitMenuItem_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private void reverseComplementButton_Click(object sender, RoutedEventArgs e)
+        {
+            clearWhiteSpaces();
+
+            TextRange textRange = new TextRange(forwardRichTextBox.Document.ContentStart, forwardRichTextBox.Document.ContentEnd);
+            string forwardSequence = textRange.Text;
+
+            string reverseSequence = ReverseComplement(forwardSequence);
+
+            textRange = new TextRange(reverseRichTextBox.Document.ContentStart, reverseRichTextBox.Document.ContentEnd);
+            textRange.Text = reverseSequence;
+        }
+
+        private void clearWhiteSpaces()
+        {
+            TextRange textRange;
+
+            textRange = new TextRange(forwardRichTextBox.Document.ContentStart, forwardRichTextBox.Document.ContentEnd);
+            textRange.Text = RemoveStringWhitespace(textRange.Text);
+
+            textRange = new TextRange(reverseRichTextBox.Document.ContentStart, reverseRichTextBox.Document.ContentEnd);
+            textRange.Text = RemoveStringWhitespace(textRange.Text);
         }
     }
 }
