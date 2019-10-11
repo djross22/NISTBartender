@@ -80,6 +80,7 @@ namespace BartenderWindow
         public MainWindow()
         {
             InitializeComponent();
+            CopyReverseComplement();
             ReadLengthStr = "150";
 
             DataContext = this;
@@ -202,6 +203,11 @@ namespace BartenderWindow
         }
 
         private void reverseComplementButton_Click(object sender, RoutedEventArgs e)
+        {
+            CopyReverseComplement();
+        }
+
+        private void CopyReverseComplement()
         {
             clearWhiteSpaces();
 
