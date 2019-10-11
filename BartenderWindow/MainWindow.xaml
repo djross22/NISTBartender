@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BartenderWindow"
         mc:Ignorable="d"
-        Title="NIST Bartender" Height="450" Width="800" Background="{DynamicResource PurpleBackgroundBrush}">
+        Title="NIST Bartender" Height="600" Width="900" Background="{DynamicResource PurpleBackgroundBrush}" MinWidth="900" MinHeight="600">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
@@ -26,7 +26,8 @@
             </Menu>
             <ToolBarTray DockPanel.Dock="Top" Background="{DynamicResource ToolBarTrayBackground}">
                 <ToolBar VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="10,0,10,0">
-                    <Button x:Name="reverseComplementButton" Content="Copy Reverse Complement" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ToolTip="Copy Reverse Complement sequence to Reverse Read Sequence box" Click="reverseComplementButton_Click"/>
+                    <Button x:Name="reverseComplementButton" Content="Copy Reverse Complement" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ToolTip="Copy Reverse Complement sequence to Reverse Read Sequence box" Click="reverseComplementButton_Click" Margin="5,0,5,0"/>
+                    <Button x:Name="analyzeButton" Content="Analyze Sequences" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ToolTip="Analyze and annotate the Forward Read and Reverse Read sequences" Margin="5,0,5,0" Click="analyzeButton_Click"/>
                 </ToolBar>
             </ToolBarTray>
         </DockPanel>
@@ -43,17 +44,17 @@
                     <RowDefinition Height="1*"/>
                     <RowDefinition Height="2*"/>
                 </Grid.RowDefinitions>
-                <RichTextBox x:Name="forwardRichTextBox" Margin="10,0,10,5" FontFamily="Courier New" Grid.Row="1">
+                <RichTextBox x:Name="forwardRichTextBox" Margin="10,0,10,5" FontFamily="Courier New" Grid.Row="1" FontSize="14">
                     <FlowDocument>
                         <Paragraph>
-                            <Run Text="RichTextBox"/>
+                            <Run Text="ZZZZZZZZXXXXXXXXXXCATCGGTGAGCCCGGGCTGTCGGCGTNNTNNNANNTNNNANNTNNNANNTNNNANNTNNNANNATATGCCAGCAGGCCGGCCACGCTNNTNNNANNTNNNANNANNNANNTNNNANNTNNNANNCGGTGGCCCGGGCGGCCGCACGATGCGTCCGGCGTAGAGGXXXXXXXXXXZZZZZZZZ"/>
                         </Paragraph>
                     </FlowDocument>
                 </RichTextBox>
-                <RichTextBox x:Name="reverseRichTextBox" Margin="10,0,10,5" FontFamily="Courier New" Grid.Row="3">
+                <RichTextBox x:Name="reverseRichTextBox" Margin="10,0,10,5" FontFamily="Courier New" Grid.Row="3" FontSize="14">
                     <FlowDocument>
                         <Paragraph>
-                            <Run Text="RichTextBox"/>
+                            <Run Text="Reverse Complement"/>
                         </Paragraph>
                     </FlowDocument>
                 </RichTextBox>

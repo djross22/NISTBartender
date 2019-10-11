@@ -1,6 +1,11 @@
-WinBartender TODO List:
+NISTBartender TODO List:
 
 replace Z statistic with probability ratio or log-ratio of Poisson probabilities for same cluster vs. different clusters
 
 Try full entroy to rank seed positions
+
+Auto-generate Regex, but also allow manual edits
+
+Example Forward Read Sequence:
+ZZZZZZZZXXXXXXXXXXCATCGGTGAGCCCGGGCTGTCGGCGTNNTNNNANNTNNNANNTNNNANNTNNNANNTNNNANNATATGCCAGCAGGCCGGCCACGCTNNTNNNANNTNNNANNANNNANNTNNNANNTNNNANNCGGTGGCCCGGGCGGCCGCACGATGCGTCCGGCGTAGAGGXXXXXXXXXXZZZZZZZZ
 

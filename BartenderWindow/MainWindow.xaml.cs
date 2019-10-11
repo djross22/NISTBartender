@@ -104,5 +104,12 @@ namespace BartenderWindow
             textRange = new TextRange(reverseRichTextBox.Document.ContentStart, reverseRichTextBox.Document.ContentEnd);
             textRange.Text = RemoveStringWhitespace(textRange.Text);
         }
+
+        private void analyzeButton_Click(object sender, RoutedEventArgs e)
+        {
+            reverseComplementButton_Click(sender, e);
+
+
+        }
     }
 }
