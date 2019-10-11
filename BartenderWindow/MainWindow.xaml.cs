@@ -27,10 +27,23 @@ namespace BartenderWindow
 
         private string forUmiTagLenStr, revUmiTagLenStr;
         private int[] forUmiTagLen, revUmiTagLen;
+        private string readLengthStr;
+        private int readLength;
 
         private string outputText;
 
         #region Properties Getters and Setters
+        public string ReadLengthStr
+        {
+            get { return this.readLengthStr; }
+            set
+            {
+                this.readLengthStr = value;
+                OnPropertyChanged("ReadLengthStr");
+                SetReadLength();
+            }
+        }
+
         public string OutputText
         {
             get { return this.outputText; }
@@ -67,8 +80,17 @@ namespace BartenderWindow
         public MainWindow()
         {
             InitializeComponent();
+            ReadLengthStr = "150";
 
             DataContext = this;
+        }
+
+        private void SetReadLength()
+        {
+            readLength = Int32.Parse(this.readLengthStr);
+            OutputText += $"Read length: {readLength}.\n";
+
+            UnderLineReads();
         }
 
         private void SetUmiTagLength(bool forward)
@@ -218,6 +240,14 @@ namespace BartenderWindow
 
         }
 
+        private void readLengthTextBox_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Return)
+            {
+                readLengthTextBox.GetBindingExpression(TextBox.TextProperty).UpdateSource();
+            }
+        }
+
         private void clearWhiteSpaces()
         {
             TextRange textRange;
@@ -231,9 +261,32 @@ namespace BartenderWindow
 
         private void analyzeButton_Click(object sender, RoutedEventArgs e)
         {
+            //If UMI tag length boxes are empty, auto-polulate them
+            //If UMI tag length boxes have values, use those values to add appropriate number of Z's at beginning of each sequence
+            TextRange textRange = new TextRange(forwardRichTextBox.Document.ContentStart, forwardRichTextBox.Document.ContentEnd);
+            textRange.Text = RemoveStringWhitespace(textRange.Text);
+
             reverseComplementButton_Click(sender, e);
 
+        }
 
+        private void UnderLineReads()
+        {
+            foreach (RichTextBox rtb in new RichTextBox[2] { forwardRichTextBox , reverseRichTextBox })
+            {
+                TextRange textRange = new TextRange(rtb.Document.ContentStart, rtb.Document.ContentEnd);
+                TextPointer startPointer = rtb.Document.ContentStart.GetPositionAtOffset(0);
+                TextPointer endPointer = rtb.Document.ContentEnd.GetPositionAtOffset(0);
+                rtb.Selection.Select(startPointer, endPointer);
+                rtb.Selection.ClearAllProperties();
+
+                if (textRange.Text.Length > readLength)
+                {
+                    endPointer = rtb.Document.ContentStart.GetPositionAtOffset(readLength);
+                }
+                rtb.Selection.Select(startPointer, endPointer);
+                rtb.Selection.ApplyPropertyValue(Inline.TextDecorationsProperty, TextDecorations.Underline);
+            }
         }
     }
 }

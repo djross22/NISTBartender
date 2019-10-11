@@ -38,6 +38,7 @@
             </Grid.ColumnDefinitions>
             <Grid>
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="25"/>
                     <RowDefinition Height="18"/>
                     <RowDefinition Height="88*"/>
                     <RowDefinition Height="18"/>
@@ -45,23 +46,33 @@
                     <RowDefinition Height="70"/>
                     <RowDefinition Height="89*"/>
                 </Grid.RowDefinitions>
-                <RichTextBox x:Name="forwardRichTextBox" Margin="10,0,10,5" FontFamily="Courier New" Grid.Row="1" FontSize="14">
+                <TextBlock HorizontalAlignment="Right" Text="Read Length:" VerticalAlignment="Center" Foreground="White" Grid.Row="0" Margin="0,0,125,0"/>
+                <TextBox x:Name="readLengthTextBox" HorizontalAlignment="Right" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="60" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" KeyUp="readLengthTextBox_KeyUp" Margin="0,0,60,0">
+                    <TextBox.Text>
+                        <Binding Path="ReadLengthStr" UpdateSourceTrigger="LostFocus">
+                            <Binding.ValidationRules>
+                                <local:RegexValidationRule x:Name="readLengthRegexRule" RegexText = "^[0-9]+$" ErrorMessage="Read length must be an integer." ValidationOptions="None"/>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
+                <RichTextBox x:Name="forwardRichTextBox" Margin="10,0,10,5" FontFamily="Courier New" Grid.Row="2" FontSize="14">
                     <FlowDocument>
                         <Paragraph>
                             <Run Text="ZZZZZZZZXXXXXXXXXXCATCGGTGAGCCCGGGCTGTCGGCGTNNTNNNANNTNNNANNTNNNANNTNNNANNTNNNANNATATGCCAGCAGGCCGGCCACGCTNNTNNNANNTNNNANNANNNANNTNNNANNTNNNANNCGGTGGCCCGGGCGGCCGCACGATGCGTCCGGCGTAGAGGXXXXXXXXXXZZZZZZZZ"/>
                         </Paragraph>
                     </FlowDocument>
                 </RichTextBox>
-                <RichTextBox x:Name="reverseRichTextBox" Margin="10,0,10,5" FontFamily="Courier New" Grid.Row="3" FontSize="14">
+                <RichTextBox x:Name="reverseRichTextBox" Margin="10,0,10,5" FontFamily="Courier New" Grid.Row="4" FontSize="14">
                     <FlowDocument>
                         <Paragraph>
                             <Run Text="Reverse Complement"/>
                         </Paragraph>
                     </FlowDocument>
                 </RichTextBox>
-                <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Forward Read Sequence:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="Use 'Z' for UMI tag bases, 'X' for sample multiplex tag bases, and 'N' for random bases in lineage tags." Height="16" Width="130"/>
-                <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Reverse Read Sequence:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" Grid.Row="2" ToolTip="Use 'Z' for UMI tag bases, 'X' for sample multiplex tag bases, and 'N' for random bases in lineage tags." Height="16" Width="128"/>
-                <Grid Grid.Row="4">
+                <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Forward Read Sequence:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="Use 'Z' for UMI tag bases, 'X' for sample multiplex tag bases, and 'N' for random bases in lineage tags." Height="16" Width="130" Grid.Row="1"/>
+                <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Reverse Read Sequence:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" Grid.Row="3" ToolTip="Use 'Z' for UMI tag bases, 'X' for sample multiplex tag bases, and 'N' for random bases in lineage tags." Height="16" Width="128"/>
+                <Grid Grid.Row="5">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="18"/>
                         <RowDefinition Height="25"/>
