@@ -208,6 +208,16 @@ namespace BartenderWindow
             }
         }
 
+        private void forRegExTextBox_KeyUp(object sender, KeyEventArgs e)
+        {
+
+        }
+
+        private void revRegExTextBox_KeyUp(object sender, KeyEventArgs e)
+        {
+
+        }
+
         private void clearWhiteSpaces()
         {
             TextRange textRange;
