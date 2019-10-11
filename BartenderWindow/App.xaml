@@ -10,6 +10,10 @@
                 <GradientStop Color="#FF2C0D51" Offset="1"/>
             </LinearGradientBrush>
             <SolidColorBrush x:Key="ToolBarTrayBackground" Color="#FF19082E"/>
+            <SolidColorBrush x:Key="ToolTipBackground" Color="#FFDDCDF1"/>
+            <Style TargetType="{x:Type ToolTip}">
+                <Setter Property="Background" Value="{DynamicResource ToolTipBackground}"/>
+            </Style>
         </ResourceDictionary>
          
     </Application.Resources>
