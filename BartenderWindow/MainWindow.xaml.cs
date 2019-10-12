@@ -334,5 +334,36 @@ namespace BartenderWindow
             }
         }
 
+        private TextPointer GetPointerFromCharOffset(int charOffset, TextPointer startPointer, FlowDocument document)
+        {
+            //modified version of method from: https://social.msdn.microsoft.com/Forums/vstudio/en-US/bc67d8c5-41f0-48bd-8d3d-79159e86b355/textpointer-into-a-flowdocument-based-on-character-index?forum=wpf
+            TextPointer navigator = startPointer;
+
+            if (charOffset == 0)
+            {
+                return navigator;
+            }
+
+            TextPointer nextPointer = navigator;
+            int counter = 0;
+            while (nextPointer != null && counter < charOffset)
+            {
+                if (nextPointer.CompareTo(document.ContentEnd) == 0)
+                {
+                    // If we reach to the end of document, return the EOF pointer.
+                    return nextPointer;
+                }
+
+                if (nextPointer.GetPointerContext(LogicalDirection.Forward) == TextPointerContext.Text)
+                {
+                    // Only incremennt the character counter if the current pointer is pointing at a character.
+                    counter++;
+                }
+                nextPointer = nextPointer.GetNextInsertionPosition(LogicalDirection.Forward);
+            }
+
+            return nextPointer;
+        }
+
     }
 }
