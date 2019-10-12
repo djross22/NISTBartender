@@ -33,6 +33,7 @@ namespace BartenderWindow
         private string outputText;
 
         private static Brush UmiTagHighlight = Brushes.Yellow;
+        private static Brush MultiTagHighlight = Brushes.LightGreen;
 
         #region Properties Getters and Setters
         public string ReadLengthStr
@@ -295,10 +296,11 @@ namespace BartenderWindow
 
             ClearSequenceFormatting();
 
-            UnderLineReadLength();
-
-
             HighlightUmiTag();
+
+            HighlightMultiTag();
+
+            UnderLineReadLength();
 
         }
 
@@ -436,7 +438,7 @@ namespace BartenderWindow
                 OutputText += $"firstNonX: {firstNonX}\n";
 
                 TextPointer startPointer = rtb.Document.ContentStart.GetPositionAtOffset(0);
-                startPointer = GetTextPointerAtOffset(rtb, firstNonZ+1);
+                startPointer = GetTextPointerAtOffset(rtb, firstNonZ);
                 TextPointer endPointer = GetTextPointerAtOffset(rtb, firstNonX);
 
                 rtb.Selection.Select(startPointer, endPointer);
