@@ -1,0 +1,30 @@
+
+Example Forward Read Sequence:
+ZZZZZZZZXXXXXXXXXXCATCGGTGAGCCCGGGCTGTCGGCGTNNTNNNANNTNNNANNTNNNANNTNNNANNTNNNANNATATGCCAGCAGGCCGGCCACGCTNNTNNNANNTNNNANNANNNANNTNNNANNTNNNANNCGGTGGCCCGGGCGGCCGCACGATGCGTCCGGCGTAGAGGXXXXXXXXXXZZZZZZZZ
+
+
+Underline readLength
+
+
+--------------------------------------------------------
+NISTBartender TODO List:
+
+highlight UMI tag (yellow)
+
+highlight multitag (green)
+
+highlight lintag (magenta)
+
+highlight constant flanking regions to lintag
+
+highlight constant flanking reagion after multitag
+
+
+
+replace Z statistic with probability ratio or log-ratio of Poisson probabilities for same cluster vs. different clusters
+
+Try full entropy to rank seed positions
+
+Auto-generate Regex, but also allow manual edits
+
+
