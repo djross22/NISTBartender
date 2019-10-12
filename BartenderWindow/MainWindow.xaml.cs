@@ -322,7 +322,7 @@ namespace BartenderWindow
                 //rtb.Selection.ClearAllProperties();
                 rtb.Selection.ApplyPropertyValue(Inline.TextDecorationsProperty, null);
 
-                endPointer = GetPointerFromCharOffset(readLength, startPointer, rtb.Document);
+                endPointer = GetTextPointerAtOffset(rtb, readLength);
 
                 rtb.Selection.Select(startPointer, endPointer);
                 rtb.Selection.ApplyPropertyValue(Inline.TextDecorationsProperty, TextDecorations.Underline);
@@ -351,7 +351,7 @@ namespace BartenderWindow
                 OutputText += $"firstNonZ: {firstNonZ}\n";
 
                 TextPointer startPointer = rtb.Document.ContentStart.GetPositionAtOffset(0);
-                TextPointer endPointer = GetPointerFromCharOffset(firstNonZ, startPointer, rtb.Document);
+                TextPointer endPointer = GetTextPointerAtOffset(rtb, firstNonZ);
 
                 rtb.Selection.Select(startPointer, endPointer);
 
@@ -385,37 +385,135 @@ namespace BartenderWindow
                 rtb.Selection.ApplyPropertyValue(Inline.BackgroundProperty, UmiTagHighlight);
             }
         }
+        
 
-        private TextPointer GetPointerFromCharOffset(int charOffset, TextPointer startPointer, FlowDocument document)
+        private void HighlightMultiTag()
         {
-            //modified version of method from: https://social.msdn.microsoft.com/Forums/vstudio/en-US/bc67d8c5-41f0-48bd-8d3d-79159e86b355/textpointer-into-a-flowdocument-based-on-character-index?forum=wpf
-            TextPointer navigator = startPointer;
-
-            if (charOffset == 0)
+            foreach (RichTextBox rtb in new RichTextBox[2] { forwardRichTextBox, reverseRichTextBox })
             {
-                return navigator;
-            }
+                TextRange textRange = new TextRange(rtb.Document.ContentStart, rtb.Document.ContentEnd);
+                string read = textRange.Text;
 
-            TextPointer nextPointer = navigator;
-            int counter = 0;
-            while (nextPointer != null && counter < charOffset)
-            {
-                if (nextPointer.CompareTo(document.ContentEnd) == 0)
+                //The Multiplexing tag is indicated by X's after the UMI tag (Z's).
+                //    So, start by finding the first non-'Z' character
+                //        and the first non-'X' non'Z' character
+                int firstNonZ = 0;
+                foreach (char c in read.ToCharArray())
                 {
-                    // If we reach to the end of document, return the EOF pointer.
-                    return nextPointer;
+                    if (c != 'Z')
+                    {
+                        break;
+                    }
+                    firstNonZ++;
+                }
+                int firstNonX = 0;
+                foreach (char c in read.ToCharArray())
+                {
+                    if (c != 'Z' && c != 'X')
+                    {
+                        break;
+                    }
+                    firstNonX++;
                 }
 
-                if (nextPointer.GetPointerContext(LogicalDirection.Forward) == TextPointerContext.Text)
+                //Check if X'x ans Z's are in expected order
+                if (firstNonX <= firstNonZ)
                 {
-                    // Only incremennt the character counter if the current pointer is pointing at a character.
-                    counter++;
+                    string errorMsg = "Unexpected sequence in ";
+                    if (Object.ReferenceEquals(rtb, forwardRichTextBox))
+                    {
+                        errorMsg += "Forward Read Sequence. ";
+                    }
+                    if (Object.ReferenceEquals(rtb, reverseRichTextBox))
+                    {
+                        errorMsg += "Reverse Read Sequence. ";
+                    }
+                    errorMsg += "Sequences should start with one or more Z's for UMI tags, then one or more X's for multiplexing tags.";
+                    MessageBox.Show(errorMsg);
+                    return;
                 }
-                nextPointer = nextPointer.GetNextInsertionPosition(LogicalDirection.Forward);
-            }
 
-            return nextPointer;
+                OutputText += $"firstNonX: {firstNonX}\n";
+
+                TextPointer startPointer = rtb.Document.ContentStart.GetPositionAtOffset(0);
+                startPointer = GetTextPointerAtOffset(rtb, firstNonZ+1);
+                TextPointer endPointer = GetTextPointerAtOffset(rtb, firstNonX);
+
+                rtb.Selection.Select(startPointer, endPointer);
+
+                //If multiplexing tags are set in the GUI then use the length from those strings - and replace/insert the appropriate number of X's
+                if (Object.ReferenceEquals(rtb, forwardRichTextBox))
+                {
+                    if (false) //multi-tag list has been set up in the GUI
+                    {
+                        //rtb.Selection.Text = new String('X', forMultiTagLen.Last());
+                    }
+                    else
+                    {
+                        
+                    }
+                }
+                if (Object.ReferenceEquals(rtb, reverseRichTextBox))
+                {
+                    if (false) //multi-tag list has been set up in the GUI
+                    {
+                        //rtb.Selection.Text = new String('X', revMultiTagLen.Last());
+                    }
+                    else
+                    {
+
+                    }
+                }
+
+                rtb.Selection.ApplyPropertyValue(Inline.BackgroundProperty, MultiTagHighlight);
+            }
         }
+
+        private static TextPointer GetTextPointerAtOffset(RichTextBox richTextBox, int offset)
+        {
+            //From: https://stackoverflow.com/questions/2565783/wpf-flowdocument-absolute-character-position
+            var navigator = richTextBox.Document.ContentStart;
+            int cnt = 0;
+
+            while (navigator.CompareTo(richTextBox.Document.ContentEnd) < 0)
+            {
+                switch (navigator.GetPointerContext(LogicalDirection.Forward))
+                {
+                    case TextPointerContext.ElementStart:
+                        break;
+                    case TextPointerContext.ElementEnd:
+                        if (navigator.GetAdjacentElement(LogicalDirection.Forward) is Paragraph)
+                            cnt += 2;
+                        break;
+                    case TextPointerContext.EmbeddedElement:
+                        // TODO: Find out what to do here?
+                        cnt++;
+                        break;
+                    case TextPointerContext.Text:
+                        int runLength = navigator.GetTextRunLength(LogicalDirection.Forward);
+
+                        if (runLength > 0 && runLength + cnt < offset)
+                        {
+                            cnt += runLength;
+                            navigator = navigator.GetPositionAtOffset(runLength);
+                            if (cnt > offset)
+                                break;
+                            continue;
+                        }
+                        cnt++;
+                        break;
+                }
+
+                if (cnt > offset)
+                    break;
+
+                navigator = navigator.GetPositionAtOffset(1, LogicalDirection.Forward);
+
+            } // End while.
+
+            return navigator;
+        }
+
 
     }
 }
