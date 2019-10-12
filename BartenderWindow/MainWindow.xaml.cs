@@ -91,7 +91,7 @@ namespace BartenderWindow
             readLength = Int32.Parse(this.readLengthStr);
             OutputText += $"Read length: {readLength}.\n";
 
-            UnderLineReads();
+            UnderLineReadLength();
         }
 
         private void SetUmiTagLength(bool forward)
@@ -276,7 +276,7 @@ namespace BartenderWindow
 
         }
 
-        private void UnderLineReads()
+        private void UnderLineReadLength()
         {
             foreach (RichTextBox rtb in new RichTextBox[2] { forwardRichTextBox , reverseRichTextBox })
             {
