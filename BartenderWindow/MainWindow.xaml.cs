@@ -290,9 +290,16 @@ namespace BartenderWindow
                 TextPointer startPointer = rtb.Document.ContentStart.GetPositionAtOffset(0);
                 TextPointer endPointer = rtb.Document.ContentEnd.GetPositionAtOffset(0);
                 rtb.Selection.Select(startPointer, endPointer);
-                rtb.Selection.ClearAllProperties();
 
-                if (textRange.Text.Length > readLength)
+                //rtb.Selection.ClearAllProperties();
+                rtb.Selection.ApplyPropertyValue(Inline.TextDecorationsProperty, null);
+
+                endPointer = GetPointerFromCharOffset(readLength, startPointer, rtb.Document);
+
+                rtb.Selection.Select(startPointer, endPointer);
+                rtb.Selection.ApplyPropertyValue(Inline.TextDecorationsProperty, TextDecorations.Underline);
+            }
+        }
 
         private void HighlightUmiTag()
         {
