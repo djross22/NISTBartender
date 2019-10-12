@@ -108,8 +108,29 @@
                     <TextBox x:Name="forRegExTextBox" HorizontalAlignment="Stretch" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="80,0,10,0" Grid.Row="1" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" KeyUp="forRegExTextBox_KeyUp" Grid.Column="1" Text="{Binding ForLintagRegexStr, Mode=TwoWay}"/>
                     <TextBlock HorizontalAlignment="Left" Margin="30,0,0,0" Text="Reverse:" VerticalAlignment="Center" Foreground="White" Grid.Row="2" Grid.Column="1"/>
                     <TextBox x:Name="revRegExTextBox" HorizontalAlignment="Stretch" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="80,0,10,0" Grid.Row="2" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" KeyUp="revRegExTextBox_KeyUp" Grid.Column="1" Text="{Binding RevLintagRegexStr, Mode=TwoWay}"/>
-                    
+
                 </Grid>
+            </Grid>
+
+            <Grid Grid.Column="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="2*"/>
+                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="1*"/>
+                </Grid.RowDefinitions>
+                <TextBlock HorizontalAlignment="Left" Text="Multiplexing Tags:" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="White" ToolTip="Enter forward and reverse multiplexing tags to be automatically combined." Margin="10,0,0,0"/>
+                <TextBlock HorizontalAlignment="Left" Text="Forward:" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="White" ToolTip="Enter forward multiplexing tags, one per line, and optionally include shorthand indentifier separated by a comma." Grid.Row="1" Margin="10,0,0,0"/>
+                <TextBlock HorizontalAlignment="Left" Text="Reverse:" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="White" ToolTip="Enter reverse multiplexing tags, one per line, and optionally include shorthand indentifier separated by a comma." Grid.Row="1" Margin="10,0,0,0" Grid.Column="1"/>
+                <TextBox Margin="10,0,10,10" Grid.Row="2" Text="AGCTAGCTAG, A" TextWrapping="NoWrap" FontFamily="Courier New" FontSize="14" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" AcceptsReturn="True"/>
+                <TextBox Margin="10,0,10,10" Grid.Row="2" Text="TAATGCCGTG, 1" TextWrapping="NoWrap" FontFamily="Courier New" FontSize="14" Grid.Column="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" AcceptsReturn="True"/>
+                <TextBlock HorizontalAlignment="Left" Text="Extra Multiplexing Tags:" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="White" ToolTip="Enter extra multiplexing tags or tags that should not be automatically comined, one per line: 'Forward, Reverse, Short-ID'. The Short-IDs are optional." Margin="10,0,0,0" Grid.Row="3"/>
+                <TextBox Margin="10,0,10,10" Grid.Row="4" Text="AGAAGGTAG, TAGTGTCGTG, S5" TextWrapping="NoWrap" FontFamily="Courier New" FontSize="14" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Grid.ColumnSpan="2" AcceptsReturn="True"/>
             </Grid>
         </Grid>
         <TextBox x:Name="outputTextBox" HorizontalAlignment="Stretch" Margin="10,10,10,10" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Stretch" Text="{Binding OutputText, Mode=TwoWay}" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" Background="#FFCBCBCB"/>

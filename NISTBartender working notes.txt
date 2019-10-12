@@ -13,6 +13,8 @@ highlight UMI tag (yellow)
 
 highlight multitag (green)
 
+auto-scorll outputTextBox
+
 highlight lintag (magenta)
 
 highlight constant flanking regions to lintag
