@@ -293,12 +293,46 @@ namespace BartenderWindow
                 rtb.Selection.ClearAllProperties();
 
                 if (textRange.Text.Length > readLength)
+
+        private void HighlightUmiTag()
+        {
+            foreach (RichTextBox rtb in new RichTextBox[2] { forwardRichTextBox, reverseRichTextBox })
+            {
+                TextRange textRange = new TextRange(rtb.Document.ContentStart, rtb.Document.ContentEnd);
+                string read = textRange.Text;
+
+                //The UMI tag is indicated by Z's at the start of each sequence.
+                //    So, start by finding the first non-'Z' character
+                int firstNonZ = 0;
+                foreach (char c in read.ToCharArray())
                 {
-                    endPointer = rtb.Document.ContentStart.GetPositionAtOffset(readLength);
+                    if (c != 'Z')
+                    {
+                        break;
+                    }
+                    firstNonZ++;
                 }
+
+                OutputText += $"firstNonZ: {firstNonZ}\n";
+                OutputText += $"firstNonZ: {firstNonZ}\n";
+
+                TextPointer startPointer = rtb.Document.ContentStart.GetPositionAtOffset(0);
+                TextPointer endPointer = GetPointerFromCharOffset(firstNonZ, startPointer, rtb.Document);
+
                 rtb.Selection.Select(startPointer, endPointer);
-                rtb.Selection.ApplyPropertyValue(Inline.TextDecorationsProperty, TextDecorations.Underline);
+
+                rtb.Selection.ApplyPropertyValue(Inline.BackgroundProperty, Brushes.Yellow);
+
+                //rtb.Selection.ClearAllProperties();
+
+                //if (textRange.Text.Length > readLength)
+                //{
+                //    endPointer = rtb.Document.ContentStart.GetPositionAtOffset(readLength);
+                //}
+                //rtb.Selection.Select(startPointer, endPointer);
+                //rtb.Selection.ApplyPropertyValue(Inline.TextDecorationsProperty, TextDecorations.Underline);
             }
         }
+
     }
 }
