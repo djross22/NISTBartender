@@ -82,8 +82,11 @@ namespace BartenderWindow
         public MainWindow()
         {
             InitializeComponent();
+
             CopyReverseComplement();
             ReadLengthStr = "150";
+            ForUmiTagLenStr = "";
+            RevUmiTagLenStr = "";
 
             DataContext = this;
         }
@@ -346,23 +349,40 @@ namespace BartenderWindow
                 }
 
                 OutputText += $"firstNonZ: {firstNonZ}\n";
-                OutputText += $"firstNonZ: {firstNonZ}\n";
 
                 TextPointer startPointer = rtb.Document.ContentStart.GetPositionAtOffset(0);
                 TextPointer endPointer = GetPointerFromCharOffset(firstNonZ, startPointer, rtb.Document);
 
                 rtb.Selection.Select(startPointer, endPointer);
 
+                //If UMI tag length is set in the GUI then use that value - and replace/insert the appropriate number of Zs
+                //    otherwise, use number of Z'z in sequence to set value for UMI tag length
+                if (Object.ReferenceEquals(rtb, forwardRichTextBox))
+                {
+                    //OutputText += $"ForUmiTagLenStr: {ForUmiTagLenStr}\n";
+                    if (ForUmiTagLenStr == "")
+                    {
+                        ForUmiTagLenStr = $"{firstNonZ}";
+                    }
+                    else
+                    {
+                        rtb.Selection.Text = new String('Z', forUmiTagLen.Last());
+                    }
+                }
+                if (Object.ReferenceEquals(rtb, reverseRichTextBox))
+                {
+                    //OutputText += $"RevUmiTagLenStr: {RevUmiTagLenStr}\n";
+                    if (RevUmiTagLenStr == "")
+                    {
+                        RevUmiTagLenStr = $"{firstNonZ}";
+                    }
+                    else
+                    {
+                        rtb.Selection.Text = new String('Z', revUmiTagLen.Last());
+                    }
+                }
+
                 rtb.Selection.ApplyPropertyValue(Inline.BackgroundProperty, UmiTagHighlight);
-
-                //rtb.Selection.ClearAllProperties();
-
-                //if (textRange.Text.Length > readLength)
-                //{
-                //    endPointer = rtb.Document.ContentStart.GetPositionAtOffset(readLength);
-                //}
-                //rtb.Selection.Select(startPointer, endPointer);
-                //rtb.Selection.ApplyPropertyValue(Inline.TextDecorationsProperty, TextDecorations.Underline);
             }
         }
 
