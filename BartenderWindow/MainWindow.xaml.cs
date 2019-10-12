@@ -274,6 +274,15 @@ namespace BartenderWindow
 
             reverseComplementButton_Click(sender, e);
 
+            ClearSequenceFormatting();
+
+            UnderLineReadLength();
+
+
+            HighlightUmiTag();
+
+        }
+
         private void ClearSequenceFormatting()
         {
             foreach (RichTextBox rtb in new RichTextBox[2] { forwardRichTextBox , reverseRichTextBox })
