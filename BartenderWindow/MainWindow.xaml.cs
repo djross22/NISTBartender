@@ -32,6 +32,8 @@ namespace BartenderWindow
 
         private string outputText;
 
+        private static Brush UmiTagHighlight = Brushes.Yellow;
+
         #region Properties Getters and Setters
         public string ReadLengthStr
         {
@@ -337,7 +339,7 @@ namespace BartenderWindow
 
                 rtb.Selection.Select(startPointer, endPointer);
 
-                rtb.Selection.ApplyPropertyValue(Inline.BackgroundProperty, Brushes.Yellow);
+                rtb.Selection.ApplyPropertyValue(Inline.BackgroundProperty, UmiTagHighlight);
 
                 //rtb.Selection.ClearAllProperties();
 
