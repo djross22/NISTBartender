@@ -103,11 +103,25 @@ namespace BartenderWindow
             if (forward)
             {
                 umiLenStr = forUmiTagLenStr;
+                if (umiLenStr == "")
+                {
+                    forUmiTagLen = null;
+                    OutputText += $"Forward UMI tag length: \n";
+                    return;
+                }
             }
             else
             {
                 umiLenStr = revUmiTagLenStr;
+                if (umiLenStr == "")
+                {
+                    revUmiTagLen = null;
+                    OutputText += $"Reverse UMI tag length: \n";
+                    return;
+                }
             }
+
+
             string[] split = umiLenStr.Split('-');
             umiLenArr = new int[split.Length];
             for (int i=0; i<split.Length; i++)

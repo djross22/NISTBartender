@@ -88,7 +88,7 @@
                         <TextBox.Text>
                             <Binding Path="ForUmiTagLenStr" UpdateSourceTrigger="LostFocus">
                                 <Binding.ValidationRules>
-                                    <local:RegexValidationRule x:Name="forUmiRegexRule" RegexText = "^[0-9]{1,2}$|^[0-9]{1,2}-[0-9]{1,2}$" ErrorMessage="UMI tag length must be an integer or range of integers." ValidationOptions="None"/>
+                                    <local:RegexValidationRule x:Name="forUmiRegexRule" RegexText = "^[0-9]{1,2}$|^[0-9]{1,2}-[0-9]{1,2}$|^$" ErrorMessage="UMI tag length must be an integer or range of integers." ValidationOptions="None"/>
                                 </Binding.ValidationRules>
                             </Binding>
                         </TextBox.Text>
@@ -98,7 +98,7 @@
                         <TextBox.Text>
                             <Binding Path="RevUmiTagLenStr" UpdateSourceTrigger="LostFocus">
                                 <Binding.ValidationRules>
-                                    <local:RegexValidationRule x:Name="revUmiRegexRule" RegexText = "^[0-9]{1,2}$|^[0-9]{1,2}-[0-9]{1,2}$" ErrorMessage="UMI tag length must be an integer or range of integers." ValidationOptions="None"/>
+                                    <local:RegexValidationRule x:Name="revUmiRegexRule" RegexText = "^[0-9]{1,2}$|^[0-9]{1,2}-[0-9]{1,2}$|^$" ErrorMessage="UMI tag length must be an integer or range of integers." ValidationOptions="None"/>
                                 </Binding.ValidationRules>
                             </Binding>
                         </TextBox.Text>
