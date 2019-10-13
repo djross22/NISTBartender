@@ -439,11 +439,6 @@ namespace BartenderWindow
             }
         }
 
-        private void outputTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            outputTextBox.ScrollToEnd();
-        }
-
         private void HighlightMultiTag()
         {
             foreach (RichTextBox rtb in new RichTextBox[2] { forwardRichTextBox, reverseRichTextBox })
@@ -571,6 +566,10 @@ namespace BartenderWindow
             return navigator;
         }
 
+        private void outputTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            outputTextBox.ScrollToEnd();
+        }
 
     }
 }
