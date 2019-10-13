@@ -30,6 +30,8 @@ namespace BartenderWindow
         private string readLengthStr;
         private int readLength;
 
+        private string forwardMultiFlankStr, reverseMultiFlankStr;
+        private string[] forwardLinTagFlankStrs, reverseLinTagFlankStrs;
         private string multiFlankLengthStr, linTagFlankLengthStr, forwardSpacerLengthStr, reverseSpacerLengthStr;
         private int multiFlankLength, linTagFlankLength, forwardSpacerLength, reverseSpacerLength;
 
@@ -53,6 +55,7 @@ namespace BartenderWindow
             {
                 this.reverseSpacerLengthStr = value;
                 OnPropertyChanged("ReverseSpacerLengthStr");
+                int.TryParse(reverseSpacerLengthStr, out reverseSpacerLength);
             }
         }
 
@@ -63,6 +66,7 @@ namespace BartenderWindow
             {
                 this.forwardSpacerLengthStr = value;
                 OnPropertyChanged("ForwardSpacerLengthStr");
+                int.TryParse(forwardSpacerLengthStr, out forwardSpacerLength);
             }
         }
 
@@ -171,6 +175,9 @@ namespace BartenderWindow
             ReadLengthStr = "150";
             ForUmiTagLenStr = "";
             RevUmiTagLenStr = "";
+
+            LinTagFlankLengthStr = "4";
+            MultiFlankLengthStr = "4";
 
             FowardMultiTagText = "AGCTAGCTAG, A\n";
             FowardMultiTagText += "CAATGCCTAG, B\n";
@@ -688,6 +695,23 @@ namespace BartenderWindow
 
                 rtb.Selection.ApplyPropertyValue(Inline.BackgroundProperty, LineageTagHighlight);
                 rtb.Selection.ApplyPropertyValue(Inline.FontWeightProperty, FontWeights.Bold);
+
+                //Also set spacer lengths in this method
+                Regex multiRegEx = new Regex("^Z*X*");
+                string multiMatch = multiRegEx.Match(read).Value;
+                //OutputText += $"multiMatch: {multiMatch}\n";
+                int firstNonX = multiMatch.Length;
+
+                if (Object.ReferenceEquals(rtb, forwardRichTextBox))
+                {
+                    ForwardSpacerLengthStr = $"{tagStart - firstNonX}";
+                    OutputText += $"forwardSpacerLength: {forwardSpacerLength}\n";
+                }
+                if (Object.ReferenceEquals(rtb, reverseRichTextBox))
+                {
+                    ReverseSpacerLengthStr = $"{tagStart - firstNonX}";
+                    OutputText += $"reverseSpacerLength: {reverseSpacerLength}\n";
+                }
             }
         }
 

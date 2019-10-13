@@ -18,13 +18,15 @@ highlight multitag (green)
 
 highlight lintag (thistle)
 
+add non-editable spacer length textboxes and properties
+
 
 --------------------------------------------------------
 NISTBartender TODO List:
 
-highlight constant flanking regions to lintag
+highlight constant flanking regions to lintag (cyan)
 
-highlight constant flanking reagion after multitag
+highlight constant flanking reagion after multitag (cyan)
 
 
 
