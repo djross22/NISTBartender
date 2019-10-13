@@ -430,6 +430,7 @@ namespace BartenderWindow
             clearWhiteSpaces();
 
             TextRange textRange = new TextRange(forwardRichTextBox.Document.ContentStart, forwardRichTextBox.Document.ContentEnd);
+            textRange.Text = textRange.Text.ToUpper();
             string forwardSequence = textRange.Text;
 
             string reverseSequence = ReverseComplement(forwardSequence);
