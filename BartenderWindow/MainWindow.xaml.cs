@@ -31,7 +31,9 @@ namespace BartenderWindow
         private int readLength;
 
         private string fowardMultiTagText, reverseMultiTagText, extraMultiTagText;
-        private List<string> fowardMultiTagList, reverseMultiTagList, extraMultiTagList, multiTagList;
+        private List<string> fowardMultiTagList, reverseMultiTagList;
+        private Dictionary<string, string> fowardIdDict, reverseIdDict;
+        private Dictionary<string[], string> mutiTagIdDict;
 
         private string outputText;
 
@@ -129,25 +131,112 @@ namespace BartenderWindow
             ExtraMultiTagText = "AGAAGGTAG, TAGTGTCGTG, S5\n";
             ExtraMultiTagText = "AGAAGGTAG, GGGCAATGCG, S6\n";
 
+            InitMultiTagLists();
+        }
+
+        private void InitMultiTagLists()
+        {
             fowardMultiTagList = new List<string>();
+            fowardIdDict = new Dictionary<string, string>();
             reverseMultiTagList = new List<string>();
-            extraMultiTagList = new List<string>();
-            multiTagList = new List<string>();
+            reverseIdDict = new Dictionary<string, string>();
+            mutiTagIdDict = new Dictionary<string[], string>();
         }
 
         private void MakeMultiTagLists()
         {
+            InitMultiTagLists();
+
             //If multitag text boxes aren't properly populated, give warning message and return from method
-            if (String.IsNullOrEmpty(ExtraMultiTagText))
+            string cleanExtra = ExtraMultiTagText.Replace("\n", "").Replace("\r", "");
+            string cleanForward = FowardMultiTagText.Replace("\n", "").Replace("\r", "");
+            string cleanReverse = ReverseMultiTagText.Replace("\n", "").Replace("\r", "");
+            if (String.IsNullOrEmpty(cleanExtra) && (String.IsNullOrEmpty(cleanForward) || String.IsNullOrEmpty(cleanReverse)))
             {
+                MessageBox.Show("Please enter at least one valid set of Multiplex Tags, and try again.");
+                return;
+            }
+            else
+            {
+                //First add to fowardMultiTagList and reverseMultiTagList from FowardMultiTagText and ReverseMultiTagText
+                string[] forwardTagArr = FowardMultiTagText.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+                string[] reverseTagArr = ReverseMultiTagText.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+
+                foreach (string tagPlusId in forwardTagArr)
+                {
+                    string[] splitTag = tagPlusId.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    fowardMultiTagList.Add(splitTag[0]);
+                    if (splitTag.Length>1)
+                    {
+                        fowardIdDict[splitTag[0]] = splitTag[1];
+                    }
+                    else
+                    {
+                        fowardIdDict[splitTag[0]] = $"{splitTag[0]}_";
+                    }
+                }
+
+                foreach (string tagPlusId in reverseTagArr)
+                {
+                    string[] splitTag = tagPlusId.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    reverseMultiTagList.Add(splitTag[0]);
+                    if (splitTag.Length>1)
+                    {
+                        reverseIdDict[splitTag[0]] = splitTag[1];
+                    }
+                    else
+                    {
+                        reverseIdDict[splitTag[0]] = $"_{splitTag[0]}";
+                    }
+                }
+
+                //Then combine Forward and Reverse tags in all possible ways and add IDs to mutiTagIDDict
+                foreach (string forTag in fowardMultiTagList)
+                {
+                    foreach (string revTag in reverseMultiTagList)
+                    {
+                        string[] keys = new string[2] { forTag, revTag };
+                        string value = $"{fowardIdDict[forTag]}{reverseIdDict[revTag]}";
+                        value = value.Replace("__", "_");
+                        mutiTagIdDict[keys] = value;
+                    }
+                }
+
+                //Then add individual tags from ExtraMultiTagText - and add mathcing IDs to mutiTagIDDict
+                string[] extraTagArr = ExtraMultiTagText.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (string tagPlusId in extraTagArr)
+                {
+                    string[] splitTag = tagPlusId.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    string forTag = splitTag[0];
+                    string revTag = splitTag[1];
+                    string[] keys = new string[2] { forTag, revTag };
+                    fowardMultiTagList.Add(forTag);
+                    reverseMultiTagList.Add(revTag);
+
+                    if (splitTag.Length > 2)
+                    {
+                        mutiTagIdDict[keys] = splitTag[2];
+                    }
+                    else
+                    {
+                        mutiTagIdDict[keys] = $"{forTag}_{revTag}";
+                    }
+                }
 
             }
+
+            OutputText += $"Multi-tag sample IDs: ";
+            foreach (string[] keys in mutiTagIdDict.Keys)
+            {
+                OutputText += $"{mutiTagIdDict[keys]}, ";
+            }
+            OutputText += $"\n";
         }
 
         private void SetReadLength()
         {
             readLength = Int32.Parse(this.readLengthStr);
-            OutputText += $"Read length: {readLength}.\n";
+            //OutputText += $"Read length: {readLength}.\n";
 
             UnderLineReadLength();
         }
@@ -162,7 +251,7 @@ namespace BartenderWindow
                 if (umiLenStr == "")
                 {
                     forUmiTagLen = null;
-                    OutputText += $"Forward UMI tag length: \n";
+                    //OutputText += $"Forward UMI tag length: \n";
                     return;
                 }
             }
@@ -172,7 +261,7 @@ namespace BartenderWindow
                 if (umiLenStr == "")
                 {
                     revUmiTagLen = null;
-                    OutputText += $"Reverse UMI tag length: \n";
+                    //OutputText += $"Reverse UMI tag length: \n";
                     return;
                 }
             }
@@ -196,18 +285,18 @@ namespace BartenderWindow
             if (forward)
             {
                 forUmiTagLen = umiLenArr;
-                OutputText += $"Forward UMI tag length: ";
+                //OutputText += $"Forward UMI tag length: ";
             }
             else
             {
                 revUmiTagLen = umiLenArr;
-                OutputText += $"Reverse UMI tag length: ";
+                //OutputText += $"Reverse UMI tag length: ";
             }
 
             foreach (int i in umiLenArr) {
-                OutputText += $"{i}, ";
+                //OutputText += $"{i}, ";
             }
-            OutputText += "\n";
+            //OutputText += "\n";
         }
 
         protected void OnPropertyChanged(string name)
@@ -350,6 +439,8 @@ namespace BartenderWindow
 
             HighlightUmiTag();
 
+            MakeMultiTagLists();
+
             HighlightMultiTag();
 
             UnderLineReadLength();
@@ -405,7 +496,7 @@ namespace BartenderWindow
                 //    So, start by finding the first non-'Z' character
                 Regex umiRegEx = new Regex("^Z*");
                 string umiMatch = umiRegEx.Match(read).Value;
-                OutputText += $"umiMatch: {umiMatch}\n";
+                //OutputText += $"umiMatch: {umiMatch}\n";
                 int firstNonZ = umiMatch.Length;
 
                 TextPointer startPointer = rtb.Document.ContentStart.GetPositionAtOffset(0);
@@ -456,12 +547,12 @@ namespace BartenderWindow
                 //        and the first non-'X' non'Z' character
                 Regex umiRegEx = new Regex("^Z*");
                 string umiMatch = umiRegEx.Match(read).Value;
-                OutputText += $"umiMatch: {umiMatch}\n";
+                //OutputText += $"umiMatch: {umiMatch}\n";
                 int firstNonZ = umiMatch.Length;
 
                 Regex multiRegEx = new Regex("^Z*X*");
                 string multiMatch = multiRegEx.Match(read).Value;
-                OutputText += $"multiMatch: {multiMatch}\n";
+                //OutputText += $"multiMatch: {multiMatch}\n";
                 int firstNonX = multiMatch.Length;
 
                 //Check if X'x ans Z's are in expected order
@@ -481,7 +572,7 @@ namespace BartenderWindow
                     return;
                 }
 
-                OutputText += $"firstNonX: {firstNonX}\n";
+                //OutputText += $"firstNonX: {firstNonX}\n";
 
                 TextPointer startPointer = rtb.Document.ContentStart.GetPositionAtOffset(0);
                 startPointer = GetTextPointerAtOffset(rtb, firstNonZ);
