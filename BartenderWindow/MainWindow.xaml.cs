@@ -45,6 +45,7 @@ namespace BartenderWindow
         private static Brush UmiTagHighlight = Brushes.Yellow;
         private static Brush MultiTagHighlight = Brushes.LightGreen;
         private static Brush LineageTagHighlight = Brushes.Thistle;
+        private static Brush FlankHighlight = Brushes.PowderBlue;
 
         #region Properties Getters and Setters
 
@@ -500,6 +501,8 @@ namespace BartenderWindow
 
             HighlightLineageTag();
 
+            HighlightMultiTagFlank();
+
             UnderLineReadLength();
 
             UnselectSequenceText();
@@ -664,6 +667,32 @@ namespace BartenderWindow
                 }
 
                 rtb.Selection.ApplyPropertyValue(Inline.BackgroundProperty, MultiTagHighlight);
+
+            }
+        }
+
+        private void HighlightMultiTagFlank()
+        {
+            foreach (RichTextBox rtb in new RichTextBox[2] { forwardRichTextBox, reverseRichTextBox })
+            {
+                TextRange textRange = new TextRange(rtb.Document.ContentStart, rtb.Document.ContentEnd);
+                string read = textRange.Text;
+
+                //Find end of multi-tag
+                Regex multiRegEx = new Regex("^Z*X*");
+                string multiMatch = multiRegEx.Match(read).Value;
+                //OutputText += $"multiMatch: {multiMatch}\n";
+                int firstNonX = multiMatch.Length;
+
+
+                TextPointer startPointer = GetTextPointerAtOffset(rtb, firstNonX);
+                TextPointer endPointer;
+                endPointer = GetTextPointerAtOffset(rtb, firstNonX + multiFlankLength);
+
+                rtb.Selection.Select(startPointer, endPointer);
+
+                rtb.Selection.ApplyPropertyValue(Inline.BackgroundProperty, FlankHighlight);
+
             }
         }
 
