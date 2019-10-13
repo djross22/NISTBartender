@@ -398,19 +398,10 @@ namespace BartenderWindow
                 TextRange textRange = new TextRange(rtb.Document.ContentStart, rtb.Document.ContentEnd);
                 string read = textRange.Text;
 
-                //The UMI tag is indicated by Z's at the start of each sequence.
-                //    So, start by finding the first non-'Z' character
-                int firstNonZ = 0;
-                foreach (char c in read.ToCharArray())
-                {
-                    if (c != 'Z')
-                    {
-                        break;
-                    }
-                    firstNonZ++;
-                }
-
-                OutputText += $"firstNonZ: {firstNonZ}\n";
+                Regex umiRegEx = new Regex("^Z*");
+                string umiMatch = umiRegEx.Match(read).Value;
+                OutputText += $"umiMatch: {umiMatch}\n";
+                int firstNonZ = umiMatch.Length;
 
                 TextPointer startPointer = rtb.Document.ContentStart.GetPositionAtOffset(0);
                 TextPointer endPointer = GetTextPointerAtOffset(rtb, firstNonZ);
