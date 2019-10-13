@@ -31,6 +31,7 @@ namespace BartenderWindow
         private int readLength;
 
         private string fowardMultiTagText, reverseMultiTagText, extraMultiTagText;
+        private List<string> fowardMultiTagList, reverseMultiTagList, extraMultiTagList, multiTagList;
 
         private string outputText;
 
@@ -127,6 +128,17 @@ namespace BartenderWindow
             ReverseMultiTagText += "GGGCAATGCG, 2\n";
             ExtraMultiTagText = "AGAAGGTAG, TAGTGTCGTG, S5\n";
             ExtraMultiTagText = "AGAAGGTAG, GGGCAATGCG, S6\n";
+
+            fowardMultiTagList = new List<string>();
+            reverseMultiTagList = new List<string>();
+            extraMultiTagList = new List<string>();
+            multiTagList = new List<string>();
+        }
+
+        private void MakeMultiTagLists()
+        {
+            //If multitag text boxes aren't properly populated
+            //if ()
         }
 
         private void SetReadLength()
