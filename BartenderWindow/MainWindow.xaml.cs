@@ -398,6 +398,8 @@ namespace BartenderWindow
                 TextRange textRange = new TextRange(rtb.Document.ContentStart, rtb.Document.ContentEnd);
                 string read = textRange.Text;
 
+                //The UMI tag is indicated by Z's at the start of each sequence.
+                //    So, start by finding the first non-'Z' character
                 Regex umiRegEx = new Regex("^Z*");
                 string umiMatch = umiRegEx.Match(read).Value;
                 OutputText += $"umiMatch: {umiMatch}\n";
@@ -449,24 +451,15 @@ namespace BartenderWindow
                 //The Multiplexing tag is indicated by X's after the UMI tag (Z's).
                 //    So, start by finding the first non-'Z' character
                 //        and the first non-'X' non'Z' character
-                int firstNonZ = 0;
-                foreach (char c in read.ToCharArray())
-                {
-                    if (c != 'Z')
-                    {
-                        break;
-                    }
-                    firstNonZ++;
-                }
-                int firstNonX = 0;
-                foreach (char c in read.ToCharArray())
-                {
-                    if (c != 'Z' && c != 'X')
-                    {
-                        break;
-                    }
-                    firstNonX++;
-                }
+                Regex umiRegEx = new Regex("^Z*");
+                string umiMatch = umiRegEx.Match(read).Value;
+                OutputText += $"umiMatch: {umiMatch}\n";
+                int firstNonZ = umiMatch.Length;
+
+                Regex multiRegEx = new Regex("^Z*X*");
+                string multiMatch = multiRegEx.Match(read).Value;
+                OutputText += $"multiMatch: {multiMatch}\n";
+                int firstNonX = multiMatch.Length;
 
                 //Check if X'x ans Z's are in expected order
                 if (firstNonX <= firstNonZ)
