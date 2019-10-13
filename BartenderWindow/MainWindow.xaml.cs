@@ -137,8 +137,11 @@ namespace BartenderWindow
 
         private void MakeMultiTagLists()
         {
-            //If multitag text boxes aren't properly populated
-            //if ()
+            //If multitag text boxes aren't properly populated, give warning message and return from method
+            if (String.IsNullOrEmpty(ExtraMultiTagText))
+            {
+
+            }
         }
 
         private void SetReadLength()

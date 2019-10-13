@@ -146,7 +146,15 @@
                     </TextBox.Text>
                 </TextBox>
                 <TextBlock HorizontalAlignment="Left" Text="Extra Multiplexing Tags:" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="White" ToolTip="Enter extra multiplexing tags or tags that should not be automatically comined, one per line: 'Forward, Reverse, Short-ID'. The Short-IDs are optional." Margin="10,0,0,0" Grid.Row="3"/>
-                <TextBox Margin="10,0,10,10" Grid.Row="4" Text="{Binding ExtraMultiTagText, Mode=TwoWay}" TextWrapping="NoWrap" FontFamily="Courier New" FontSize="14" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Grid.ColumnSpan="2" AcceptsReturn="True"/>
+                <TextBox Margin="10,0,10,10" Grid.Row="4" TextWrapping="NoWrap" FontFamily="Courier New" FontSize="14" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Grid.ColumnSpan="2" AcceptsReturn="True">
+                    <TextBox.Text>
+                        <Binding Path="ExtraMultiTagText" UpdateSourceTrigger="PropertyChanged"  Mode="TwoWay">
+                            <Binding.ValidationRules>
+                                <local:MultiLineValidationRule RegexText = "^[AGCT]{5,20}, [AGCT]{5,20}$|^[AGCT]{5,20}, [AGCT]{5,20},.*$" ErrorMessage="Each line must have the form: '{F-Tag sequence}, {R-Tag sequence}, Short-ID'." ValidationOptions="None"/>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
             </Grid>
         </Grid>
         <TextBox x:Name="outputTextBox" HorizontalAlignment="Stretch" Margin="10,10,10,10" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Stretch" Text="{Binding OutputText, Mode=TwoWay}" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" Background="#FFCBCBCB" TextChanged="outputTextBox_TextChanged"/>
