@@ -30,6 +30,9 @@ namespace BartenderWindow
         private string readLengthStr;
         private int readLength;
 
+        private string multiFlankLengthStr, linTagFlankLengthStr, forwardSpacerLengthStr, reverseSpacerLengthStr;
+        private int multiFlankLength, linTagFlankLength, forwardSpacerLength, reverseSpacerLength;
+
         private string fowardMultiTagText, reverseMultiTagText, extraMultiTagText;
         private List<string> fowardMultiTagList, reverseMultiTagList;
         private Dictionary<string, string> fowardIdDict, reverseIdDict;
@@ -42,6 +45,49 @@ namespace BartenderWindow
         private static Brush LineageTagHighlight = Brushes.Thistle;
 
         #region Properties Getters and Setters
+
+        public string ReverseSpacerLengthStr
+        {
+            get { return this.reverseSpacerLengthStr; }
+            set
+            {
+                this.reverseSpacerLengthStr = value;
+                OnPropertyChanged("ReverseSpacerLengthStr");
+            }
+        }
+
+        public string ForwardSpacerLengthStr
+        {
+            get { return this.forwardSpacerLengthStr; }
+            set
+            {
+                this.forwardSpacerLengthStr = value;
+                OnPropertyChanged("ForwardSpacerLengthStr");
+            }
+        }
+
+        public string LinTagFlankLengthStr
+        {
+            get { return this.linTagFlankLengthStr; }
+            set
+            {
+                this.linTagFlankLengthStr = value;
+                OnPropertyChanged("LinTagFlankLengthStr");
+                int.TryParse(linTagFlankLengthStr, out linTagFlankLength);
+            }
+        }
+
+        public string MultiFlankLengthStr
+        {
+            get { return this.multiFlankLengthStr; }
+            set
+            {
+                this.multiFlankLengthStr = value;
+                OnPropertyChanged("MultiFlankLengthStr");
+                int.TryParse(multiFlankLengthStr, out multiFlankLength);
+            }
+        }
+
         public string ExtraMultiTagText
         {
             get { return this.extraMultiTagText; }
@@ -51,6 +97,7 @@ namespace BartenderWindow
                 OnPropertyChanged("ExtraMultiTagText");
             }
         }
+
         public string ReverseMultiTagText
         {
             get { return this.reverseMultiTagText; }
