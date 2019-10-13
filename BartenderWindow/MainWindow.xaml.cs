@@ -725,6 +725,17 @@ namespace BartenderWindow
                 rtb.Selection.ApplyPropertyValue(Inline.BackgroundProperty, LineageTagHighlight);
                 rtb.Selection.ApplyPropertyValue(Inline.FontWeightProperty, FontWeights.Bold);
 
+                //Also highlight the flanking sequences used for matching
+                startPointer = GetTextPointerAtOffset(rtb, tagStart - linTagFlankLength);
+                endPointer = GetTextPointerAtOffset(rtb, tagStart);
+                rtb.Selection.Select(startPointer, endPointer);
+                rtb.Selection.ApplyPropertyValue(Inline.BackgroundProperty, FlankHighlight);
+
+                startPointer = GetTextPointerAtOffset(rtb, tagEnd);
+                endPointer = GetTextPointerAtOffset(rtb, tagEnd + linTagFlankLength);
+                rtb.Selection.Select(startPointer, endPointer);
+                rtb.Selection.ApplyPropertyValue(Inline.BackgroundProperty, FlankHighlight);
+
                 //Also set spacer lengths in this method
                 Regex multiRegEx = new Regex("^Z*X*");
                 string multiMatch = multiRegEx.Match(read).Value;

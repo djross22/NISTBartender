@@ -22,11 +22,11 @@ add non-editable spacer length textboxes and properties
 
 highlight constant flanking reagion after multitag (PowderBlue)
 
+highlight constant flanking regions to lintag (PowderBlue)
+
 
 --------------------------------------------------------
 NISTBartender TODO List:
-
-highlight constant flanking regions to lintag (PowderBlue)
 
 
 
