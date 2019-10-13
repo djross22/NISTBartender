@@ -31,7 +31,8 @@ namespace BartenderWindow
         private int readLength;
 
         private string forwardMultiFlankStr, reverseMultiFlankStr;
-        private string[] forwardLinTagFlankStrs, reverseLinTagFlankStrs;
+        private string[] forwardLinTagFlankStrs = new string[2];
+        private string[] reverseLinTagFlankStrs = new string[2];
         private string multiFlankLengthStr, linTagFlankLengthStr, forwardSpacerLengthStr, reverseSpacerLengthStr;
         private int multiFlankLength, linTagFlankLength, forwardSpacerLength, reverseSpacerLength;
 
@@ -693,6 +694,17 @@ namespace BartenderWindow
 
                 rtb.Selection.ApplyPropertyValue(Inline.BackgroundProperty, FlankHighlight);
 
+                if (Object.ReferenceEquals(rtb, forwardRichTextBox))
+                {
+                    forwardMultiFlankStr = rtb.Selection.Text;
+                    OutputText += $"forwardMultiFlankStr: {forwardMultiFlankStr}\n";
+                }
+                if (Object.ReferenceEquals(rtb, reverseRichTextBox))
+                {
+                    reverseMultiFlankStr = rtb.Selection.Text;
+                    OutputText += $"reverseMultiFlankStr: {reverseMultiFlankStr}\n";
+                }
+
             }
         }
 
@@ -730,11 +742,31 @@ namespace BartenderWindow
                 endPointer = GetTextPointerAtOffset(rtb, tagStart);
                 rtb.Selection.Select(startPointer, endPointer);
                 rtb.Selection.ApplyPropertyValue(Inline.BackgroundProperty, FlankHighlight);
+                if (Object.ReferenceEquals(rtb, forwardRichTextBox))
+                {
+                    forwardLinTagFlankStrs[0] = rtb.Selection.Text;
+                    OutputText += $"forwardLinTagFlankStrs[0]: {forwardLinTagFlankStrs[0]}\n";
+                }
+                if (Object.ReferenceEquals(rtb, reverseRichTextBox))
+                {
+                    reverseLinTagFlankStrs[0] = rtb.Selection.Text;
+                    OutputText += $"reverseLinTagFlankStrs[0]: {reverseLinTagFlankStrs[0]}\n";
+                }
 
                 startPointer = GetTextPointerAtOffset(rtb, tagEnd);
                 endPointer = GetTextPointerAtOffset(rtb, tagEnd + linTagFlankLength);
                 rtb.Selection.Select(startPointer, endPointer);
                 rtb.Selection.ApplyPropertyValue(Inline.BackgroundProperty, FlankHighlight);
+                if (Object.ReferenceEquals(rtb, forwardRichTextBox))
+                {
+                    forwardLinTagFlankStrs[1] = rtb.Selection.Text;
+                    OutputText += $"forwardLinTagFlankStrs[1]: {forwardLinTagFlankStrs[1]}\n";
+                }
+                if (Object.ReferenceEquals(rtb, reverseRichTextBox))
+                {
+                    reverseLinTagFlankStrs[1] = rtb.Selection.Text;
+                    OutputText += $"reverseLinTagFlankStrs[1]: {reverseLinTagFlankStrs[1]}\n";
+                }
 
                 //Also set spacer lengths in this method
                 Regex multiRegEx = new Regex("^Z*X*");

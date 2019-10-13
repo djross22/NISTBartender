@@ -24,9 +24,13 @@ highlight constant flanking reagion after multitag (PowderBlue)
 
 highlight constant flanking regions to lintag (PowderBlue)
 
+write the flanking sequences to the appropriate variables for use by the parser
+
 
 --------------------------------------------------------
 NISTBartender TODO List:
+
+Auto-generate Regex, but also allow manual edits
 
 
 
@@ -35,7 +39,5 @@ All samples/multitags to be parsed into one file and clustered together
 replace Z statistic with probability ratio or log-ratio of Poisson probabilities for same cluster vs. different clusters
 
 Try full entropy to rank seed positions
-
-Auto-generate Regex, but also allow manual edits
 
 
