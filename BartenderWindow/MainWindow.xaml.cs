@@ -30,12 +30,43 @@ namespace BartenderWindow
         private string readLengthStr;
         private int readLength;
 
+        private string fowardMultiTagText, reverseMultiTagText, extraMultiTagText;
+
         private string outputText;
 
         private static Brush UmiTagHighlight = Brushes.Yellow;
         private static Brush MultiTagHighlight = Brushes.LightGreen;
 
         #region Properties Getters and Setters
+        public string ExtraMultiTagText
+        {
+            get { return this.extraMultiTagText; }
+            set
+            {
+                this.extraMultiTagText = value;
+                OnPropertyChanged("ExtraMultiTagText");
+            }
+        }
+        public string ReverseMultiTagText
+        {
+            get { return this.reverseMultiTagText; }
+            set
+            {
+                this.reverseMultiTagText = value;
+                OnPropertyChanged("ReverseMultiTagText");
+            }
+        }
+
+        public string FowardMultiTagText
+        {
+            get { return this.fowardMultiTagText; }
+            set
+            {
+                this.fowardMultiTagText = value;
+                OnPropertyChanged("FowardMultiTagText");
+            }
+        }
+
         public string ReadLengthStr
         {
             get { return this.readLengthStr; }
@@ -83,13 +114,19 @@ namespace BartenderWindow
         public MainWindow()
         {
             InitializeComponent();
+            DataContext = this;
 
             CopyReverseComplement();
             ReadLengthStr = "150";
             ForUmiTagLenStr = "";
             RevUmiTagLenStr = "";
 
-            DataContext = this;
+            FowardMultiTagText = "AGCTAGCTAG, A\n";
+            FowardMultiTagText += "CAATGCCTAG, B\n";
+            ReverseMultiTagText = "TAATGCCGTG, 1\n";
+            ReverseMultiTagText += "GGGCAATGCG, 2\n";
+            ExtraMultiTagText = "AGAAGGTAG, TAGTGTCGTG, S5\n";
+            ExtraMultiTagText = "AGAAGGTAG, GGGCAATGCG, S6\n";
         }
 
         private void SetReadLength()
