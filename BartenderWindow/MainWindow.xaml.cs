@@ -351,6 +351,8 @@ namespace BartenderWindow
 
             UnderLineReadLength();
 
+            UnselectSequenceText();
+
         }
 
         private void ClearSequenceFormatting()
@@ -358,6 +360,15 @@ namespace BartenderWindow
             foreach (RichTextBox rtb in new RichTextBox[2] { forwardRichTextBox , reverseRichTextBox })
             {
                 rtb.Selection.ClearAllProperties();
+            }
+        }
+
+        private void UnselectSequenceText()
+        {
+            foreach (RichTextBox rtb in new RichTextBox[2] { forwardRichTextBox, reverseRichTextBox })
+            {
+                TextPointer endPointer = rtb.Document.ContentEnd.GetPositionAtOffset(0);
+                rtb.Selection.Select(endPointer, endPointer);
             }
         }
 
