@@ -556,7 +556,7 @@ namespace BartenderWindow
                 int firstNonX = multiMatch.Length;
 
                 //Check if X'x ans Z's are in expected order
-                if (firstNonX <= firstNonZ)
+                if (firstNonX < firstNonZ)
                 {
                     string errorMsg = "Unexpected sequence in ";
                     if (Object.ReferenceEquals(rtb, forwardRichTextBox))
@@ -583,9 +583,10 @@ namespace BartenderWindow
                 //If multiplexing tags are set in the GUI then use the length from those strings - and replace/insert the appropriate number of X's
                 if (Object.ReferenceEquals(rtb, forwardRichTextBox))
                 {
-                    if (false) //multi-tag list has been set up in the GUI
+                    string cleanForward = FowardMultiTagText.Replace("\n", "").Replace("\r", "");
+                    if (!String.IsNullOrEmpty(cleanForward)) //multi-tag list has been set up in the GUI
                     {
-                        //rtb.Selection.Text = new String('X', forMultiTagLen.Last());
+                        rtb.Selection.Text = new String('X', GetMaxMultiTagLength(forward:true));
                     }
                     else
                     {
@@ -594,9 +595,10 @@ namespace BartenderWindow
                 }
                 if (Object.ReferenceEquals(rtb, reverseRichTextBox))
                 {
-                    if (false) //multi-tag list has been set up in the GUI
+                    string cleanReverse = ReverseMultiTagText.Replace("\n", "").Replace("\r", "");
+                    if (!String.IsNullOrEmpty(cleanReverse)) //multi-tag list has been set up in the GUI
                     {
-                        //rtb.Selection.Text = new String('X', revMultiTagLen.Last());
+                        rtb.Selection.Text = new String('X', GetMaxMultiTagLength(forward: false));
                     }
                     else
                     {
@@ -606,6 +608,27 @@ namespace BartenderWindow
 
                 rtb.Selection.ApplyPropertyValue(Inline.BackgroundProperty, MultiTagHighlight);
             }
+        }
+
+        private int GetMaxMultiTagLength(bool forward)
+        {
+            int maxLength = 0;
+            List<string> tagList;
+            if (forward)
+            {
+                tagList = fowardMultiTagList;
+            }
+            else
+            {
+                tagList = reverseMultiTagList;
+            }
+
+            foreach (string tag in tagList)
+            {
+                if (tag.Length > maxLength) maxLength = tag.Length;
+            }
+
+            return maxLength;
         }
 
         private static TextPointer GetTextPointerAtOffset(RichTextBox richTextBox, int offset)

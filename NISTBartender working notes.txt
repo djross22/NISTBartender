@@ -5,15 +5,20 @@ ZZZZZZZZXXXXXXXXXXCATCGGTGAGCCCGGGCTGTCGGCGTNNTNNNANNTNNNANNTNNNANNTNNNANNTNNNAN
 
 Underline readLength
 
+use regex to find/highlight UMI tags and multitags
 
---------------------------------------------------------
-NISTBartender TODO List:
+clear selection after analysis
+
+Sample IDs: Dictionary with string[2] key: key[0] if forward multitag, key[1] is reverse multitag
+	value/ID = "unexpected" if not in Dictionary (will happen in parser)
 
 highlight UMI tag (yellow)
 
 highlight multitag (green)
 
-auto-scorll outputTextBox
+
+--------------------------------------------------------
+NISTBartender TODO List:
 
 highlight lintag (magenta)
 
@@ -22,6 +27,8 @@ highlight constant flanking regions to lintag
 highlight constant flanking reagion after multitag
 
 
+
+All samples/multitags to be parsed into one file and clustered together
 
 replace Z statistic with probability ratio or log-ratio of Poisson probabilities for same cluster vs. different clusters
 
