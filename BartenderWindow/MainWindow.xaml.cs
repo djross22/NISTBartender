@@ -30,9 +30,14 @@ namespace BartenderWindow
         private string readLengthStr;
         private int readLength;
 
-        private string forwardMultiFlankStr, reverseMultiFlankStr;
+        private string forwardLinTag, reverseLinTag;
+        private string forwardLinTagLengthStr, reverseLinTagLengthStr;
+        private int forwardLinTagLength, reverseLinTagLength;
+        private string forLintagRegexStr, revLintagRegexStr;
         private string[] forwardLinTagFlankStrs = new string[2];
         private string[] reverseLinTagFlankStrs = new string[2];
+
+        private string forwardMultiFlankStr, reverseMultiFlankStr;
         private string multiFlankLengthStr, linTagFlankLengthStr, forwardSpacerLengthStr, reverseSpacerLengthStr;
         private int multiFlankLength, linTagFlankLength, forwardSpacerLength, reverseSpacerLength;
 
@@ -49,6 +54,48 @@ namespace BartenderWindow
         private static Brush FlankHighlight = Brushes.PowderBlue;
 
         #region Properties Getters and Setters
+
+        public string RevLintagRegexStr
+        {
+            get { return this.revLintagRegexStr; }
+            set
+            {
+                this.revLintagRegexStr = value;
+                OnPropertyChanged("RevLintagRegexStr");
+            }
+        }
+
+        public string ForLintagRegexStr
+        {
+            get { return this.forLintagRegexStr; }
+            set
+            {
+                this.forLintagRegexStr = value;
+                OnPropertyChanged("ForLintagRegexStr");
+            }
+        }
+
+        public string ReverseLinTagLengthStr
+        {
+            get { return this.reverseLinTagLengthStr; }
+            set
+            {
+                this.reverseLinTagLengthStr = value;
+                OnPropertyChanged("ReverseLinTagLengthStr");
+                int.TryParse(reverseLinTagLengthStr, out reverseLinTagLength);
+            }
+        }
+
+        public string ForwardLinTagLengthStr
+        {
+            get { return this.forwardLinTagLengthStr; }
+            set
+            {
+                this.forwardLinTagLengthStr = value;
+                OnPropertyChanged("ForwardLinTagLengthStr");
+                int.TryParse(forwardLinTagLengthStr, out forwardLinTagLength);
+            }
+        }
 
         public string ReverseSpacerLengthStr
         {
@@ -464,6 +511,11 @@ namespace BartenderWindow
         {
 
         }
+        
+        private void autoRegexButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
 
         private void readLengthTextBox_KeyUp(object sender, KeyEventArgs e)
         {
@@ -737,6 +789,20 @@ namespace BartenderWindow
 
                 rtb.Selection.ApplyPropertyValue(Inline.BackgroundProperty, LineageTagHighlight);
                 rtb.Selection.ApplyPropertyValue(Inline.FontWeightProperty, FontWeights.Bold);
+
+                //Write lineage tag string to appropriate variable
+                if (Object.ReferenceEquals(rtb, forwardRichTextBox))
+                {
+                    forwardLinTag = rtb.Selection.Text;
+                    ForwardLinTagLengthStr = $"{rtb.Selection.Text.Length}";
+                    OutputText += $"forwardLinTag: {forwardLinTag}\n";
+                }
+                if (Object.ReferenceEquals(rtb, reverseRichTextBox))
+                {
+                    reverseLinTag = rtb.Selection.Text;
+                    ReverseLinTagLengthStr = $"{rtb.Selection.Text.Length}";
+                    OutputText += $"reverseLinTag: {reverseLinTag}\n";
+                }
 
                 //Also highlight the flanking sequences used for matching
                 startPointer = GetTextPointerAtOffset(rtb, tagStart - linTagFlankLength);
