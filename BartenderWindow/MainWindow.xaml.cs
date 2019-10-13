@@ -387,7 +387,11 @@ namespace BartenderWindow
                 rtb.Selection.ApplyPropertyValue(Inline.BackgroundProperty, UmiTagHighlight);
             }
         }
-        
+
+        private void outputTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            outputTextBox.ScrollToEnd();
+        }
 
         private void HighlightMultiTag()
         {

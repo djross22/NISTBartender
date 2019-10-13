@@ -133,7 +133,7 @@
                 <TextBox Margin="10,0,10,10" Grid.Row="4" Text="AGAAGGTAG, TAGTGTCGTG, S5" TextWrapping="NoWrap" FontFamily="Courier New" FontSize="14" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Grid.ColumnSpan="2" AcceptsReturn="True"/>
             </Grid>
         </Grid>
-        <TextBox x:Name="outputTextBox" HorizontalAlignment="Stretch" Margin="10,10,10,10" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Stretch" Text="{Binding OutputText, Mode=TwoWay}" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" Background="#FFCBCBCB"/>
+        <TextBox x:Name="outputTextBox" HorizontalAlignment="Stretch" Margin="10,10,10,10" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Stretch" Text="{Binding OutputText, Mode=TwoWay}" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" Background="#FFCBCBCB" TextChanged="outputTextBox_TextChanged"/>
 
     </Grid>
 </Window>
