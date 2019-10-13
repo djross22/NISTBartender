@@ -16,11 +16,11 @@ highlight UMI tag (yellow)
 
 highlight multitag (green)
 
+highlight lintag (thistle)
+
 
 --------------------------------------------------------
 NISTBartender TODO List:
-
-highlight lintag (magenta)
 
 highlight constant flanking regions to lintag
 

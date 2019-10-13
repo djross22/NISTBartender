@@ -39,6 +39,7 @@ namespace BartenderWindow
 
         private static Brush UmiTagHighlight = Brushes.Yellow;
         private static Brush MultiTagHighlight = Brushes.LightGreen;
+        private static Brush LineageTagHighlight = Brushes.Thistle;
 
         #region Properties Getters and Setters
         public string ExtraMultiTagText
@@ -443,6 +444,8 @@ namespace BartenderWindow
 
             HighlightMultiTag();
 
+            HighlightLineageTag();
+
             UnderLineReadLength();
 
             UnselectSequenceText();
@@ -607,6 +610,37 @@ namespace BartenderWindow
                 }
 
                 rtb.Selection.ApplyPropertyValue(Inline.BackgroundProperty, MultiTagHighlight);
+            }
+        }
+
+        private void HighlightLineageTag()
+        {
+            foreach (RichTextBox rtb in new RichTextBox[2] { forwardRichTextBox, reverseRichTextBox })
+            {
+                TextRange textRange = new TextRange(rtb.Document.ContentStart, rtb.Document.ContentEnd);
+                string read = textRange.Text;
+
+                //The Lineage tag is indicated by N's but can have constant (non-N) bases in it.
+                //    So, start by finding the first 'N' character
+                //        and the first run of 5 non-N characters after that
+                Regex tagStartRegEx = new Regex("^.+?N");
+                string tagStartMatch = tagStartRegEx.Match(read).Value;
+                OutputText += $"tagStartMatch: {tagStartMatch}\n";
+                int tagStart = tagStartMatch.Length - 1;
+
+                Regex tagEndRegEx = new Regex("^.+?N.+?N[^N]{5}");
+                string tagEndMatch = tagEndRegEx.Match(read).Value;
+                OutputText += $"tagEndMatch: {tagEndMatch}\n";
+                int tagEnd = tagEndMatch.Length - 5;
+
+
+                TextPointer startPointer = GetTextPointerAtOffset(rtb, tagStart);
+                TextPointer endPointer = GetTextPointerAtOffset(rtb, tagEnd);
+
+                rtb.Selection.Select(startPointer, endPointer);
+
+                rtb.Selection.ApplyPropertyValue(Inline.BackgroundProperty, LineageTagHighlight);
+                rtb.Selection.ApplyPropertyValue(Inline.FontWeightProperty, FontWeights.Bold);
             }
         }
 
