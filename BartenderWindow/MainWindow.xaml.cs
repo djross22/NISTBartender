@@ -72,6 +72,9 @@ namespace BartenderWindow
         private static Brush LineageTagHighlight = Brushes.LightGreen;
         private static Brush FlankHighlight = Brushes.PowderBlue;
 
+        //Parameters for sequence file parsing
+        private int threadsForParsing;
+
         #region Properties Getters and Setters
 
         public bool ParamsChanged
@@ -352,7 +355,9 @@ namespace BartenderWindow
 
             InitMultiTagLists();
 
-            OutputText += $"Number Of Logical Processors: {Environment.ProcessorCount}";
+            AddOutputText($"Number of Logical Processors: {Environment.ProcessorCount}");
+            threadsForParsing = Environment.ProcessorCount / 2;
+            AddOutputText($"Number of threads to use for sequence file parsing: {threadsForParsing}");
         }
 
         private void InitMultiTagLists()
@@ -479,18 +484,18 @@ namespace BartenderWindow
                 }
             }
 
-            OutputText += $"Multi-tag sample IDs: ";
+            AddOutputText($"Multi-tag sample IDs: ", false);
             foreach (string[] keys in mutiTagIdDict.Keys)
             {
-                OutputText += $"{mutiTagIdDict[keys]}, ";
+                AddOutputText($"{mutiTagIdDict[keys]}, ", false);
             }
-            OutputText += $"\n";
+            AddOutputText($"");
         }
 
         private void SetReadLength()
         {
             readLength = Int32.Parse(this.readLengthStr);
-            //OutputText += $"Read length: {readLength}.\n";
+            //AddOutputText($"Read length: {readLength}.\n");
 
             UnderLineReadLength();
         }
@@ -505,7 +510,7 @@ namespace BartenderWindow
                 if (string.IsNullOrEmpty(umiLenStr))
                 {
                     forUmiTagLen = null;
-                    //OutputText += $"Forward UMI tag length: \n";
+                    //AddOutputText($"Forward UMI tag length: )";
                     return;
                 }
             }
@@ -515,7 +520,7 @@ namespace BartenderWindow
                 if (string.IsNullOrEmpty(umiLenStr))
                 {
                     revUmiTagLen = null;
-                    //OutputText += $"Reverse UMI tag length: \n";
+                    //AddOutputText($"Reverse UMI tag length: ");
                     return;
                 }
             }
@@ -539,18 +544,18 @@ namespace BartenderWindow
             if (forward)
             {
                 forUmiTagLen = umiLenArr;
-                //OutputText += $"Forward UMI tag length: ";
+                //AddOutputText($"Forward UMI tag length: ", false);
             }
             else
             {
                 revUmiTagLen = umiLenArr;
-                //OutputText += $"Reverse UMI tag length: ";
+                //AddOutputText($"Reverse UMI tag length: ", false);
             }
 
             foreach (int i in umiLenArr) {
-                //OutputText += $"{i}, ";
+                //AddOutputText($"{i}, ", false);
             }
-            //OutputText += "\n";
+            //AddOutputText("");
         }
 
         protected void OnPropertyChanged(string name)
@@ -864,7 +869,7 @@ namespace BartenderWindow
         {
             if (newLine)
             {
-                OutputText += $"\n{txt}";
+                OutputText += $"{txt}\n";
             }
             else
             {
@@ -1144,7 +1149,7 @@ namespace BartenderWindow
                 //    So, start by finding the first non-'Z' character
                 Regex umiRegEx = new Regex("^Z*");
                 string umiMatch = umiRegEx.Match(read).Value;
-                //OutputText += $"umiMatch: {umiMatch}\n";
+                //AddOutputText($"umiMatch: {umiMatch}");
                 int firstNonZ = umiMatch.Length;
 
                 TextPointer startPointer = rtb.Document.ContentStart.GetPositionAtOffset(0);
@@ -1156,7 +1161,7 @@ namespace BartenderWindow
                 //    otherwise, use number of Z'z in sequence to set value for UMI tag length
                 if (Object.ReferenceEquals(rtb, forwardRichTextBox))
                 {
-                    //OutputText += $"ForUmiTagLenStr: {ForUmiTagLenStr}\n";
+                    //AddOutputText($"ForUmiTagLenStr: {ForUmiTagLenStr}");
                     if (string.IsNullOrEmpty(ForUmiTagLenStr))
                     {
                         ForUmiTagLenStr = $"{firstNonZ}";
@@ -1168,7 +1173,7 @@ namespace BartenderWindow
                 }
                 if (Object.ReferenceEquals(rtb, reverseRichTextBox))
                 {
-                    //OutputText += $"RevUmiTagLenStr: {RevUmiTagLenStr}\n";
+                    //AddOutputText($"RevUmiTagLenStr: {RevUmiTagLenStr}");
                     if (string.IsNullOrEmpty(RevUmiTagLenStr))
                     {
                         RevUmiTagLenStr = $"{firstNonZ}";
@@ -1195,12 +1200,12 @@ namespace BartenderWindow
                 //        and the first non-'X' non'Z' character
                 Regex umiRegEx = new Regex("^Z*");
                 string umiMatch = umiRegEx.Match(read).Value;
-                //OutputText += $"umiMatch: {umiMatch}\n";
+                //AddOutputText($"umiMatch: {umiMatch}");
                 int firstNonZ = umiMatch.Length;
 
                 Regex multiRegEx = new Regex("^Z*X*");
                 string multiMatch = multiRegEx.Match(read).Value;
-                //OutputText += $"multiMatch: {multiMatch}\n";
+                //AddOutputText($"multiMatch: {multiMatch}");
                 int firstNonX = multiMatch.Length;
 
                 //Check if X'x ans Z's are in expected order
@@ -1220,7 +1225,7 @@ namespace BartenderWindow
                     return;
                 }
 
-                //OutputText += $"firstNonX: {firstNonX}\n";
+                //AddOutputText($"firstNonX: {firstNonX}");
 
                 TextPointer startPointer = rtb.Document.ContentStart.GetPositionAtOffset(0);
                 startPointer = GetTextPointerAtOffset(rtb, firstNonZ);
@@ -1277,7 +1282,7 @@ namespace BartenderWindow
                     //Find end of multi-tag
                     Regex multiRegEx = new Regex("^Z*X*");
                     string multiMatch = multiRegEx.Match(read).Value;
-                    //OutputText += $"multiMatch: {multiMatch}\n";
+                    //AddOutputText($"multiMatch: {multiMatch}");
                     int firstNonX = multiMatch.Length;
 
 
@@ -1292,12 +1297,12 @@ namespace BartenderWindow
                     if (Object.ReferenceEquals(rtb, forwardRichTextBox))
                     {
                         forwardMultiFlankStr = rtb.Selection.Text;
-                        OutputText += $"forwardMultiFlankStr: {forwardMultiFlankStr}\n";
+                        AddOutputText($"forwardMultiFlankStr: {forwardMultiFlankStr}");
                     }
                     if (Object.ReferenceEquals(rtb, reverseRichTextBox))
                     {
                         reverseMultiFlankStr = rtb.Selection.Text;
-                        OutputText += $"reverseMultiFlankStr: {reverseMultiFlankStr}\n";
+                        AddOutputText($"reverseMultiFlankStr: {reverseMultiFlankStr}");
                     }
                 }
             }
@@ -1320,12 +1325,12 @@ namespace BartenderWindow
                 //        and the first run of 5 non-N characters after that
                 Regex tagStartRegEx = new Regex("^.+?N");
                 string tagStartMatch = tagStartRegEx.Match(read).Value;
-                OutputText += $"tagStartMatch: {tagStartMatch}\n";
+                //AddOutputText($"tagStartMatch: {tagStartMatch}");
                 int tagStart = tagStartMatch.Length - 1;
 
                 Regex tagEndRegEx = new Regex("^.+?N.+?N[^N]{5}");
                 string tagEndMatch = tagEndRegEx.Match(read).Value;
-                OutputText += $"tagEndMatch: {tagEndMatch}\n";
+                //AddOutputText($"tagEndMatch: {tagEndMatch}");
                 int tagEnd = tagEndMatch.Length - 5;
 
 
@@ -1342,13 +1347,13 @@ namespace BartenderWindow
                 {
                     forwardLinTag = rtb.Selection.Text;
                     ForwardLinTagLengthStr = $"{rtb.Selection.Text.Length}";
-                    OutputText += $"forwardLinTag: {forwardLinTag}\n";
+                    AddOutputText($"forwardLinTag: {forwardLinTag}");
                 }
                 if (Object.ReferenceEquals(rtb, reverseRichTextBox))
                 {
                     reverseLinTag = rtb.Selection.Text;
                     ReverseLinTagLengthStr = $"{rtb.Selection.Text.Length}";
-                    OutputText += $"reverseLinTag: {reverseLinTag}\n";
+                    AddOutputText($"reverseLinTag: {reverseLinTag}");
                 }
 
                 //Also highlight the flanking sequences used for matching
@@ -1361,12 +1366,12 @@ namespace BartenderWindow
                     if (Object.ReferenceEquals(rtb, forwardRichTextBox))
                     {
                         forwardLinTagFlankStrs[0] = rtb.Selection.Text;
-                        OutputText += $"forwardLinTagFlankStrs[0]: {forwardLinTagFlankStrs[0]}\n";
+                        //AddOutputText($"forwardLinTagFlankStrs[0]: {forwardLinTagFlankStrs[0]}");
                     }
                     if (Object.ReferenceEquals(rtb, reverseRichTextBox))
                     {
                         reverseLinTagFlankStrs[0] = rtb.Selection.Text;
-                        OutputText += $"reverseLinTagFlankStrs[0]: {reverseLinTagFlankStrs[0]}\n";
+                        //AddOutputText($"reverseLinTagFlankStrs[0]: {reverseLinTagFlankStrs[0]}");
                     }
 
                     startPointer = GetTextPointerAtOffset(rtb, tagEnd);
@@ -1376,12 +1381,12 @@ namespace BartenderWindow
                     if (Object.ReferenceEquals(rtb, forwardRichTextBox))
                     {
                         forwardLinTagFlankStrs[1] = rtb.Selection.Text;
-                        OutputText += $"forwardLinTagFlankStrs[1]: {forwardLinTagFlankStrs[1]}\n";
+                        //AddOutputText($"forwardLinTagFlankStrs[1]: {forwardLinTagFlankStrs[1]}");
                     }
                     if (Object.ReferenceEquals(rtb, reverseRichTextBox))
                     {
                         reverseLinTagFlankStrs[1] = rtb.Selection.Text;
-                        OutputText += $"reverseLinTagFlankStrs[1]: {reverseLinTagFlankStrs[1]}\n";
+                        //AddOutputText($"reverseLinTagFlankStrs[1]: {reverseLinTagFlankStrs[1]}");
                     }
                 }
                 else
@@ -1392,18 +1397,18 @@ namespace BartenderWindow
                 //Also set spacer lengths in this method
                 Regex multiRegEx = new Regex("^Z*X*");
                 string multiMatch = multiRegEx.Match(read).Value;
-                //OutputText += $"multiMatch: {multiMatch}\n";
+                //AddOutputText($"multiMatch: {multiMatch}");
                 int firstNonX = multiMatch.Length;
 
                 if (Object.ReferenceEquals(rtb, forwardRichTextBox))
                 {
                     ForwardSpacerLengthStr = $"{tagStart - firstNonX}";
-                    OutputText += $"forwardSpacerLength: {forwardSpacerLength}\n";
+                    //AddOutputText($"forwardSpacerLength: {forwardSpacerLength}");
                 }
                 if (Object.ReferenceEquals(rtb, reverseRichTextBox))
                 {
                     ReverseSpacerLengthStr = $"{tagStart - firstNonX}";
-                    OutputText += $"reverseSpacerLength: {reverseSpacerLength}\n";
+                    //AddOutputText($"reverseSpacerLength: {reverseSpacerLength}");
                 }
             }
         }
