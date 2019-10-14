@@ -314,15 +314,15 @@ namespace BartenderWindow
 
             //CopyReverseComplement();
 
-            TextRange textRange = new TextRange(forwardRichTextBox.Document.ContentStart, forwardRichTextBox.Document.ContentEnd);
-            textRange.Text = "ZZZZZZZZXXXXXXXXXXCATCGGTGAGCCCGGGCTGTCGGCGTNNTNNNANNTNNNANNTNNNANNTNNNANNTNNNANNATATGCCAGCAGGCCGGCCACGCTNNTNNNANNTNNNANNANNNANNTNNNANNTNNNANNCGGTGGCCCGGGCGGCCGCACGATGCGTCCGGCGTAGAGGXXXXXXXXXXZZZZZZZZ";
+            //TextRange textRange = new TextRange(forwardRichTextBox.Document.ContentStart, forwardRichTextBox.Document.ContentEnd);
+            //textRange.Text = "ZZZZZZZZXXXXXXXXXXCATCGGTGAGCCCGGGCTGTCGGCGTNNTNNNANNTNNNANNTNNNANNTNNNANNTNNNANNATATGCCAGCAGGCCGGCCACGCTNNTNNNANNTNNNANNANNNANNTNNNANNTNNNANNCGGTGGCCCGGGCGGCCGCACGATGCGTCCGGCGTAGAGGXXXXXXXXXXZZZZZZZZ";
 
-            //ReadLengthStr = "150";
+            ReadLengthStr = "150";
             //ForUmiTagLenStr = "";
             //RevUmiTagLenStr = "";
 
-            //LinTagFlankLengthStr = "4";
-            //MultiFlankLengthStr = "4";
+            LinTagFlankLengthStr = "4";
+            MultiFlankLengthStr = "4";
 
             //FowardMultiTagText = "AGCTAGCTAG, A\n";
             //FowardMultiTagText += "CAATGCCTAG, B\n";
@@ -381,6 +381,11 @@ namespace BartenderWindow
             InitMultiTagLists();
 
             //If multitag text boxes aren't properly populated, give warning message and return from method
+            if (String.IsNullOrEmpty(ExtraMultiTagText) && (String.IsNullOrEmpty(FowardMultiTagText) || String.IsNullOrEmpty(ReverseMultiTagText)))
+            {
+                MessageBox.Show("Please enter at least one valid set of Multiplex Tags, and try again.");
+                return;
+            }
             string cleanExtra = ExtraMultiTagText.Replace("\n", "").Replace("\r", "");
             string cleanForward = FowardMultiTagText.Replace("\n", "").Replace("\r", "");
             string cleanReverse = ReverseMultiTagText.Replace("\n", "").Replace("\r", "");
@@ -389,73 +394,70 @@ namespace BartenderWindow
                 MessageBox.Show("Please enter at least one valid set of Multiplex Tags, and try again.");
                 return;
             }
-            else
+
+            //First add to fowardMultiTagList and reverseMultiTagList from FowardMultiTagText and ReverseMultiTagText
+            string[] forwardTagArr = FowardMultiTagText.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] reverseTagArr = ReverseMultiTagText.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (string tagPlusId in forwardTagArr)
             {
-                //First add to fowardMultiTagList and reverseMultiTagList from FowardMultiTagText and ReverseMultiTagText
-                string[] forwardTagArr = FowardMultiTagText.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-                string[] reverseTagArr = ReverseMultiTagText.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-
-                foreach (string tagPlusId in forwardTagArr)
+                string[] splitTag = tagPlusId.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                fowardMultiTagList.Add(splitTag[0]);
+                if (splitTag.Length > 1)
                 {
-                    string[] splitTag = tagPlusId.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                    fowardMultiTagList.Add(splitTag[0]);
-                    if (splitTag.Length>1)
-                    {
-                        fowardIdDict[splitTag[0]] = splitTag[1];
-                    }
-                    else
-                    {
-                        fowardIdDict[splitTag[0]] = $"{splitTag[0]}_";
-                    }
+                    fowardIdDict[splitTag[0]] = splitTag[1];
                 }
-
-                foreach (string tagPlusId in reverseTagArr)
+                else
                 {
-                    string[] splitTag = tagPlusId.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                    reverseMultiTagList.Add(splitTag[0]);
-                    if (splitTag.Length>1)
-                    {
-                        reverseIdDict[splitTag[0]] = splitTag[1];
-                    }
-                    else
-                    {
-                        reverseIdDict[splitTag[0]] = $"_{splitTag[0]}";
-                    }
+                    fowardIdDict[splitTag[0]] = $"{splitTag[0]}_";
                 }
+            }
 
-                //Then combine Forward and Reverse tags in all possible ways and add IDs to mutiTagIDDict
-                foreach (string forTag in fowardMultiTagList)
+            foreach (string tagPlusId in reverseTagArr)
+            {
+                string[] splitTag = tagPlusId.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                reverseMultiTagList.Add(splitTag[0]);
+                if (splitTag.Length > 1)
                 {
-                    foreach (string revTag in reverseMultiTagList)
-                    {
-                        string[] keys = new string[2] { forTag, revTag };
-                        string value = $"{fowardIdDict[forTag]}{reverseIdDict[revTag]}";
-                        value = value.Replace("__", "_");
-                        mutiTagIdDict[keys] = value;
-                    }
+                    reverseIdDict[splitTag[0]] = splitTag[1];
                 }
-
-                //Then add individual tags from ExtraMultiTagText - and add mathcing IDs to mutiTagIDDict
-                string[] extraTagArr = ExtraMultiTagText.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-                foreach (string tagPlusId in extraTagArr)
+                else
                 {
-                    string[] splitTag = tagPlusId.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                    string forTag = splitTag[0];
-                    string revTag = splitTag[1];
+                    reverseIdDict[splitTag[0]] = $"_{splitTag[0]}";
+                }
+            }
+
+            //Then combine Forward and Reverse tags in all possible ways and add IDs to mutiTagIDDict
+            foreach (string forTag in fowardMultiTagList)
+            {
+                foreach (string revTag in reverseMultiTagList)
+                {
                     string[] keys = new string[2] { forTag, revTag };
-                    fowardMultiTagList.Add(forTag);
-                    reverseMultiTagList.Add(revTag);
-
-                    if (splitTag.Length > 2)
-                    {
-                        mutiTagIdDict[keys] = splitTag[2];
-                    }
-                    else
-                    {
-                        mutiTagIdDict[keys] = $"{forTag}_{revTag}";
-                    }
+                    string value = $"{fowardIdDict[forTag]}{reverseIdDict[revTag]}";
+                    value = value.Replace("__", "_");
+                    mutiTagIdDict[keys] = value;
                 }
+            }
 
+            //Then add individual tags from ExtraMultiTagText - and add mathcing IDs to mutiTagIDDict
+            string[] extraTagArr = ExtraMultiTagText.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (string tagPlusId in extraTagArr)
+            {
+                string[] splitTag = tagPlusId.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                string forTag = splitTag[0];
+                string revTag = splitTag[1];
+                string[] keys = new string[2] { forTag, revTag };
+                fowardMultiTagList.Add(forTag);
+                reverseMultiTagList.Add(revTag);
+
+                if (splitTag.Length > 2)
+                {
+                    mutiTagIdDict[keys] = splitTag[2];
+                }
+                else
+                {
+                    mutiTagIdDict[keys] = $"{forTag}_{revTag}";
+                }
             }
 
             OutputText += $"Multi-tag sample IDs: ";
@@ -481,7 +483,7 @@ namespace BartenderWindow
             if (forward)
             {
                 umiLenStr = forUmiTagLenStr;
-                if (umiLenStr == "")
+                if (string.IsNullOrEmpty(umiLenStr))
                 {
                     forUmiTagLen = null;
                     //OutputText += $"Forward UMI tag length: \n";
@@ -491,7 +493,7 @@ namespace BartenderWindow
             else
             {
                 umiLenStr = revUmiTagLenStr;
-                if (umiLenStr == "")
+                if (string.IsNullOrEmpty(umiLenStr))
                 {
                     revUmiTagLen = null;
                     //OutputText += $"Reverse UMI tag length: \n";
@@ -584,7 +586,7 @@ namespace BartenderWindow
         private bool Save()
         {
             bool didSave;
-            if (ParamsFilePath != "")
+            if (!string.IsNullOrEmpty(ParamsFilePath))
             {
                 try
                 {
@@ -620,7 +622,7 @@ namespace BartenderWindow
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.Filter = "XML file (*.xml)|*.xml";
-            if (ParamsFilePath != null)
+            if (!string.IsNullOrEmpty(ParamsFilePath))
             {
                 saveFileDialog.FileName = System.IO.Path.GetFileName(ParamsFilePath);
             }
@@ -1052,7 +1054,7 @@ namespace BartenderWindow
                 if (Object.ReferenceEquals(rtb, forwardRichTextBox))
                 {
                     //OutputText += $"ForUmiTagLenStr: {ForUmiTagLenStr}\n";
-                    if (ForUmiTagLenStr == "")
+                    if (string.IsNullOrEmpty(ForUmiTagLenStr))
                     {
                         ForUmiTagLenStr = $"{firstNonZ}";
                     }
@@ -1064,7 +1066,7 @@ namespace BartenderWindow
                 if (Object.ReferenceEquals(rtb, reverseRichTextBox))
                 {
                     //OutputText += $"RevUmiTagLenStr: {RevUmiTagLenStr}\n";
-                    if (RevUmiTagLenStr == "")
+                    if (string.IsNullOrEmpty(RevUmiTagLenStr))
                     {
                         RevUmiTagLenStr = $"{firstNonZ}";
                     }
@@ -1126,26 +1128,32 @@ namespace BartenderWindow
                 //If multiplexing tags are set in the GUI then use the length from those strings - and replace/insert the appropriate number of X's
                 if (Object.ReferenceEquals(rtb, forwardRichTextBox))
                 {
-                    string cleanForward = FowardMultiTagText.Replace("\n", "").Replace("\r", "");
-                    if (!String.IsNullOrEmpty(cleanForward)) //multi-tag list has been set up in the GUI
+                    if (!String.IsNullOrEmpty(FowardMultiTagText))
                     {
-                        rtb.Selection.Text = new String('X', GetMaxMultiTagLength(forward:true));
-                    }
-                    else
-                    {
-                        
+                        string cleanForward = FowardMultiTagText.Replace("\n", "").Replace("\r", "");
+                        if (!String.IsNullOrEmpty(cleanForward)) //multi-tag list has been set up in the GUI
+                        {
+                            rtb.Selection.Text = new String('X', GetMaxMultiTagLength(forward: true));
+                        }
+                        else
+                        {
+
+                        }
                     }
                 }
                 if (Object.ReferenceEquals(rtb, reverseRichTextBox))
                 {
-                    string cleanReverse = ReverseMultiTagText.Replace("\n", "").Replace("\r", "");
-                    if (!String.IsNullOrEmpty(cleanReverse)) //multi-tag list has been set up in the GUI
+                    if (!String.IsNullOrEmpty(ReverseMultiTagText))
                     {
-                        rtb.Selection.Text = new String('X', GetMaxMultiTagLength(forward: false));
-                    }
-                    else
-                    {
+                        string cleanReverse = ReverseMultiTagText.Replace("\n", "").Replace("\r", "");
+                        if (!String.IsNullOrEmpty(cleanReverse)) //multi-tag list has been set up in the GUI
+                        {
+                            rtb.Selection.Text = new String('X', GetMaxMultiTagLength(forward: false));
+                        }
+                        else
+                        {
 
+                        }
                     }
                 }
 
@@ -1156,38 +1164,45 @@ namespace BartenderWindow
 
         private void HighlightMultiTagFlank()
         {
-            foreach (RichTextBox rtb in new RichTextBox[2] { forwardRichTextBox, reverseRichTextBox })
+            if (!string.IsNullOrEmpty(MultiFlankLengthStr))
             {
-                TextRange textRange = new TextRange(rtb.Document.ContentStart, rtb.Document.ContentEnd);
-                string read = textRange.Text;
-
-                //Find end of multi-tag
-                Regex multiRegEx = new Regex("^Z*X*");
-                string multiMatch = multiRegEx.Match(read).Value;
-                //OutputText += $"multiMatch: {multiMatch}\n";
-                int firstNonX = multiMatch.Length;
-
-
-                TextPointer startPointer = GetTextPointerAtOffset(rtb, firstNonX);
-                TextPointer endPointer;
-                endPointer = GetTextPointerAtOffset(rtb, firstNonX + multiFlankLength);
-
-                rtb.Selection.Select(startPointer, endPointer);
-
-                rtb.Selection.ApplyPropertyValue(Inline.BackgroundProperty, FlankHighlight);
-
-                if (Object.ReferenceEquals(rtb, forwardRichTextBox))
+                foreach (RichTextBox rtb in new RichTextBox[2] { forwardRichTextBox, reverseRichTextBox })
                 {
-                    forwardMultiFlankStr = rtb.Selection.Text;
-                    OutputText += $"forwardMultiFlankStr: {forwardMultiFlankStr}\n";
-                }
-                if (Object.ReferenceEquals(rtb, reverseRichTextBox))
-                {
-                    reverseMultiFlankStr = rtb.Selection.Text;
-                    OutputText += $"reverseMultiFlankStr: {reverseMultiFlankStr}\n";
-                }
+                    TextRange textRange = new TextRange(rtb.Document.ContentStart, rtb.Document.ContentEnd);
+                    string read = textRange.Text;
 
+                    //Find end of multi-tag
+                    Regex multiRegEx = new Regex("^Z*X*");
+                    string multiMatch = multiRegEx.Match(read).Value;
+                    //OutputText += $"multiMatch: {multiMatch}\n";
+                    int firstNonX = multiMatch.Length;
+
+
+                    TextPointer startPointer = GetTextPointerAtOffset(rtb, firstNonX);
+                    TextPointer endPointer;
+                    endPointer = GetTextPointerAtOffset(rtb, firstNonX + multiFlankLength);
+
+                    rtb.Selection.Select(startPointer, endPointer);
+
+                    rtb.Selection.ApplyPropertyValue(Inline.BackgroundProperty, FlankHighlight);
+
+                    if (Object.ReferenceEquals(rtb, forwardRichTextBox))
+                    {
+                        forwardMultiFlankStr = rtb.Selection.Text;
+                        OutputText += $"forwardMultiFlankStr: {forwardMultiFlankStr}\n";
+                    }
+                    if (Object.ReferenceEquals(rtb, reverseRichTextBox))
+                    {
+                        reverseMultiFlankStr = rtb.Selection.Text;
+                        OutputText += $"reverseMultiFlankStr: {reverseMultiFlankStr}\n";
+                    }
+                }
             }
+            else
+            {
+                MessageBox.Show("Set Multiplex Tag Flanking Length and try again.");
+            }
+
         }
 
         private void HighlightLineageTag()
@@ -1234,36 +1249,43 @@ namespace BartenderWindow
                 }
 
                 //Also highlight the flanking sequences used for matching
-                startPointer = GetTextPointerAtOffset(rtb, tagStart - linTagFlankLength);
-                endPointer = GetTextPointerAtOffset(rtb, tagStart);
-                rtb.Selection.Select(startPointer, endPointer);
-                rtb.Selection.ApplyPropertyValue(Inline.BackgroundProperty, FlankHighlight);
-                if (Object.ReferenceEquals(rtb, forwardRichTextBox))
+                if (!string.IsNullOrEmpty(LinTagFlankLengthStr))
                 {
-                    forwardLinTagFlankStrs[0] = rtb.Selection.Text;
-                    OutputText += $"forwardLinTagFlankStrs[0]: {forwardLinTagFlankStrs[0]}\n";
-                }
-                if (Object.ReferenceEquals(rtb, reverseRichTextBox))
-                {
-                    reverseLinTagFlankStrs[0] = rtb.Selection.Text;
-                    OutputText += $"reverseLinTagFlankStrs[0]: {reverseLinTagFlankStrs[0]}\n";
-                }
+                    startPointer = GetTextPointerAtOffset(rtb, tagStart - linTagFlankLength);
+                    endPointer = GetTextPointerAtOffset(rtb, tagStart);
+                    rtb.Selection.Select(startPointer, endPointer);
+                    rtb.Selection.ApplyPropertyValue(Inline.BackgroundProperty, FlankHighlight);
+                    if (Object.ReferenceEquals(rtb, forwardRichTextBox))
+                    {
+                        forwardLinTagFlankStrs[0] = rtb.Selection.Text;
+                        OutputText += $"forwardLinTagFlankStrs[0]: {forwardLinTagFlankStrs[0]}\n";
+                    }
+                    if (Object.ReferenceEquals(rtb, reverseRichTextBox))
+                    {
+                        reverseLinTagFlankStrs[0] = rtb.Selection.Text;
+                        OutputText += $"reverseLinTagFlankStrs[0]: {reverseLinTagFlankStrs[0]}\n";
+                    }
 
-                startPointer = GetTextPointerAtOffset(rtb, tagEnd);
-                endPointer = GetTextPointerAtOffset(rtb, tagEnd + linTagFlankLength);
-                rtb.Selection.Select(startPointer, endPointer);
-                rtb.Selection.ApplyPropertyValue(Inline.BackgroundProperty, FlankHighlight);
-                if (Object.ReferenceEquals(rtb, forwardRichTextBox))
-                {
-                    forwardLinTagFlankStrs[1] = rtb.Selection.Text;
-                    OutputText += $"forwardLinTagFlankStrs[1]: {forwardLinTagFlankStrs[1]}\n";
+                    startPointer = GetTextPointerAtOffset(rtb, tagEnd);
+                    endPointer = GetTextPointerAtOffset(rtb, tagEnd + linTagFlankLength);
+                    rtb.Selection.Select(startPointer, endPointer);
+                    rtb.Selection.ApplyPropertyValue(Inline.BackgroundProperty, FlankHighlight);
+                    if (Object.ReferenceEquals(rtb, forwardRichTextBox))
+                    {
+                        forwardLinTagFlankStrs[1] = rtb.Selection.Text;
+                        OutputText += $"forwardLinTagFlankStrs[1]: {forwardLinTagFlankStrs[1]}\n";
+                    }
+                    if (Object.ReferenceEquals(rtb, reverseRichTextBox))
+                    {
+                        reverseLinTagFlankStrs[1] = rtb.Selection.Text;
+                        OutputText += $"reverseLinTagFlankStrs[1]: {reverseLinTagFlankStrs[1]}\n";
+                    }
                 }
-                if (Object.ReferenceEquals(rtb, reverseRichTextBox))
+                else
                 {
-                    reverseLinTagFlankStrs[1] = rtb.Selection.Text;
-                    OutputText += $"reverseLinTagFlankStrs[1]: {reverseLinTagFlankStrs[1]}\n";
+                    MessageBox.Show("Set Lineage Tag Flanking Length and try again.");
                 }
-
+                
                 //Also set spacer lengths in this method
                 Regex multiRegEx = new Regex("^Z*X*");
                 string multiMatch = multiRegEx.Match(read).Value;
