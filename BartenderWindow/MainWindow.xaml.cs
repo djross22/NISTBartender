@@ -25,6 +25,8 @@ namespace BartenderWindow
         //Property change notification event required for INotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
 
+        private string inputDirectory, outputDirectory, forwardGzFastQ, reverseGzFastQ;
+
         private string forUmiTagLenStr, revUmiTagLenStr;
         private int[] forUmiTagLen, revUmiTagLen;
         private string readLengthStr;
@@ -54,6 +56,47 @@ namespace BartenderWindow
         private static Brush FlankHighlight = Brushes.PowderBlue;
 
         #region Properties Getters and Setters
+
+        public string ReverseGzFastQ
+        {
+            get { return this.reverseGzFastQ; }
+            set
+            {
+                this.reverseGzFastQ = value;
+                OnPropertyChanged("ReverseGzFastQ");
+            }
+        }
+        
+
+        public string ForwardGzFastQ
+        {
+            get { return this.forwardGzFastQ; }
+            set
+            {
+                this.forwardGzFastQ = value;
+                OnPropertyChanged("ForwardGzFastQ");
+            }
+        }
+
+        public string OutputDirectory
+        {
+            get { return this.outputDirectory; }
+            set
+            {
+                this.outputDirectory = value;
+                OnPropertyChanged("OutputDirectory");
+            }
+        }
+
+        public string InputDirectory
+        {
+            get { return this.inputDirectory; }
+            set
+            {
+                this.inputDirectory = value;
+                OnPropertyChanged("InputDirectory");
+            }
+        }
 
         public string RevLintagRegexStr
         {
@@ -236,6 +279,8 @@ namespace BartenderWindow
             ExtraMultiTagText = "AGAAGGTAG, GGGCAATGCG, S6\n";
 
             InitMultiTagLists();
+
+            OutputText += $"Number Of Logical Processors: {Environment.ProcessorCount}";
         }
 
         private void InitMultiTagLists()
