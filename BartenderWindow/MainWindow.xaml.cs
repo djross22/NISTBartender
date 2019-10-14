@@ -311,6 +311,9 @@ namespace BartenderWindow
 
             ParamsFilePath = "";
             CreateParamsList();
+            //TODO: In OnPropertyChanged(string name), check if name is on list of parameters properties to be saved to XML file
+            //   and set ParamsChanged accordingly. For now, just leave ParamsChanged = true all the time.
+            ParamsChanged = true; 
 
             //CopyReverseComplement();
 
@@ -595,7 +598,7 @@ namespace BartenderWindow
                     //Save the XML document
                     xmlDoc.Save(ParamsFilePath);
 
-                    ParamsChanged = false;
+                    //ParamsChanged = false;
                     didSave = true;
                 }
                 catch (UnauthorizedAccessException e)
@@ -636,7 +639,7 @@ namespace BartenderWindow
                 //Save the XML document
                 xmlDoc.Save(ParamsFilePath);
 
-                ParamsChanged = false;
+                //ParamsChanged = false;
                 didSave = true;
             }
             else
@@ -757,7 +760,7 @@ namespace BartenderWindow
 
                     ReadParamsXml(ParamsFilePath);
 
-                    ParamsChanged = false;
+                    //ParamsChanged = false;
                 }
                 catch
                 {
@@ -810,7 +813,7 @@ namespace BartenderWindow
             {
                 ParamsFilePath = openFileDialog.FileName;
                 ReadParamsXml(ParamsFilePath);
-                ParamsChanged = false;
+                //ParamsChanged = false;
             }
         }
 
