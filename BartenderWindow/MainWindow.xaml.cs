@@ -421,82 +421,110 @@ namespace BartenderWindow
             InitMultiTagLists();
 
             //If multitag text boxes aren't properly populated, give warning message and return from method
-            if (String.IsNullOrEmpty(ExtraMultiTagText) && (String.IsNullOrEmpty(FowardMultiTagText) || String.IsNullOrEmpty(ReverseMultiTagText)))
+            string invalidTagListMsg = "Please enter at least one valid set of Multiplex Tags, and try again.";
+            bool validForRevTags = true, validExtraTags = true;
+            if (String.IsNullOrEmpty(ExtraMultiTagText))
             {
-                MessageBox.Show("Please enter at least one valid set of Multiplex Tags, and try again.");
-                return;
+                validExtraTags = false;
             }
-            string cleanExtra = ExtraMultiTagText.Replace("\n", "").Replace("\r", "");
-            string cleanForward = FowardMultiTagText.Replace("\n", "").Replace("\r", "");
-            string cleanReverse = ReverseMultiTagText.Replace("\n", "").Replace("\r", "");
-            if (String.IsNullOrEmpty(cleanExtra) && (String.IsNullOrEmpty(cleanForward) || String.IsNullOrEmpty(cleanReverse)))
+            else
             {
-                MessageBox.Show("Please enter at least one valid set of Multiplex Tags, and try again.");
+                string cleanExtra = ExtraMultiTagText.Replace("\n", "").Replace("\r", "");
+                if (String.IsNullOrEmpty(cleanExtra))
+                {
+                    validExtraTags = false;
+                }
+            }
+
+            if (String.IsNullOrEmpty(FowardMultiTagText) || String.IsNullOrEmpty(ReverseMultiTagText))
+            {
+                validForRevTags = false;
+            }
+            else
+            {
+                string cleanForward = FowardMultiTagText.Replace("\n", "").Replace("\r", "");
+                string cleanReverse = ReverseMultiTagText.Replace("\n", "").Replace("\r", "");
+                if (String.IsNullOrEmpty(cleanForward) || String.IsNullOrEmpty(cleanReverse))
+                {
+                    validForRevTags = false;
+                }
+            }
+
+            if (!validForRevTags && !validExtraTags)
+            {
+                MessageBox.Show(invalidTagListMsg);
                 return;
             }
 
             //First add to fowardMultiTagList and reverseMultiTagList from FowardMultiTagText and ReverseMultiTagText
-            string[] forwardTagArr = FowardMultiTagText.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-            string[] reverseTagArr = ReverseMultiTagText.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-
-            foreach (string tagPlusId in forwardTagArr)
+            if (validForRevTags)
             {
-                string[] splitTag = tagPlusId.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                fowardMultiTagList.Add(splitTag[0]);
-                if (splitTag.Length > 1)
+                string[] forwardTagArr = FowardMultiTagText.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+                string[] reverseTagArr = ReverseMultiTagText.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+
+                foreach (string tagPlusId in forwardTagArr)
                 {
-                    fowardIdDict[splitTag[0]] = splitTag[1];
+                    string[] splitTag = tagPlusId.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    fowardMultiTagList.Add(splitTag[0]);
+                    if (splitTag.Length > 1)
+                    {
+                        fowardIdDict[splitTag[0]] = splitTag[1];
+                    }
+                    else
+                    {
+                        fowardIdDict[splitTag[0]] = $"{splitTag[0]}_";
+                    }
                 }
-                else
+
+                foreach (string tagPlusId in reverseTagArr)
                 {
-                    fowardIdDict[splitTag[0]] = $"{splitTag[0]}_";
+                    string[] splitTag = tagPlusId.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    reverseMultiTagList.Add(splitTag[0]);
+                    if (splitTag.Length > 1)
+                    {
+                        reverseIdDict[splitTag[0]] = splitTag[1];
+                    }
+                    else
+                    {
+                        reverseIdDict[splitTag[0]] = $"_{splitTag[0]}";
+                    }
+                }
+
+                //Then combine Forward and Reverse tags in all possible ways and add IDs to mutiTagIDDict
+                foreach (string forTag in fowardMultiTagList)
+                {
+                    foreach (string revTag in reverseMultiTagList)
+                    {
+                        string[] keys = new string[2] { forTag, revTag };
+                        string value = $"{fowardIdDict[forTag]}{reverseIdDict[revTag]}";
+                        value = value.Replace("__", "_");
+                        mutiTagIdDict[keys] = value;
+                    }
                 }
             }
 
-            foreach (string tagPlusId in reverseTagArr)
-            {
-                string[] splitTag = tagPlusId.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                reverseMultiTagList.Add(splitTag[0]);
-                if (splitTag.Length > 1)
-                {
-                    reverseIdDict[splitTag[0]] = splitTag[1];
-                }
-                else
-                {
-                    reverseIdDict[splitTag[0]] = $"_{splitTag[0]}";
-                }
-            }
-
-            //Then combine Forward and Reverse tags in all possible ways and add IDs to mutiTagIDDict
-            foreach (string forTag in fowardMultiTagList)
-            {
-                foreach (string revTag in reverseMultiTagList)
-                {
-                    string[] keys = new string[2] { forTag, revTag };
-                    string value = $"{fowardIdDict[forTag]}{reverseIdDict[revTag]}";
-                    value = value.Replace("__", "_");
-                    mutiTagIdDict[keys] = value;
-                }
-            }
 
             //Then add individual tags from ExtraMultiTagText - and add mathcing IDs to mutiTagIDDict
-            string[] extraTagArr = ExtraMultiTagText.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-            foreach (string tagPlusId in extraTagArr)
+            if (validExtraTags)
             {
-                string[] splitTag = tagPlusId.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                string forTag = splitTag[0];
-                string revTag = splitTag[1];
-                string[] keys = new string[2] { forTag, revTag };
-                fowardMultiTagList.Add(forTag);
-                reverseMultiTagList.Add(revTag);
+                string[] extraTagArr = ExtraMultiTagText.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (string tagPlusId in extraTagArr)
+                {
+                    string[] splitTag = tagPlusId.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    string forTag = splitTag[0];
+                    string revTag = splitTag[1];
+                    string[] keys = new string[2] { forTag, revTag };
+                    fowardMultiTagList.Add(forTag);
+                    reverseMultiTagList.Add(revTag);
 
-                if (splitTag.Length > 2)
-                {
-                    mutiTagIdDict[keys] = splitTag[2];
-                }
-                else
-                {
-                    mutiTagIdDict[keys] = $"{forTag}_{revTag}";
+                    if (splitTag.Length > 2)
+                    {
+                        mutiTagIdDict[keys] = splitTag[2];
+                    }
+                    else
+                    {
+                        mutiTagIdDict[keys] = $"{forTag}_{revTag}";
+                    }
                 }
             }
 
