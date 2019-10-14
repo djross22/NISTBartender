@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -580,7 +581,11 @@ namespace BartenderWindow
             {
                 try
                 {
-                    //TODO: implement save parameters to XML file; File.WriteAllText(ParamsFileName, InputText);
+                    //Populate the XML document
+                    CreateParamsXml();
+                    //Save the XML document
+                    xmlDoc.Save(ParamsFilePath);
+
                     ParamsChanged = false;
                     didSave = true;
                 }
@@ -610,14 +615,18 @@ namespace BartenderWindow
             saveFileDialog.Filter = "XML file (*.xml)|*.xml";
             if (ParamsFilePath != null)
             {
-
                 saveFileDialog.FileName = System.IO.Path.GetFileName(ParamsFilePath);
             }
             bool didSave;
             if (saveFileDialog.ShowDialog() == true)
             {
-                //TODO: implement save parameters to XML file; File.WriteAllText(saveFileDialog.FileName, InputText);
                 ParamsFilePath = saveFileDialog.FileName;
+
+                //Populate the XML document
+                CreateParamsXml();
+                //Save the XML document
+                xmlDoc.Save(ParamsFilePath);
+
                 ParamsChanged = false;
                 didSave = true;
             }
@@ -627,6 +636,33 @@ namespace BartenderWindow
             }
 
             return didSave;
+        }
+
+        private void CreateParamsXml()
+        {
+            xmlDoc = new XmlDocument();
+            rootNode = xmlDoc.CreateElement("parameters");
+            XmlAttribute sourceAtt = xmlDoc.CreateAttribute("source");
+            sourceAtt.Value = appName;
+            rootNode.Attributes.Append(sourceAtt);
+            //add the root node to the document
+            xmlDoc.AppendChild(rootNode);
+
+            //add all the parameters values to the XML document
+            foreach (string param in paramsList)
+            {
+                PropertyInfo propInfo = this.GetType().GetProperty(param);
+                if (propInfo != null)
+                {
+                    string value = $"{propInfo.GetValue(this)}";
+                    XmlNode paramNode = xmlDoc.CreateElement(param);
+                    paramNode.InnerText = value;
+                    //paramNode.InnerXml = value;
+                    //add the experiment ID node to the experiment node
+                    rootNode.AppendChild(paramNode);
+                }
+                
+            }
         }
 
         private void ExitMenuItem_Click(object sender, RoutedEventArgs e)
