@@ -40,7 +40,7 @@ namespace BartenderWindow
         private XmlNode rootNode;
 
         private string inputDirectory, outputDirectory, forwardGzFastQ, reverseGzFastQ;
-        private string defaultDirectory = @"C:\";
+        private string defaultDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);//@"C:";
 
         private string forUmiTagLenStr, revUmiTagLenStr;
         private int[] forUmiTagLen, revUmiTagLen;
@@ -877,12 +877,42 @@ namespace BartenderWindow
 
         private void inputDirMenuItme_Click(object sender, RoutedEventArgs e)
         {
+            OpenFileDialog dialog = new OpenFileDialog();
+            // Set validate names and check file exists to false otherwise windows will
+            // not let you select "Folder Selection."
+            dialog.ValidateNames = false;
+            dialog.CheckFileExists = false;
+            dialog.CheckPathExists = true;
+            // Always default to Folder Selection.
+            dialog.FileName = "_";
 
+            dialog.Title = "Select Directory Containing Input Sequencee Files";
+            if (InputDirectory != defaultDirectory) dialog.InitialDirectory = InputDirectory;
+
+            if (dialog.ShowDialog() == true)
+            {
+                InputDirectory = System.IO.Path.GetDirectoryName(dialog.FileName);
+            }
         }
 
         private void outputDirMenuItme_Click(object sender, RoutedEventArgs e)
         {
+            OpenFileDialog dialog = new OpenFileDialog();
+            // Set validate names and check file exists to false otherwise windows will
+            // not let you select "Folder Selection."
+            dialog.ValidateNames = false;
+            dialog.CheckFileExists = false;
+            dialog.CheckPathExists = true;
+            // Always default to Folder Selection.
+            dialog.FileName = "_";
 
+            dialog.Title = "Select Directory For Saving Output Files";
+            if (OutputDirectory != defaultDirectory) dialog.InitialDirectory = OutputDirectory;
+
+            if (dialog.ShowDialog() == true)
+            {
+                OutputDirectory = System.IO.Path.GetDirectoryName(dialog.FileName);
+            }
         }
 
         private void forFastqMenuItme_Click(object sender, RoutedEventArgs e)
