@@ -10,8 +10,8 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
             <RowDefinition Height="50"/>
-            <RowDefinition Height="8*"/>
-            <RowDefinition Height="3*"/>
+            <RowDefinition Height="370"/>
+            <RowDefinition/>
         </Grid.RowDefinitions>
         <DockPanel LastChildFill="False" Grid.RowSpan="2">
             <Menu x:Name="mainMenu" DockPanel.Dock="Top" VerticalAlignment="Top" HorizontalAlignment="Stretch">
@@ -65,9 +65,9 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="16"/>
                     <RowDefinition Height="18"/>
-                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="80"/>
                     <RowDefinition Height="18"/>
-                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="80"/>
                     <RowDefinition Height="70"/>
                     <RowDefinition Height="80"/>
                 </Grid.RowDefinitions>
