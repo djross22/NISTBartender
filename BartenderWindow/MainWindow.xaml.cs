@@ -799,7 +799,7 @@ namespace BartenderWindow
             }
             else
             {
-                var messageBoxResult = MessageBox.Show($"Are you sure you want to exit {appName}?\nClick 'Yes' to abort or 'No' to continue.", "Exit {appName}?", MessageBoxButton.YesNo);
+                var messageBoxResult = MessageBox.Show($"Are you sure you want to exit {appName}?\nClick 'Yes' to abort or 'No' to continue.", $"Exit {appName}?", MessageBoxButton.YesNo);
                 if (messageBoxResult == MessageBoxResult.Yes)
                 {
                     AddOutputText($"Closing {appName}.");
