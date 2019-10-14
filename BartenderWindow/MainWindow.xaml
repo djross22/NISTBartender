@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BartenderWindow"
         mc:Ignorable="d"
-        Title="NIST Bartender" Height="600" Width="900" Background="{DynamicResource PurpleBackgroundBrush}" MinWidth="900" MinHeight="600">
+        Title="{Binding DisplayTitle}" Height="600" Width="900" Background="{DynamicResource PurpleBackgroundBrush}" MinWidth="900" MinHeight="600" Closing="Window_Closing">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
@@ -16,10 +16,9 @@
         <DockPanel LastChildFill="False" Grid.RowSpan="2">
             <Menu x:Name="mainMenu" DockPanel.Dock="Top" VerticalAlignment="Top" HorizontalAlignment="Stretch">
                 <MenuItem Header="_File">
-                    <MenuItem x:Name="newMenuItem" Header="New" Click="NewMenuItem_Click"/>
-                    <MenuItem x:Name="openMenuItme" Header="Open" Click="OpenMenuItme_Click"/>
-                    <MenuItem x:Name="saveMenuItem" Header="Save" Click="SaveMenuItem_Click" />
-                    <MenuItem x:Name="saveAsMenuItem" Header="Save As..." Click="SaveAsMenuItem_Click" />
+                    <MenuItem x:Name="loadMenuItme" Header="Load" Click="loadMenuItme_Click" ToolTip="Load parameters/settings from .xml file"/>
+                    <MenuItem x:Name="saveMenuItem" Header="Save" Click="SaveMenuItem_Click" ToolTip="Save parameters/settings to .xml file"/>
+                    <MenuItem x:Name="saveAsMenuItem" Header="Save As..." Click="SaveAsMenuItem_Click" ToolTip="Save parameters/settings to .xml file with new filename"/>
                     <Separator />
                     <MenuItem x:Name="exitMenuItem" Header="Exit" Click="ExitMenuItem_Click" />
                 </MenuItem>

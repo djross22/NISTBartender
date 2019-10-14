@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Text.RegularExpressions;
 using System.ComponentModel;
+using Microsoft.Win32;
 
 namespace BartenderWindow
 {
@@ -24,6 +26,12 @@ namespace BartenderWindow
     {
         //Property change notification event required for INotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
+
+        //Window title, app name, plus file name, plus * to indicate unsaved changes
+        private static string appName = "NIST Bartender";
+        private string displayTitle = appName + " - ";
+        private string paramsFilePath;
+        private bool paramsChanged = false;
 
         private string inputDirectory, outputDirectory, forwardGzFastQ, reverseGzFastQ;
 
@@ -56,6 +64,38 @@ namespace BartenderWindow
         private static Brush FlankHighlight = Brushes.PowderBlue;
 
         #region Properties Getters and Setters
+
+        public bool ParamsChanged
+        {
+            get { return this.paramsChanged; }
+            set
+            {
+                this.paramsChanged = value;
+                UpdateTitle();
+                //OnPropertyChanged("ParamsChanged");
+            }
+        }
+
+        public string ParamsFilePath
+        {
+            get { return this.paramsFilePath; }
+            set
+            {
+                this.paramsFilePath = value;
+                UpdateTitle();
+                OnPropertyChanged("ParamsFileName");
+            }
+        }
+
+        public string DisplayTitle
+        {
+            get { return this.displayTitle; }
+            set
+            {
+                this.displayTitle = value;
+                OnPropertyChanged("DisplayTitle");
+            }
+        }
 
         public string ReverseGzFastQ
         {
@@ -263,6 +303,8 @@ namespace BartenderWindow
             InitializeComponent();
             DataContext = this;
 
+            ParamsFilePath = "";
+
             CopyReverseComplement();
             ReadLengthStr = "150";
             ForUmiTagLenStr = "";
@@ -290,6 +332,15 @@ namespace BartenderWindow
             reverseMultiTagList = new List<string>();
             reverseIdDict = new Dictionary<string, string>();
             mutiTagIdDict = new Dictionary<string[], string>();
+        }
+
+        private void UpdateTitle()
+        {
+            DisplayTitle = appName + " - " + ParamsFilePath;
+            if (ParamsChanged)
+            {
+                DisplayTitle += "*";
+            }
         }
 
         private void MakeMultiTagLists()
@@ -450,6 +501,10 @@ namespace BartenderWindow
 
         protected void OnPropertyChanged(string name)
         {
+            if (true) //TODO: check if name is on list of parameters properties to be saved to XML file
+            {
+                ParamsChanged = true;
+            }
             if (PropertyChanged != null)
             {
                 PropertyChanged(this, new PropertyChangedEventArgs(name));
@@ -487,34 +542,215 @@ namespace BartenderWindow
             return output;
         }
 
-        private void NewMenuItem_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void OpenMenuItme_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
         private void SaveMenuItem_Click(object sender, RoutedEventArgs e)
         {
+            Save();
+            outputTextBox.Focus();
+        }
 
+        private bool Save()
+        {
+            bool didSave;
+            if (ParamsFilePath != "")
+            {
+                try
+                {
+                    //TODO: implement save parameters to XML file; File.WriteAllText(ParamsFileName, InputText);
+                    ParamsChanged = false;
+                    didSave = true;
+                }
+                catch (UnauthorizedAccessException e)
+                {
+                    MessageBox.Show($"{e.Message}. Try saving with a temporary file name, then restart {appName}");
+                    didSave = SaveAs();
+                }
+            }
+            else
+            {
+                didSave = SaveAs();
+            }
+
+            return didSave;
         }
 
         private void SaveAsMenuItem_Click(object sender, RoutedEventArgs e)
         {
+            SaveAs();
+            outputTextBox.Focus();
+        }
 
+        private bool SaveAs()
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "XML file (*.xml)|*.xml";
+            if (ParamsFilePath != null)
+            {
+
+                saveFileDialog.FileName = System.IO.Path.GetFileName(ParamsFilePath);
+            }
+            bool didSave;
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                //TODO: implement save parameters to XML file; File.WriteAllText(saveFileDialog.FileName, InputText);
+                ParamsFilePath = saveFileDialog.FileName;
+                ParamsChanged = false;
+                didSave = true;
+            }
+            else
+            {
+                didSave = false;
+            }
+
+            return didSave;
         }
 
         private void ExitMenuItem_Click(object sender, RoutedEventArgs e)
         {
-
+            this.Close();
+            outputTextBox.Focus();
         }
 
         private void reverseComplementButton_Click(object sender, RoutedEventArgs e)
         {
             CopyReverseComplement();
+        }
+        private bool SaveFirstQuery()
+        {
+            //SaveFirstQuery returns true unless the user chooses 'Cancel'
+            //    - either directly in response to the 1st Message Box
+            //    - or in in the Select File Save Dialog box-
+            string messageBoxText = "Do you want to save changes first?";
+            string caption = "Save File?";
+            MessageBoxButton button = MessageBoxButton.YesNoCancel;
+            MessageBoxImage icon = MessageBoxImage.Warning;
+
+            bool okToGo = false;
+
+            MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
+            switch (result)
+            {
+                case MessageBoxResult.Yes:
+                    // User pressed Yes button
+                    //Save();
+                    //okToGo = true;
+                    okToGo = Save();
+                    break;
+                case MessageBoxResult.No:
+                    // User pressed No button
+                    // do nothing (go ahead without saving)
+                    okToGo = true;
+                    break;
+                case MessageBoxResult.Cancel:
+                    // User pressed Cancel button
+                    okToGo = false;
+                    break;
+            }
+            return okToGo;
+        }
+
+        private void loadMenuItme_Click(object sender, RoutedEventArgs e)
+        {
+            if (!ParamsChanged || SaveFirstQuery())
+            {
+                LoadParams();
+            }
+            outputTextBox.Focus();
+        }
+
+        private void LoadParamsFile(string file)
+        {
+            if (!ParamsChanged || SaveFirstQuery())
+            {
+                LoadParams(file);
+            }
+            outputTextBox.Focus();
+        }
+
+        private void LoadParams(string file)
+        {
+            if (file.EndsWith(".xml", StringComparison.CurrentCultureIgnoreCase))
+            {
+                try
+                {
+                    ParamsFilePath = file;
+                    //TODO implement read setting from XML file; InputText = File.ReadAllText(ParamsFileName);
+                    ParamsChanged = false;
+                }
+                catch
+                {
+                    MessageBox.Show($"Failed to open file, {file}");
+                }
+            }
+            else
+            {
+                MessageBox.Show($"{file} is not an parameters file in XML format (*.xml)");
+            }
+        }
+
+        private void LoadParams()
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "XML file (*.xml)|*.xml";
+            if (openFileDialog.ShowDialog() == true)
+            {
+                //TODO implement read setting from XML file; InputText = File.ReadAllText(openFileDialog.FileName);
+                ParamsFilePath = openFileDialog.FileName;
+                ParamsChanged = false;
+            }
+        }
+
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            //Make sure that any changes to parameters are updated before closing
+            //TODO: update source for all properties on params list; inputTextBox.GetBindingExpression(TextBox.TextProperty).UpdateSource();
+
+            if (ParamsChanged && !SaveFirstQuery())
+            {
+                //Input trext has changed, and the user selected 'Cancel'
+                //    so do not close
+                e.Cancel = true;
+            }
+            else
+            {
+                var messageBoxResult = MessageBox.Show($"Are you sure you want to exit {appName}?\nClick 'Yes' to abort or 'No' to continue.", "Exit {appName}?", MessageBoxButton.YesNo);
+                if (messageBoxResult == MessageBoxResult.Yes)
+                {
+                    AddOutputText($"Closing {appName}.");
+                }
+                else
+                {
+                    // If user doesn't want to close, cancel closure
+                    e.Cancel = true;
+                }
+            }
+            outputTextBox.Focus();
+        }
+
+        private void AddOutputText(string txt, bool newLine = true)
+        {
+            if (newLine)
+            {
+                OutputText += $"\n{txt}";
+            }
+            else
+            {
+                OutputText += txt;
+            }
+
+            //TODO: set up log file
+            ////Add to log file
+            //if (logFilePath != null)
+            //{
+            //    if (newLine)
+            //    {
+            //        string timeStr = DateTime.Now.ToString("yyyy-MM-dd.HH:mm:ss.fff");
+            //        File.AppendAllText(logFilePath, $"\n{timeStr},\t {txt}");
+            //    }
+            //    else
+            //    {
+            //        File.AppendAllText(logFilePath, txt);
+            //    }
+            //}
         }
 
         private void CopyReverseComplement()
