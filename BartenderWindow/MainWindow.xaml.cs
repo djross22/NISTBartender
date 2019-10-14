@@ -312,7 +312,11 @@ namespace BartenderWindow
             ParamsFilePath = "";
             CreateParamsList();
 
-            CopyReverseComplement();
+            //CopyReverseComplement();
+
+            TextRange textRange = new TextRange(forwardRichTextBox.Document.ContentStart, forwardRichTextBox.Document.ContentEnd);
+            textRange.Text = "ZZZZZZZZXXXXXXXXXXCATCGGTGAGCCCGGGCTGTCGGCGTNNTNNNANNTNNNANNTNNNANNTNNNANNTNNNANNATATGCCAGCAGGCCGGCCACGCTNNTNNNANNTNNNANNANNNANNTNNNANNTNNNANNCGGTGGCCCGGGCGGCCGCACGATGCGTCCGGCGTAGAGGXXXXXXXXXXZZZZZZZZ";
+
             //ReadLengthStr = "150";
             //ForUmiTagLenStr = "";
             //RevUmiTagLenStr = "";
@@ -348,6 +352,8 @@ namespace BartenderWindow
             paramsList.Add("ForwardGzFastQ");
             paramsList.Add("OutputDirectory");
             paramsList.Add("InputDirectory");
+            paramsList.Add("ForwardReadSequence");
+            paramsList.Add("ReverseReadSequence");
             paramsList.Add("RevLintagRegexStr");
             paramsList.Add("ForLintagRegexStr");
             paramsList.Add("LinTagFlankLengthStr");
@@ -528,7 +534,7 @@ namespace BartenderWindow
 
         protected void OnPropertyChanged(string name)
         {
-            if (true) //TODO: check if name is on list of parameters properties to be saved to XML file
+            if (false) //TODO: check if name is on list of parameters properties to be saved to XML file
             {
                 ParamsChanged = true;
             }
@@ -649,17 +655,28 @@ namespace BartenderWindow
             //add the root node to the document
             xmlDoc.AppendChild(rootNode);
 
+            //handle the Forward and Reverse Read Sequences separately, since propery binding to RichTextDocuments is wierd.
+            TextRange textRange = new TextRange(forwardRichTextBox.Document.ContentStart, forwardRichTextBox.Document.ContentEnd);
+            string value = textRange.Text;
+            XmlNode paramNode = xmlDoc.CreateElement("ForwardReadSequence");
+            paramNode.InnerText = value;
+            rootNode.AppendChild(paramNode);
+
+            textRange = new TextRange(reverseRichTextBox.Document.ContentStart, reverseRichTextBox.Document.ContentEnd);
+            value = textRange.Text;
+            paramNode = xmlDoc.CreateElement("ReverseReadSequence");
+            paramNode.InnerText = value;
+            rootNode.AppendChild(paramNode);
+
             //add all the parameters values to the XML document
             foreach (string param in paramsList)
             {
                 PropertyInfo propInfo = this.GetType().GetProperty(param);
                 if (propInfo != null)
                 {
-                    string value = $"{propInfo.GetValue(this)}";
-                    XmlNode paramNode = xmlDoc.CreateElement(param);
+                    value = $"{propInfo.GetValue(this)}";
+                    paramNode = xmlDoc.CreateElement(param);
                     paramNode.InnerText = value;
-                    //paramNode.InnerXml = value;
-                    //add the experiment ID node to the experiment node
                     rootNode.AppendChild(paramNode);
                 }
                 
@@ -758,10 +775,19 @@ namespace BartenderWindow
 
             rootNode = xmlDoc.SelectSingleNode("descendant::parameters");
 
-            //Read all the parameter values from the XML document
+            //handle the Forward and Reverse Read Sequences separately, since propery binding to RichTextDocuments is wierd.
+            TextRange textRange = new TextRange(forwardRichTextBox.Document.ContentStart, forwardRichTextBox.Document.ContentEnd);
+            XmlNode paramNode = rootNode.SelectSingleNode($"descendant::ForwardReadSequence");
+            textRange.Text = paramNode.InnerText;
+
+            textRange = new TextRange(reverseRichTextBox.Document.ContentStart, reverseRichTextBox.Document.ContentEnd);
+            paramNode = rootNode.SelectSingleNode($"descendant::ReverseReadSequence");
+            textRange.Text = paramNode.InnerText;
+
+            //Read all the paramsList parameter values from the XML document
             foreach (string param in paramsList)
             {
-                XmlNode paramNode = rootNode.SelectSingleNode($"descendant::{param}");
+                paramNode = rootNode.SelectSingleNode($"descendant::{param}");
                 PropertyInfo propInfo = this.GetType().GetProperty(param);
 
                 if (propInfo != null && paramNode != null)

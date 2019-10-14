@@ -79,14 +79,14 @@
                 <RichTextBox x:Name="forwardRichTextBox" Margin="10,0,10,5" FontFamily="Courier New" Grid.Row="2" FontSize="14">
                     <FlowDocument>
                         <Paragraph>
-                            <Run Text="ZZZZZZZZXXXXXXXXXXCATCGGTGAGCCCGGGCTGTCGGCGTNNTNNNANNTNNNANNTNNNANNTNNNANNTNNNANNATATGCCAGCAGGCCGGCCACGCTNNTNNNANNTNNNANNANNNANNTNNNANNTNNNANNCGGTGGCCCGGGCGGCCGCACGATGCGTCCGGCGTAGAGGXXXXXXXXXXZZZZZZZZ"/>
+                            <Run Text="Enter Forward Read Sequence here."/>
                         </Paragraph>
                     </FlowDocument>
                 </RichTextBox>
                 <RichTextBox x:Name="reverseRichTextBox" Margin="10,0,10,5" FontFamily="Courier New" Grid.Row="4" FontSize="14">
                     <FlowDocument>
                         <Paragraph>
-                            <Run Text="Reverse Complement"/>
+                            <Run Text="Enter Reverse Read Sequence here, or use the 'Copy Reverse Complement' button."/>
                         </Paragraph>
                     </FlowDocument>
                 </RichTextBox>
