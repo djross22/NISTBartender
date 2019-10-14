@@ -34,6 +34,7 @@
                     <Button x:Name="reverseComplementButton" Content="Copy Reverse Complement" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ToolTip="Copy Reverse Complement sequence to Reverse Read Sequence box" Click="reverseComplementButton_Click" Margin="5,0,5,0"/>
                     <Button x:Name="analyzeButton" Content="Analyze Sequences" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ToolTip="Analyze and annotate the Forward Read and Reverse Read sequences" Margin="5,0,5,0" Click="analyzeButton_Click"/>
                     <Button x:Name="autoRegexButton" Content="Auto Regex" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ToolTip="Automatically generate Lineage Tag RegEx's" Margin="5,0,5,0" Click="autoRegexButton_Click"/>
+                    <Button x:Name="parseButton" Content="Parse" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ToolTip="Run Barcode Parser" Margin="5,0,5,0" Click="parseButton_Click"/>
                 </ToolBar>
             </ToolBarTray>
             <Grid/>

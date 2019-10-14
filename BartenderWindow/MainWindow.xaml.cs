@@ -18,6 +18,7 @@ using System.Text.RegularExpressions;
 using System.ComponentModel;
 using Microsoft.Win32;
 using System.Xml;
+using BarcodeParser;
 
 namespace BartenderWindow
 {
@@ -76,6 +77,7 @@ namespace BartenderWindow
         private int threadsForParsing;
         private string minQualityStr;
         private double minQuality;
+        private Parser parser;
 
         #region Properties Getters and Setters
 
@@ -339,6 +341,9 @@ namespace BartenderWindow
         public MainWindow()
         {
             InitializeComponent();
+
+            parser = new Parser();
+
             DataContext = this;
 
             forUmiTagLenTextBox.Background = UmiTagHighlight;
@@ -1059,6 +1064,11 @@ namespace BartenderWindow
         private void reverseRichTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             ParamsChanged = true;
+        }
+
+        private void parseButton_Click(object sender, RoutedEventArgs e)
+        {
+            AddOutputText(parser.TestParser());
         }
 
         private void CopyReverseComplement()
