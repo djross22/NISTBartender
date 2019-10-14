@@ -37,27 +37,27 @@ Implement File menu items
 
 Add Read seqeunces to parameters saved/loaded to/from XML parameters file
 
+Set input and output directories and input fastq files 
+
+Match colors for input text boxes to related highlighted regions
+	
+Convert "OutputText +=" to AddOutputText()
+
+Set number of parsing threads to 1/2 the number of logical processors
+
+static double min_qs = 30;
+
+In OnPropertyChanged(string name), check if name is on list of parameters properties to be saved to XML file
+
+Make Sequence RichTextBoxes constant height in layout
+
 
 --------------------------------------------------------
 NISTBartender TODO List:
 
 
-	In OnPropertyChanged(string name), check if name is on list of parameters properties to be saved to XML file
-	In Window_Closing(), update source for all properties on params list
-	
+Add parser (as dll?)
 
-Set input and output directories and input fastq files
-
-Match colors for input text boxes to related highlighted regions
-
-static double min_qs = 30;
-
-threads for parsing
-	Number of logical processors:
-		Console.WriteLine("Number Of Logical Processors: {0}", Environment.ProcessorCount);
-	Set number of parsing threads to 1/2 the number of logical processors
-	
-Convert "OutputText +=" to AddOutputText()
 
 set up log file; in AddOutputText()
 
