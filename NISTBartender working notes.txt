@@ -28,10 +28,38 @@ write the flanking sequences to the appropriate variables for use by the parser
 
 Auto-generate Regex, but also allow manual edits
 
+Create list of parameters properties to be saved to XML file
+
+Implement File menu items
+	Save/Read editable text boxes to/from XML
+	In Save() and SaveAs(), implement save parameters to XML file
+	In LoadParams() and LoadParams(string file), implement read setting from XML file
+
+Add Read seqeunces to parameters saved/loaded to/from XML parameters file
+
 
 --------------------------------------------------------
 NISTBartender TODO List:
 
+
+	In OnPropertyChanged(string name), check if name is on list of parameters properties to be saved to XML file
+	In Window_Closing(), update source for all properties on params list
+	
+
+Set input and output directories and input fastq files
+
+Match colors for input text boxes to related highlighted regions
+
+static double min_qs = 30;
+
+threads for parsing
+	Number of logical processors:
+		Console.WriteLine("Number Of Logical Processors: {0}", Environment.ProcessorCount);
+	Set number of parsing threads to 1/2 the number of logical processors
+	
+Convert "OutputText +=" to AddOutputText()
+
+set up log file; in AddOutputText()
 
 
 All samples/multitags to be parsed into one file and clustered together
