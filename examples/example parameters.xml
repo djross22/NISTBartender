@@ -1,0 +1,29 @@
+<parameters source="NIST Bartender">
+  <ForwardReadSequence>ZZZZZZZZXXXXXXXXXXCATCGGTGAGCCCGGGCTGTCGGCGTNNTNNNANNTNNNANNTNNNANNTNNNANNTNNNANNATATGCCAGCAGGCCGGCCACGCTNNTNNNANNTNNNANNANNNANNTNNNANNTNNNANNCGGTGGCCCGGGCGGCCGCACGATGCGTCCGGCGTAGAGGXXXXXXXXXXZZZZZZZZ
+</ForwardReadSequence>
+  <ReverseReadSequence>ZZZZZZZZXXXXXXXXXXCCTCTACGCCGGACGCATCGTGCGGCCGCCCGGGCCACCGNNTNNNANNTNNNANNTNNNTNNTNNNANNTNNNANNAGCGTGGCCGGCCTGCTGGCATATNNTNNNANNTNNNANNTNNNANNTNNNANNTNNNANNACGCCGACAGCCCGGGCTCACCGATGXXXXXXXXXXZZZZZZZZ
+</ReverseReadSequence>
+  <ReverseGzFastQ>
+  </ReverseGzFastQ>
+  <ForwardGzFastQ>
+  </ForwardGzFastQ>
+  <OutputDirectory>
+  </OutputDirectory>
+  <InputDirectory>
+  </InputDirectory>
+  <RevLintagRegexStr>(ACCG|.CCG|A.CG|AC.G|ACC.)..T...A..T...A..T...T..T...A..T...A..(AGCG|.GCG|A.CG|AG.G|AGC.)</RevLintagRegexStr>
+  <ForLintagRegexStr>(GCGT|.CGT|G.GT|GC.T|GCG.)..T...A..T...A..T...A..T...A..T...A..(ATAT|.TAT|A.AT|AT.T|ATA.)</ForLintagRegexStr>
+  <LinTagFlankLengthStr>4</LinTagFlankLengthStr>
+  <MultiFlankLengthStr>4</MultiFlankLengthStr>
+  <ExtraMultiTagText>AGAAGGTAG, GGGCAATGCG, S6
+</ExtraMultiTagText>
+  <ReverseMultiTagText>TAATGCCGTG, 1
+GGGCAATGCG, 2
+</ReverseMultiTagText>
+  <FowardMultiTagText>AGCTAGCTAG, A
+CAATGCCTAG, B
+</FowardMultiTagText>
+  <ReadLengthStr>150</ReadLengthStr>
+  <RevUmiTagLenStr>8</RevUmiTagLenStr>
+  <ForUmiTagLenStr>8</ForUmiTagLenStr>
+</parameters>
