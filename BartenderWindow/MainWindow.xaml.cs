@@ -1280,32 +1280,18 @@ namespace BartenderWindow
                 //If multiplexing tags are set in the GUI then use the length from those strings - and replace/insert the appropriate number of X's
                 if (Object.ReferenceEquals(rtb, forwardRichTextBox))
                 {
-                    if (!String.IsNullOrEmpty(FowardMultiTagText))
+                    //if (!String.IsNullOrEmpty(FowardMultiTagText))
+                    if (fowardMultiTagList.Count>0)
                     {
-                        string cleanForward = FowardMultiTagText.Replace("\n", "").Replace("\r", "");
-                        if (!String.IsNullOrEmpty(cleanForward)) //multi-tag list has been set up in the GUI
-                        {
-                            rtb.Selection.Text = new String('X', GetMaxMultiTagLength(forward: true));
-                        }
-                        else
-                        {
-
-                        }
+                        rtb.Selection.Text = new String('X', GetMaxMultiTagLength(forward: true));
                     }
                 }
                 if (Object.ReferenceEquals(rtb, reverseRichTextBox))
                 {
-                    if (!String.IsNullOrEmpty(ReverseMultiTagText))
+                    //if (!String.IsNullOrEmpty(ReverseMultiTagText))
+                    if (reverseMultiTagList.Count>0)
                     {
-                        string cleanReverse = ReverseMultiTagText.Replace("\n", "").Replace("\r", "");
-                        if (!String.IsNullOrEmpty(cleanReverse)) //multi-tag list has been set up in the GUI
-                        {
-                            rtb.Selection.Text = new String('X', GetMaxMultiTagLength(forward: false));
-                        }
-                        else
-                        {
-
-                        }
+                        rtb.Selection.Text = new String('X', GetMaxMultiTagLength(forward: false));
                     }
                 }
 
