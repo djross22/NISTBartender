@@ -40,6 +40,7 @@ namespace BartenderWindow
         private XmlNode rootNode;
 
         private string inputDirectory, outputDirectory, forwardGzFastQ, reverseGzFastQ;
+        private string defaultDirectory = @"C:\";
 
         private string forUmiTagLenStr, revUmiTagLenStr;
         private int[] forUmiTagLen, revUmiTagLen;
@@ -308,6 +309,9 @@ namespace BartenderWindow
         {
             InitializeComponent();
             DataContext = this;
+
+            InputDirectory = defaultDirectory;
+            OutputDirectory = defaultDirectory;
 
             ParamsFilePath = "";
             CreateParamsList();
@@ -869,6 +873,60 @@ namespace BartenderWindow
             //        File.AppendAllText(logFilePath, txt);
             //    }
             //}
+        }
+
+        private void inputDirMenuItme_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void outputDirMenuItme_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void forFastqMenuItme_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            //openFileDialog.Filter = "XML file (*.xml)|*.xml";
+            openFileDialog.Title = "Select GZipped Fastq file with Forward Reads";
+            if (InputDirectory != defaultDirectory) openFileDialog.InitialDirectory = InputDirectory;
+            if (openFileDialog.ShowDialog() == true)
+            {
+                string filePathStr = openFileDialog.FileName;
+                string FileDir = System.IO.Path.GetDirectoryName(filePathStr);
+                //If file is in the InputDirectory, then just display the filename, without the directory info
+                if (FileDir == InputDirectory)
+                {
+                    ForwardGzFastQ = System.IO.Path.GetFileName(filePathStr);
+                }
+                else
+                {
+                    ForwardGzFastQ = filePathStr;
+                }
+            }
+        }
+
+        private void revFastqMenuItme_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            //openFileDialog.Filter = "XML file (*.xml)|*.xml";
+            openFileDialog.Title = "Select GZipped Fastq file with Reverse Reads";
+            if (InputDirectory != defaultDirectory) openFileDialog.InitialDirectory = InputDirectory;
+            if (openFileDialog.ShowDialog() == true)
+            {
+                string filePathStr = openFileDialog.FileName;
+                string FileDir = System.IO.Path.GetDirectoryName(filePathStr);
+                //If file is in the InputDirectory, then just display the filename, without the directory info
+                if (FileDir == InputDirectory)
+                {
+                    ReverseGzFastQ = System.IO.Path.GetFileName(filePathStr);
+                }
+                else
+                {
+                    ReverseGzFastQ = filePathStr;
+                }
+            }
         }
 
         private void CopyReverseComplement()

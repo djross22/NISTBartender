@@ -20,6 +20,11 @@
                     <MenuItem x:Name="saveMenuItem" Header="Save" Click="SaveMenuItem_Click" ToolTip="Save parameters/settings to .xml file"/>
                     <MenuItem x:Name="saveAsMenuItem" Header="Save As..." Click="SaveAsMenuItem_Click" ToolTip="Save parameters/settings to .xml file with new filename"/>
                     <Separator />
+                    <MenuItem x:Name="inputDirMenuItme" Header="InputDir" Click="inputDirMenuItme_Click" ToolTip="Select directory for input files."/>
+                    <MenuItem x:Name="outputDirMenuItme" Header="OutputDir" Click="outputDirMenuItme_Click" ToolTip="Select directory for output files."/>
+                    <MenuItem x:Name="forFastqMenuItme" Header="F-Fastq" Click="forFastqMenuItme_Click" ToolTip="Select fastq file with forward reads."/>
+                    <MenuItem x:Name="revFastqMenuItme" Header="R-Fastq" Click="revFastqMenuItme_Click" ToolTip="Select fastq file with reverse reads."/>
+                    <Separator />
                     <MenuItem x:Name="exitMenuItem" Header="Exit" Click="ExitMenuItem_Click" />
                 </MenuItem>
 
