@@ -32,6 +32,10 @@ namespace BartenderWindow
         private string displayTitle = appName + " - ";
         private string paramsFilePath;
         private bool paramsChanged = false;
+        private List<string> paramsList;
+        //Fields for XML parameters file output
+        private XmlDocument xmlDoc;
+        private XmlNode rootNode;
 
         private string inputDirectory, outputDirectory, forwardGzFastQ, reverseGzFastQ;
 
@@ -304,6 +308,7 @@ namespace BartenderWindow
             DataContext = this;
 
             ParamsFilePath = "";
+            CreateParamsList();
 
             CopyReverseComplement();
             ReadLengthStr = "150";
@@ -332,6 +337,26 @@ namespace BartenderWindow
             reverseMultiTagList = new List<string>();
             reverseIdDict = new Dictionary<string, string>();
             mutiTagIdDict = new Dictionary<string[], string>();
+        }
+
+        private void CreateParamsList()
+        {
+            paramsList = new List<string>();
+            paramsList.Add("ReverseGzFastQ");
+            paramsList.Add("ForwardGzFastQ");
+            paramsList.Add("OutputDirectory");
+            paramsList.Add("InputDirectory");
+            paramsList.Add("RevLintagRegexStr");
+            paramsList.Add("ForLintagRegexStr");
+            paramsList.Add("LinTagFlankLengthStr");
+            paramsList.Add("MultiFlankLengthStr");
+            paramsList.Add("ExtraMultiTagText");
+            paramsList.Add("ReverseMultiTagText");
+            paramsList.Add("FowardMultiTagText");
+            paramsList.Add("ReadLengthStr");
+            paramsList.Add("RevUmiTagLenStr");
+            paramsList.Add("ForUmiTagLenStr");
+            //paramsList.Add("");
         }
 
         private void UpdateTitle()
