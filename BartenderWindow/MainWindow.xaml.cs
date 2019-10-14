@@ -313,19 +313,19 @@ namespace BartenderWindow
             CreateParamsList();
 
             CopyReverseComplement();
-            ReadLengthStr = "150";
-            ForUmiTagLenStr = "";
-            RevUmiTagLenStr = "";
+            //ReadLengthStr = "150";
+            //ForUmiTagLenStr = "";
+            //RevUmiTagLenStr = "";
 
-            LinTagFlankLengthStr = "4";
-            MultiFlankLengthStr = "4";
+            //LinTagFlankLengthStr = "4";
+            //MultiFlankLengthStr = "4";
 
-            FowardMultiTagText = "AGCTAGCTAG, A\n";
-            FowardMultiTagText += "CAATGCCTAG, B\n";
-            ReverseMultiTagText = "TAATGCCGTG, 1\n";
-            ReverseMultiTagText += "GGGCAATGCG, 2\n";
-            ExtraMultiTagText = "AGAAGGTAG, TAGTGTCGTG, S5\n";
-            ExtraMultiTagText = "AGAAGGTAG, GGGCAATGCG, S6\n";
+            //FowardMultiTagText = "AGCTAGCTAG, A\n";
+            //FowardMultiTagText += "CAATGCCTAG, B\n";
+            //ReverseMultiTagText = "TAATGCCGTG, 1\n";
+            //ReverseMultiTagText += "GGGCAATGCG, 2\n";
+            //ExtraMultiTagText = "AGAAGGTAG, TAGTGTCGTG, S5\n";
+            //ExtraMultiTagText = "AGAAGGTAG, GGGCAATGCG, S6\n";
 
             InitMultiTagLists();
 
