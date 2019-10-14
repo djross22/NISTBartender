@@ -81,14 +81,14 @@
                         </Binding>
                     </TextBox.Text>
                 </TextBox>
-                <RichTextBox x:Name="forwardRichTextBox" Margin="10,0,10,5" FontFamily="Courier New" Grid.Row="2" FontSize="14">
+                <RichTextBox x:Name="forwardRichTextBox" Margin="10,0,10,5" FontFamily="Courier New" Grid.Row="2" FontSize="14" TextChanged="forwardRichTextBox_TextChanged">
                     <FlowDocument>
                         <Paragraph>
                             <Run Text="Enter Forward Read Sequence here."/>
                         </Paragraph>
                     </FlowDocument>
                 </RichTextBox>
-                <RichTextBox x:Name="reverseRichTextBox" Margin="10,0,10,5" FontFamily="Courier New" Grid.Row="4" FontSize="14">
+                <RichTextBox x:Name="reverseRichTextBox" Margin="10,0,10,5" FontFamily="Courier New" Grid.Row="4" FontSize="14" TextChanged="reverseRichTextBox_TextChanged">
                     <FlowDocument>
                         <Paragraph>
                             <Run Text="Enter Reverse Read Sequence here, or use the 'Copy Reverse Complement' button."/>

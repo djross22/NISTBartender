@@ -323,6 +323,19 @@ namespace BartenderWindow
         }
         #endregion
 
+        protected void OnPropertyChanged(string name)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(name));
+
+                if ((paramsList != null) && (paramsList.Contains(name)))
+                {
+                    ParamsChanged = true;
+                }
+            }
+        }
+
         public MainWindow()
         {
             InitializeComponent();
@@ -343,9 +356,6 @@ namespace BartenderWindow
 
             ParamsFilePath = "";
             CreateParamsList();
-            //TODO: In OnPropertyChanged(string name), check if name is on list of parameters properties to be saved to XML file
-            //   and set ParamsChanged accordingly. For now, just leave ParamsChanged = true all the time.
-            ParamsChanged = true; 
 
             //CopyReverseComplement();
 
@@ -373,6 +383,9 @@ namespace BartenderWindow
             AddOutputText($"Number of threads to use for sequence file parsing: {threadsForParsing}");
 
             MinQualityStr = "30";
+
+            //"ParamsChanged = false" should be the last thing in the Constructor
+            ParamsChanged = false;
         }
 
         private void InitMultiTagLists()
@@ -409,11 +422,16 @@ namespace BartenderWindow
 
         private void UpdateTitle()
         {
-            DisplayTitle = appName + " - " + ParamsFilePath;
+            string title = appName;
+            if (!string.IsNullOrEmpty(ParamsFilePath))
+            {
+                title += " - " + ParamsFilePath;
+            }
             if (ParamsChanged)
             {
-                DisplayTitle += "*";
+                title += "*";
             }
+            DisplayTitle = title;
         }
 
         private void MakeMultiTagLists()
@@ -630,18 +648,6 @@ namespace BartenderWindow
             //AddOutputText("");
         }
 
-        protected void OnPropertyChanged(string name)
-        {
-            if (false) //TODO: check if name is on list of parameters properties to be saved to XML file
-            {
-                ParamsChanged = true;
-            }
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(name));
-            }
-        }
-
         static string ReverseComplement(string inputSequence)
         {
             string outputString = inputSequence.TrimEnd('\r', '\n');
@@ -691,7 +697,7 @@ namespace BartenderWindow
                     //Save the XML document
                     xmlDoc.Save(ParamsFilePath);
 
-                    //ParamsChanged = false;
+                    ParamsChanged = false;
                     didSave = true;
                 }
                 catch (UnauthorizedAccessException e)
@@ -732,7 +738,7 @@ namespace BartenderWindow
                 //Save the XML document
                 xmlDoc.Save(ParamsFilePath);
 
-                //ParamsChanged = false;
+                ParamsChanged = false;
                 didSave = true;
             }
             else
@@ -853,7 +859,7 @@ namespace BartenderWindow
 
                     ReadParamsXml(ParamsFilePath);
 
-                    //ParamsChanged = false;
+                    ParamsChanged = false;
                 }
                 catch
                 {
@@ -906,15 +912,12 @@ namespace BartenderWindow
             {
                 ParamsFilePath = openFileDialog.FileName;
                 ReadParamsXml(ParamsFilePath);
-                //ParamsChanged = false;
+                ParamsChanged = false;
             }
         }
 
         private void Window_Closing(object sender, CancelEventArgs e)
         {
-            //Make sure that any changes to parameters are updated before closing
-            //TODO: update source for all properties on params list; inputTextBox.GetBindingExpression(TextBox.TextProperty).UpdateSource();
-
             if (ParamsChanged && !SaveFirstQuery())
             {
                 //Input trext has changed, and the user selected 'Cancel'
@@ -1046,6 +1049,16 @@ namespace BartenderWindow
                     ReverseGzFastQ = filePathStr;
                 }
             }
+        }
+
+        private void forwardRichTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ParamsChanged = true;
+        }
+
+        private void reverseRichTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ParamsChanged = true;
         }
 
         private void CopyReverseComplement()
