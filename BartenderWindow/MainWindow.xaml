@@ -233,7 +233,7 @@
                 </TextBox>
             </Grid>
         </Grid>
-        <TextBox x:Name="outputTextBox" Margin="10,10,10,10" Grid.Row="3" TextWrapping="Wrap" Text="{Binding OutputText, Mode=TwoWay}" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" Background="{DynamicResource ReadOnlyBackground}" TextChanged="outputTextBox_TextChanged" Foreground="{DynamicResource ReadOnlyForeground}"/>
+        <TextBox x:Name="outputTextBox" Margin="10,10,10,10" Grid.Row="3" TextWrapping="Wrap" Text="{Binding OutputText, Mode=TwoWay}" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" Background="#FF170D23" TextChanged="outputTextBox_TextChanged" Foreground="#FFCDCDCD" FontFamily="Courier New" FontSize="14"/>
 
 
     </Grid>
