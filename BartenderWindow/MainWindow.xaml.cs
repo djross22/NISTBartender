@@ -74,8 +74,21 @@ namespace BartenderWindow
 
         //Parameters for sequence file parsing
         private int threadsForParsing;
+        private string minQualityStr;
+        private double minQuality;
 
         #region Properties Getters and Setters
+
+        public string MinQualityStr
+        {
+            get { return this.minQualityStr; }
+            set
+            {
+                this.minQualityStr = value;
+                OnPropertyChanged("MinQualityStr");
+                double.TryParse(minQualityStr, out minQuality);
+            }
+        }
 
         public bool ParamsChanged
         {
@@ -358,6 +371,8 @@ namespace BartenderWindow
             AddOutputText($"Number of Logical Processors: {Environment.ProcessorCount}");
             threadsForParsing = Environment.ProcessorCount / 2;
             AddOutputText($"Number of threads to use for sequence file parsing: {threadsForParsing}");
+
+            MinQualityStr = "30";
         }
 
         private void InitMultiTagLists()
@@ -388,6 +403,7 @@ namespace BartenderWindow
             paramsList.Add("ReadLengthStr");
             paramsList.Add("RevUmiTagLenStr");
             paramsList.Add("ForUmiTagLenStr");
+            paramsList.Add("MinQualityStr");
             //paramsList.Add("");
         }
 

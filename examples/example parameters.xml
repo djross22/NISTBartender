@@ -22,4 +22,5 @@ CAATGCCTAG, B
   <ReadLengthStr>150</ReadLengthStr>
   <RevUmiTagLenStr>8</RevUmiTagLenStr>
   <ForUmiTagLenStr>8</ForUmiTagLenStr>
+  <MinQualityStr>30</MinQualityStr>
 </parameters>
