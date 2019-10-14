@@ -422,7 +422,7 @@ namespace BartenderWindow
 
             //If multitag text boxes aren't properly populated, give warning message and return from method
             string invalidTagListMsg = "Please enter at least one valid set of Multiplex Tags, and try again.";
-            bool validForRevTags = true, validExtraTags = true;
+            bool validForRevTags = true, validForwardTags = true, validReverseTags = true, validExtraTags = true;
             if (String.IsNullOrEmpty(ExtraMultiTagText))
             {
                 validExtraTags = false;
@@ -436,19 +436,47 @@ namespace BartenderWindow
                 }
             }
 
-            if (String.IsNullOrEmpty(FowardMultiTagText) || String.IsNullOrEmpty(ReverseMultiTagText))
+            if (String.IsNullOrEmpty(FowardMultiTagText))
             {
-                validForRevTags = false;
+                validForwardTags = false;
             }
             else
             {
                 string cleanForward = FowardMultiTagText.Replace("\n", "").Replace("\r", "");
-                string cleanReverse = ReverseMultiTagText.Replace("\n", "").Replace("\r", "");
-                if (String.IsNullOrEmpty(cleanForward) || String.IsNullOrEmpty(cleanReverse))
+                if (String.IsNullOrEmpty(cleanForward))
                 {
-                    validForRevTags = false;
+                    validForwardTags = false;
                 }
             }
+
+            if (String.IsNullOrEmpty(ReverseMultiTagText))
+            {
+                validReverseTags = false;
+            }
+            else
+            {
+                string cleanReverse = ReverseMultiTagText.Replace("\n", "").Replace("\r", "");
+                if (String.IsNullOrEmpty(cleanReverse))
+                {
+                    validReverseTags = false;
+                }
+            }
+
+            //Give warning if the forward or reverse multiplexing tag list is empty
+            if (validForwardTags && !validReverseTags)
+            {
+                string msg = "Warning: Ignoring Forward Multiplexing Tag list since Reverse Multiplexing Tag list is empty.\n";
+                msg += "Analysis will procede using only tags listed in Extra Multiplexing Tags list.";
+                MessageBox.Show(msg, "Warning!");
+            }
+            if (!validForwardTags && validReverseTags)
+            {
+                string msg = "Warning: Ignoring Reverse Multiplexing Tag list since Forward Multiplexing Tag list is empty.\n";
+                msg += "Analysis will procede using only tags listed in Extra Multiplexing Tags list.";
+                MessageBox.Show(msg, "Warning!");
+            }
+
+            validForRevTags = validForwardTags & validReverseTags;
 
             if (!validForRevTags && !validExtraTags)
             {
