@@ -106,9 +106,9 @@
                     </TextBox>
                     <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Lineage tag Regex:" VerticalAlignment="Center" Foreground="White" Grid.Column="1"/>
                     <TextBlock HorizontalAlignment="Left" Margin="30,0,0,0" Text="Forward:" VerticalAlignment="Center" Foreground="White" Grid.Row="1" Grid.Column="1"/>
-                    <TextBox x:Name="forRegExTextBox" HorizontalAlignment="Stretch" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="80,0,10,0" Grid.Row="1" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" KeyUp="forRegExTextBox_KeyUp" Grid.Column="1" Text="{Binding ForLintagRegexStr, Mode=TwoWay}"/>
+                    <TextBox x:Name="forRegExTextBox" HorizontalAlignment="Stretch" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="80,0,10,0" Grid.Row="1" FontFamily="Courier New" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" KeyUp="forRegExTextBox_KeyUp" Grid.Column="1" Text="{Binding ForLintagRegexStr, Mode=TwoWay}"/>
                     <TextBlock HorizontalAlignment="Left" Margin="30,0,0,0" Text="Reverse:" VerticalAlignment="Center" Foreground="White" Grid.Row="2" Grid.Column="1"/>
-                    <TextBox x:Name="revRegExTextBox" HorizontalAlignment="Stretch" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="80,0,10,0" Grid.Row="2" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" KeyUp="revRegExTextBox_KeyUp" Grid.Column="1" Text="{Binding RevLintagRegexStr, Mode=TwoWay}"/>
+                    <TextBox x:Name="revRegExTextBox" HorizontalAlignment="Stretch" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="80,0,10,0" Grid.Row="2" FontFamily="Courier New" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" KeyUp="revRegExTextBox_KeyUp" Grid.Column="1" Text="{Binding RevLintagRegexStr, Mode=TwoWay}"/>
 
                 </Grid>
                 <Grid Grid.Row="6">
