@@ -14,6 +14,8 @@
             <Style TargetType="{x:Type ToolTip}">
                 <Setter Property="Background" Value="{DynamicResource ToolTipBackground}"/>
             </Style>
+            <SolidColorBrush x:Key="ReadOnlyBackground" Color="#FFF0F0F0"/>
+            <SolidColorBrush x:Key="ReadOnlyForeground" Color="#FF666666"/>
         </ResourceDictionary>
          
     </Application.Resources>

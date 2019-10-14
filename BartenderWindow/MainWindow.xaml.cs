@@ -66,8 +66,10 @@ namespace BartenderWindow
         private string outputText;
 
         private static Brush UmiTagHighlight = Brushes.Yellow;
-        private static Brush MultiTagHighlight = Brushes.LightGreen;
-        private static Brush LineageTagHighlight = Brushes.Thistle;
+        //private static Brush MultiTagHighlight = Brushes.LightGreen;
+        //private static Brush LineageTagHighlight = Brushes.Thistle;
+        private static Brush MultiTagHighlight = Brushes.Thistle;
+        private static Brush LineageTagHighlight = Brushes.LightGreen;
         private static Brush FlankHighlight = Brushes.PowderBlue;
 
         #region Properties Getters and Setters
@@ -309,6 +311,16 @@ namespace BartenderWindow
         {
             InitializeComponent();
             DataContext = this;
+
+            forUmiTagLenTextBox.Background = UmiTagHighlight;
+            revUmiTagLenTextBox.Background = UmiTagHighlight;
+            fowardMultiTagTextBox.Background = MultiTagHighlight;
+            reverseMultiTagTextBox.Background = MultiTagHighlight;
+            extraMultiTagTextBox.Background = MultiTagHighlight;
+            multiFlankLengthTextBox.Background = FlankHighlight;
+            linTagFlankLengthTextBox.Background = FlankHighlight;
+            forRegExTextBox.Background = LineageTagHighlight;
+            revRegExTextBox.Background = LineageTagHighlight;
 
             InputDirectory = defaultDirectory;
             OutputDirectory = defaultDirectory;

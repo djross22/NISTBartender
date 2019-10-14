@@ -48,13 +48,13 @@
                 <ColumnDefinition Width="2*"/>
             </Grid.ColumnDefinitions>
             <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Input Directory:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="Directory containing input (gzipped fastq) files." Height="16"/>
-            <TextBox Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="115,0,10,0" FontFamily="Courier New" MaxLines="1" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Text="{Binding InputDirectory, Mode=TwoWay}" IsReadOnly="True" Background="#FFCBCBCB"/>
+            <TextBox Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="115,0,10,0" FontFamily="Courier New" MaxLines="1" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Text="{Binding InputDirectory, Mode=TwoWay}" IsReadOnly="True" Background="{DynamicResource ReadOnlyBackground}" Foreground="{DynamicResource ReadOnlyForeground}"/>
             <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Output Directory:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="Directory to save output files." Height="16" Grid.Row="1"/>
-            <TextBox Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="115,0,10,0" FontFamily="Courier New" MaxLines="1" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Text="{Binding OutputDirectory, Mode=TwoWay}" Grid.Row="1" IsReadOnly="True" Background="#FFCBCBCB"/>
+            <TextBox Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="115,0,10,0" FontFamily="Courier New" MaxLines="1" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Text="{Binding OutputDirectory, Mode=TwoWay}" Grid.Row="1" IsReadOnly="True" Background="{DynamicResource ReadOnlyBackground}" Foreground="{DynamicResource ReadOnlyForeground}"/>
             <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Forward Fastq file:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="Gzipped fastq file containing forward reads." Height="16" Grid.Column="1"/>
             <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Reverse Fastq file:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="Gzipped fastq file containing reverse reads." Height="16" Grid.Column="1" Grid.Row="1"/>
-            <TextBox Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="115,0,10,0" FontFamily="Courier New" MaxLines="1" HorizontalContentAlignment="Left"  VerticalContentAlignment="Center" Text="{Binding ForwardGzFastQ, Mode=TwoWay}" Grid.Column="1" IsReadOnly="True" Background="#FFCBCBCB"/>
-            <TextBox Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="115,0,10,0" FontFamily="Courier New" MaxLines="1" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Text="{Binding ReverseGzFastQ, Mode=TwoWay}" Grid.Row="1" Grid.Column="1" IsReadOnly="True" Background="#FFCBCBCB"/>
+            <TextBox Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="115,0,10,0" FontFamily="Courier New" MaxLines="1" HorizontalContentAlignment="Left"  VerticalContentAlignment="Center" Text="{Binding ForwardGzFastQ, Mode=TwoWay}" Grid.Column="1" IsReadOnly="True" Background="{DynamicResource ReadOnlyBackground}" Foreground="{DynamicResource ReadOnlyForeground}"/>
+            <TextBox Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="115,0,10,0" FontFamily="Courier New" MaxLines="1" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Text="{Binding ReverseGzFastQ, Mode=TwoWay}" Grid.Row="1" Grid.Column="1" IsReadOnly="True" Background="{DynamicResource ReadOnlyBackground}" Foreground="{DynamicResource ReadOnlyForeground}"/>
         </Grid>
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
@@ -168,13 +168,13 @@
                         </TextBox.Text>
                     </TextBox>
                     <TextBlock HorizontalAlignment="Left" Text="Forward Spacer Length:" VerticalAlignment="Center" Foreground="White" ToolTip="Length of constant sequence between multiplexing tags and lineage tags on forward reads" Grid.Row="1" Margin="10,0,0,0" Grid.Column="1" Height="15" Width="124"/>
-                    <TextBox HorizontalAlignment="Left" Margin="139,0,0,0" Grid.Row="1" VerticalAlignment="Center" Text="{Binding ForwardSpacerLengthStr, Mode=TwoWay}" AcceptsReturn="False" IsReadOnly="True" Background="#FFCBCBCB" Height="20" Width="30" Grid.Column="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                    <TextBox HorizontalAlignment="Left" Margin="139,0,0,0" Grid.Row="1" VerticalAlignment="Center" Text="{Binding ForwardSpacerLengthStr, Mode=TwoWay}" AcceptsReturn="False" IsReadOnly="True" Background="{DynamicResource ReadOnlyBackground}" Height="20" Width="30" Grid.Column="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="{DynamicResource ReadOnlyForeground}"/>
                     <TextBlock HorizontalAlignment="Left" Text="Reverse Spacer Length:" VerticalAlignment="Center" Foreground="White" ToolTip="Length of constant sequence between multiplexing tags and lineage tags on forward reads" Grid.Row="2" Margin="10,0,0,0" Grid.Column="1" Height="15" Width="122"/>
-                    <TextBox HorizontalAlignment="Left" Margin="139,0,0,0" Grid.Row="2" VerticalAlignment="Center" Text="{Binding ReverseSpacerLengthStr, Mode=TwoWay}" AcceptsReturn="False" IsReadOnly="True" Background="#FFCBCBCB" Height="20" Width="30" Grid.Column="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                    <TextBox HorizontalAlignment="Left" Margin="139,0,0,0" Grid.Row="2" VerticalAlignment="Center" Text="{Binding ReverseSpacerLengthStr, Mode=TwoWay}" AcceptsReturn="False" IsReadOnly="True" Background="{DynamicResource ReadOnlyBackground}" Height="20" Width="30" Grid.Column="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="{DynamicResource ReadOnlyForeground}"/>
                     <TextBlock HorizontalAlignment="Left" Text="Forward Lin-Tag Length:" VerticalAlignment="Center" Foreground="White" ToolTip="Length of lineage tags on forward reads" Grid.Row="1" Margin="10,0,0,0" Grid.Column="2" Height="15" Width="124"/>
-                    <TextBox HorizontalAlignment="Left" Margin="139,0,0,0" Grid.Row="1" VerticalAlignment="Center" Text="{Binding ForwardLinTagLengthStr, Mode=TwoWay}" AcceptsReturn="False" IsReadOnly="True" Background="#FFCBCBCB" Height="20" Width="30" Grid.Column="2" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                    <TextBox HorizontalAlignment="Left" Margin="139,0,0,0" Grid.Row="1" VerticalAlignment="Center" Text="{Binding ForwardLinTagLengthStr, Mode=TwoWay}" AcceptsReturn="False" IsReadOnly="True" Background="{DynamicResource ReadOnlyBackground}" Height="20" Width="30" Grid.Column="2" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="{DynamicResource ReadOnlyForeground}"/>
                     <TextBlock HorizontalAlignment="Left" Text="Reverse Lin-Tag Length:" VerticalAlignment="Center" Foreground="White" ToolTip="Length of lineage tags on reverse reads" Grid.Row="2" Margin="10,0,0,0" Grid.Column="2" Height="15" Width="124"/>
-                    <TextBox HorizontalAlignment="Left" Margin="139,0,0,0" Grid.Row="2" VerticalAlignment="Center" Text="{Binding ReverseLinTagLengthStr, Mode=TwoWay}" AcceptsReturn="False" IsReadOnly="True" Background="#FFCBCBCB" Height="20" Width="30" Grid.Column="2" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                    <TextBox HorizontalAlignment="Left" Margin="139,0,0,0" Grid.Row="2" VerticalAlignment="Center" Text="{Binding ReverseLinTagLengthStr, Mode=TwoWay}" AcceptsReturn="False" IsReadOnly="True" Background="{DynamicResource ReadOnlyBackground}" Height="20" Width="30" Grid.Column="2" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="{DynamicResource ReadOnlyForeground}"/>
                 </Grid>
             </Grid>
 
@@ -193,7 +193,7 @@
                 <TextBlock HorizontalAlignment="Left" Text="Multiplexing Tags:" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="White" ToolTip="Enter forward and reverse multiplexing tags to be automatically combined." Margin="10,0,0,0"/>
                 <TextBlock HorizontalAlignment="Left" Text="Forward:" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="White" ToolTip="Enter forward multiplexing tags, one per line, and optionally include shorthand indentifier separated by a comma." Grid.Row="1" Margin="10,0,0,0"/>
                 <TextBlock HorizontalAlignment="Left" Text="Reverse:" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="White" ToolTip="Enter reverse multiplexing tags, one per line, and optionally include shorthand indentifier separated by a comma." Grid.Row="1" Margin="10,0,0,0" Grid.Column="1"/>
-                <TextBox Margin="10,0,10,10" Grid.Row="2" TextWrapping="NoWrap" FontFamily="Courier New" FontSize="14" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" AcceptsReturn="True">
+                <TextBox x:Name="fowardMultiTagTextBox" Margin="10,0,10,10" Grid.Row="2" TextWrapping="NoWrap" FontFamily="Courier New" FontSize="14" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" AcceptsReturn="True">
                     <TextBox.Text>
                         <Binding Path="FowardMultiTagText" UpdateSourceTrigger="PropertyChanged"  Mode="TwoWay">
                             <Binding.ValidationRules>
@@ -202,7 +202,7 @@
                         </Binding>
                     </TextBox.Text>
                 </TextBox>
-                <TextBox Margin="10,0,10,10" Grid.Row="2" TextWrapping="NoWrap" FontFamily="Courier New" FontSize="14" Grid.Column="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" AcceptsReturn="True">
+                <TextBox x:Name="reverseMultiTagTextBox" Margin="10,0,10,10" Grid.Row="2" TextWrapping="NoWrap" FontFamily="Courier New" FontSize="14" Grid.Column="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" AcceptsReturn="True">
                     <TextBox.Text>
                         <Binding Path="ReverseMultiTagText" UpdateSourceTrigger="PropertyChanged"  Mode="TwoWay">
                             <Binding.ValidationRules>
@@ -212,7 +212,7 @@
                     </TextBox.Text>
                 </TextBox>
                 <TextBlock HorizontalAlignment="Left" Text="Extra Multiplexing Tags:" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="White" ToolTip="Enter extra multiplexing tags or tags that should not be automatically comined, one per line: 'Forward, Reverse, Short-ID'. The Short-IDs are optional." Margin="10,0,0,0" Grid.Row="3"/>
-                <TextBox Margin="10,0,10,10" Grid.Row="4" TextWrapping="NoWrap" FontFamily="Courier New" FontSize="14" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Grid.ColumnSpan="2" AcceptsReturn="True">
+                <TextBox x:Name="extraMultiTagTextBox" Margin="10,0,10,10" Grid.Row="4" TextWrapping="NoWrap" FontFamily="Courier New" FontSize="14" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Grid.ColumnSpan="2" AcceptsReturn="True">
                     <TextBox.Text>
                         <Binding Path="ExtraMultiTagText" UpdateSourceTrigger="PropertyChanged"  Mode="TwoWay">
                             <Binding.ValidationRules>
@@ -223,7 +223,7 @@
                 </TextBox>
             </Grid>
         </Grid>
-        <TextBox x:Name="outputTextBox" Margin="10,10,10,10" Grid.Row="3" TextWrapping="Wrap" Text="{Binding OutputText, Mode=TwoWay}" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" Background="#FFCBCBCB" TextChanged="outputTextBox_TextChanged"/>
+        <TextBox x:Name="outputTextBox" Margin="10,10,10,10" Grid.Row="3" TextWrapping="Wrap" Text="{Binding OutputText, Mode=TwoWay}" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" Background="{DynamicResource ReadOnlyBackground}" TextChanged="outputTextBox_TextChanged" Foreground="{DynamicResource ReadOnlyForeground}"/>
 
 
     </Grid>
