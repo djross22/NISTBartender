@@ -17,6 +17,7 @@ using System.Windows.Shapes;
 using System.Text.RegularExpressions;
 using System.ComponentModel;
 using Microsoft.Win32;
+using System.Xml;
 
 namespace BartenderWindow
 {
@@ -734,7 +735,9 @@ namespace BartenderWindow
                 try
                 {
                     ParamsFilePath = file;
-                    //TODO implement read setting from XML file; InputText = File.ReadAllText(ParamsFileName);
+
+                    ReadParamsXml(ParamsFilePath);
+
                     ParamsChanged = false;
                 }
                 catch
@@ -748,14 +751,37 @@ namespace BartenderWindow
             }
         }
 
+        private void ReadParamsXml(string filePath)
+        {
+            xmlDoc = new XmlDocument();
+            xmlDoc.Load(filePath);
+
+            rootNode = xmlDoc.SelectSingleNode("descendant::parameters");
+
+            //Read all the parameter values from the XML document
+            foreach (string param in paramsList)
+            {
+                XmlNode paramNode = rootNode.SelectSingleNode($"descendant::{param}");
+                PropertyInfo propInfo = this.GetType().GetProperty(param);
+
+                if (propInfo != null && paramNode != null)
+                {
+                    string value = paramNode.InnerText;
+                    propInfo.SetValue(this, value);
+                }
+
+            }
+        }
+
         private void LoadParams()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "XML file (*.xml)|*.xml";
+            openFileDialog.Title = "Select Parameters File to Load";
             if (openFileDialog.ShowDialog() == true)
             {
-                //TODO implement read setting from XML file; InputText = File.ReadAllText(openFileDialog.FileName);
                 ParamsFilePath = openFileDialog.FileName;
+                ReadParamsXml(ParamsFilePath);
                 ParamsChanged = false;
             }
         }
