@@ -26,11 +26,11 @@ highlight constant flanking regions to lintag (PowderBlue)
 
 write the flanking sequences to the appropriate variables for use by the parser
 
+Auto-generate Regex, but also allow manual edits
+
 
 --------------------------------------------------------
 NISTBartender TODO List:
-
-Auto-generate Regex, but also allow manual edits
 
 
 
