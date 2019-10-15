@@ -70,25 +70,81 @@ namespace BarcodeParser
             return new string(charArray);
         }
 
-        //HammingDistance() and LevenshteinDistance() from: https://www.csharpstar.com/csharp-string-distance-algorithm/
-        public static int HammingDistance(string s, string t)
+
+        public static int HammingDistance(string seq1, string seq2, int max = Int32.MaxValue, bool ignoreN = false)
         {
-            if (s.Length != t.Length)
+            //This Hamming distance, from Levy lab (mostly), included max and ignoreN parameters
+            //     It assumes that seq1.Length <= seq2.Length, otherwise it returns max
+            if (seq1.Equals(seq2))
             {
-                throw new Exception("Strings must be equal length");
+                return 0;
             }
-
-            int distance =
-                s.ToCharArray()
-                .Zip(t.ToCharArray(), (c1, c2) => new { c1, c2 })
-                .Count(m => m.c1 != m.c2);
-
-            return distance;
+            else
+            {
+                if (seq1.Length > seq2.Length)
+                {
+                    return max;
+                }
+                else
+                {
+                    int mismatches = 0;
+                    if (ignoreN)
+                    {
+                        for (int i = 0; i < seq1.Length; i++)
+                        {
+                            if ((seq1[i] != 'N') && (seq2[i] != 'N'))
+                            {
+                                if (seq1[i] != seq2[i])
+                                {
+                                    mismatches += 1;
+                                }
+                            }
+                            if (mismatches >= max)
+                            {
+                                break;
+                            }
+                        }
+                        return mismatches;
+                    }
+                    else
+                    {
+                        for (int i = 0; i < seq1.Length; i++)
+                        {
+                            if (seq1[i] != seq2[i])
+                            {
+                                mismatches += 1;
+                            }
+                            if (mismatches >= max)
+                            {
+                                break;
+                            }
+                        }
+                        return mismatches;
+                    }
+                }
+            }
         }
+
+        //public static int HammingDistance(string s, string t)
+        //{
+        //    //HammingDistance() from: https://www.csharpstar.com/csharp-string-distance-algorithm/
+        //    if (s.Length != t.Length)
+        //    {
+        //        throw new Exception("Strings must be equal length");
+        //    }
+
+        //    int distance =
+        //        s.ToCharArray()
+        //        .Zip(t.ToCharArray(), (c1, c2) => new { c1, c2 })
+        //        .Count(m => m.c1 != m.c2);
+
+        //    return distance;
+        //}
 
 
         public static int LevenshteinDistance(string s, string t)
         {
+            //LevenshteinDistance() from: https://www.csharpstar.com/csharp-string-distance-algorithm/
             int n = s.Length;
             int m = t.Length;
             int[,] d = new int[n + 1, m + 1];
@@ -130,6 +186,52 @@ namespace BarcodeParser
             }
             // Step 7
             return d[n, m];
+        }
+
+
+        public static (string, int) BestMatchMultiTag(string m, string[] tags, int max = Int32.MaxValue, bool ignoreN = false, bool useHamming = true)
+        {
+            //Combines the best_match and mismatches functions
+            //returns the best matching multitag and the number of mismathces
+            //    m is the sequence to test
+            //    tags is the array of multitags; 
+            //        Note that this method uses an array input instead of a list, since the foreach loop should run slightly faster that way
+            //    max sets the maximum number of mismatches before it moves on.
+            //        Lowering max increases performance.
+            //        If the best match has >= max mismatches, the return value for the best match tag will be an empty string
+            //    IGNORE_N = true will ignore mismatches with N.
+            //    useHamming controls whether the distance metric is Hamming (true) or Levenshtein (false)
+            string bestMatch = "";
+            int leastMismatches = max;
+            int mismatches;
+
+            //first search for exact matach
+            foreach (string t in tags)
+            {
+                if (m.Equals(t))
+                {
+                    return (t, 0);
+                }
+                else
+                {
+                    if (useHamming)
+                    {
+                        mismatches = HammingDistance(m, t, max, ignoreN);
+                    }
+                    else
+                    {
+                        mismatches = LevenshteinDistance(m, t);
+                    }
+                    
+                    if (mismatches < leastMismatches)
+                    {
+                        bestMatch = t;
+                        leastMismatches = mismatches;
+                    }
+                }
+            }
+
+            return (bestMatch, leastMismatches);
         }
 
 
