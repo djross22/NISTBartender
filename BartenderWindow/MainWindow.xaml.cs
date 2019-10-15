@@ -555,7 +555,7 @@ namespace BartenderWindow
             }
 
 
-            //Then add individual tags from ExtraMultiTagText - and add mathcing IDs to mutiTagIDDict
+            //Then add individual tags from ExtraMultiTagText - and add matching IDs to mutiTagIDDict
             if (validExtraTags)
             {
                 string[] extraTagArr = ExtraMultiTagText.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
@@ -565,8 +565,8 @@ namespace BartenderWindow
                     string forTag = splitTag[0];
                     string revTag = splitTag[1];
                     string[] keys = new string[2] { forTag, revTag };
-                    fowardMultiTagList.Add(forTag);
-                    reverseMultiTagList.Add(revTag);
+                    if (!fowardMultiTagList.Contains(forTag)) fowardMultiTagList.Add(forTag);
+                    if (!reverseMultiTagList.Contains(revTag)) reverseMultiTagList.Add(revTag);
 
                     if (splitTag.Length > 2)
                     {
