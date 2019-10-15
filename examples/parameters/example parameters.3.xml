@@ -1,0 +1,25 @@
+<parameters source="NIST Bartender">
+  <ForwardReadSequence>ZZZZZZZZXXXXXXTTAATATGGACTAAAGGAGGCTTTTGTCGACGGATCCGATATCGGTACCNNNNNAANNNNNAANNNNNTTNNNNNATAACTTCGTATAATGTATGCTATACGAAGTTATTGCGCGGTGATCACTTATGGTACCGTTCGTATAATGTGTACTAAACGAACGGTAANNNNNAANNNNNTTNNNNNTTNNNNNGGTACCGATATCAGATCTAAGCTTGAATTCGACTGXXXXXXZZZZZZZZ
+</ForwardReadSequence>
+  <ReverseReadSequence>ZZZZZZZZXXXXXXCAGTCGAATTCAAGCTTAGATCTGATATCGGTACCNNNNNAANNNNNAANNNNNTTNNNNNTTACCGTTCGTTTAGTACACATTATACGAACGGTACCATAAGTGATCACCGCGCAATAACTTCGTATAGCATACATTATACGAAGTTATNNNNNAANNNNNTTNNNNNTTNNNNNGGTACCGATATCGGATCCGTCGACAAAAGCCTCCTTTAGTCCATATTAAXXXXXXZZZZZZZZ
+</ReverseReadSequence>
+  <ReverseGzFastQ>sample_100000_2.fq.gz</ReverseGzFastQ>
+  <ForwardGzFastQ>sample_100000_1.fq.gz</ForwardGzFastQ>
+  <OutputDirectory>C:\Users\djross\Documents\temp\csharp_test</OutputDirectory>
+  <InputDirectory>C:\Users\djross\Documents\temp\csharp_test</InputDirectory>
+  <RevLintagRegexStr>(TACC|.ACC|T.CC|TA.C|TAC.).....AA.....AA.....TT.....(TTAC|.TAC|T.AC|TT.C|TTA.)</RevLintagRegexStr>
+  <ForLintagRegexStr>(TACC|.ACC|T.CC|TA.C|TAC.).....AA.....AA.....TT.....(ATAA|.TAA|A.AA|AT.A|ATA.)</ForLintagRegexStr>
+  <LinTagFlankLengthStr>4</LinTagFlankLengthStr>
+  <MultiFlankLengthStr>4</MultiFlankLengthStr>
+  <ExtraMultiTagText>TTCGGT, GCTTAA, S1
+CGCATA, CACCGA, S2
+</ExtraMultiTagText>
+  <ReverseMultiTagText>
+  </ReverseMultiTagText>
+  <FowardMultiTagText>
+  </FowardMultiTagText>
+  <ReadLengthStr>150</ReadLengthStr>
+  <RevUmiTagLenStr>8</RevUmiTagLenStr>
+  <ForUmiTagLenStr>8</ForUmiTagLenStr>
+  <MinQualityStr>30</MinQualityStr>
+</parameters>
