@@ -5,8 +5,8 @@
 </ReverseReadSequence>
   <ReverseGzFastQ>sample_100000_2.fq.gz</ReverseGzFastQ>
   <ForwardGzFastQ>sample_100000_1.fq.gz</ForwardGzFastQ>
-  <OutputDirectory>C:\Users\djross\source\repos\NISTBartender\examples</OutputDirectory>
-  <InputDirectory>C:\Users\djross\Documents\temp\csharp_version</InputDirectory>
+  <OutputDirectory>C:\Users\djross\source\repos\NISTBartender\examples\output</OutputDirectory>
+  <InputDirectory>C:\Users\djross\source\repos\NISTBartender\examples\input</InputDirectory>
   <RevLintagRegexStr>(ACCG|.CCG|A.CG|AC.G|ACC.)..T...A..T...A..T...T..T...A..T...A..(AGCG|.GCG|A.CG|AG.G|AGC.)</RevLintagRegexStr>
   <ForLintagRegexStr>(GCGT|.CGT|G.GT|GC.T|GCG.)..T...A..T...A..T...A..T...A..T...A..(ATAT|.TAT|A.AT|AT.T|ATA.)</ForLintagRegexStr>
   <LinTagFlankLengthStr>4</LinTagFlankLengthStr>
