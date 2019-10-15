@@ -1048,6 +1048,10 @@ namespace BartenderWindow
                 AddOutputText($"{tag}: Hamming", false);
                 AddOutputText($"{Parser.BestMatchMultiTag(tag, compList.ToArray())}, Levenshtein: ", false);
                 AddOutputText($"{Parser.BestMatchMultiTag(tag, compList.ToArray(), useHamming:false)}.");
+                foreach (string s in compList)
+                {
+                    if (s.Contains(tag)) AddOutputText($"!!Warning: {tag} is a substring of {s}.");
+                }
             }
 
             AddOutputText("");
@@ -1059,7 +1063,12 @@ namespace BartenderWindow
                 AddOutputText($"{tag}: Hamming", false);
                 AddOutputText($"{Parser.BestMatchMultiTag(tag, compList.ToArray())}, Levenshtein: ", false);
                 AddOutputText($"{Parser.BestMatchMultiTag(tag, compList.ToArray(), useHamming:false)}.");
+                foreach (string s in compList)
+                {
+                    if (s.Contains(tag)) AddOutputText($"!!Warning: {tag} is a substring of {s}.");
+                }
             }
+            AddOutputText("");
         }
 
         private void parseButton_Click(object sender, RoutedEventArgs e)
