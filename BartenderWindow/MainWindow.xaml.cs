@@ -1113,42 +1113,15 @@ namespace BartenderWindow
         
         private void autoRegexButton_Click(object sender, RoutedEventArgs e)
         {
-            string regExStr = RegExStrWithOneSnip(forwardLinTagFlankStrs[0]);
+            string regExStr = Parser.RegExStrWithOneSnip(forwardLinTagFlankStrs[0]);
             regExStr += forwardLinTag.Replace('N', '.');
-            regExStr += RegExStrWithOneSnip(forwardLinTagFlankStrs[1]);
+            regExStr += Parser.RegExStrWithOneSnip(forwardLinTagFlankStrs[1]);
             ForLintagRegexStr = regExStr;
 
-            regExStr = RegExStrWithOneSnip(reverseLinTagFlankStrs[0]);
+            regExStr = Parser.RegExStrWithOneSnip(reverseLinTagFlankStrs[0]);
             regExStr += reverseLinTag.Replace('N', '.');
-            regExStr += RegExStrWithOneSnip(reverseLinTagFlankStrs[1]);
+            regExStr += Parser.RegExStrWithOneSnip(reverseLinTagFlankStrs[1]);
             RevLintagRegexStr = regExStr;
-        }
-
-
-        private string RegExStrWithOneSnip(string seq)
-        {
-            string regExStr = $"({seq}|";
-            char[] seqChars = seq.ToCharArray();
-            for (int i=0; i<seqChars.Length; i++)
-            {
-                for (int j=0; j<seqChars.Length; j++)
-                {
-                    if (i==j)
-                    {
-                        regExStr += ".";
-                    }
-                    else
-                    {
-                        regExStr += seqChars[j];
-                    }
-                }
-                regExStr += "|";
-            }
-
-            regExStr = regExStr.Remove(regExStr.Length - 1);
-            regExStr += ")";
-
-            return regExStr;
         }
 
         private void readLengthTextBox_KeyUp(object sender, KeyEventArgs e)
