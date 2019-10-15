@@ -1035,6 +1035,33 @@ namespace BartenderWindow
             ParamsChanged = true;
         }
 
+        private void analyzeMultiButton_Click(object sender, RoutedEventArgs e)
+        {
+            MakeMultiTagLists();
+
+            AddOutputText("");
+            AddOutputText("Nearest neighbor and minimum distances for Forward Multiplex Tags:");
+            foreach (string tag in fowardMultiTagList)
+            {
+                List<string> compList = new List<string>(fowardMultiTagList);
+                compList.Remove(tag);
+                AddOutputText($"{tag}: Hamming", false);
+                AddOutputText($"{Parser.BestMatchMultiTag(tag, compList.ToArray())}, Levenshtein: ", false);
+                AddOutputText($"{Parser.BestMatchMultiTag(tag, compList.ToArray(), useHamming:false)}.");
+            }
+
+            AddOutputText("");
+            AddOutputText("Nearest neighbor and minimum distances for Reverse Multiplex Tags:");
+            foreach (string tag in reverseMultiTagList)
+            {
+                List<string> compList = new List<string>(reverseMultiTagList);
+                compList.Remove(tag);
+                AddOutputText($"{tag}: Hamming", false);
+                AddOutputText($"{Parser.BestMatchMultiTag(tag, compList.ToArray())}, Levenshtein: ", false);
+                AddOutputText($"{Parser.BestMatchMultiTag(tag, compList.ToArray(), useHamming:false)}.");
+            }
+        }
+
         private void parseButton_Click(object sender, RoutedEventArgs e)
         {
             AddOutputText(parser.TestParser());
