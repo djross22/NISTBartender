@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace BarcodeParser
 {
@@ -37,5 +38,19 @@ namespace BarcodeParser
 
             return regExStr;
         }
+
+        public static string RemoveStringWhitespace(string input)
+        {
+            string output = new string(input.ToCharArray()
+                .Where(c => !Char.IsWhiteSpace(c))
+                .ToArray());
+
+            output = output.Replace("\n", "");
+            output = output.Replace("\r", "");
+
+            return output;
+        }
+
+
     }
 }

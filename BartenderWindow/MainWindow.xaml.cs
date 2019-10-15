@@ -656,7 +656,7 @@ namespace BartenderWindow
         static string ReverseComplement(string inputSequence)
         {
             string outputString = inputSequence.TrimEnd('\r', '\n');
-            outputString = RemoveStringWhitespace(outputString);
+            outputString = Parser.RemoveStringWhitespace(outputString);
 
             outputString = outputString.ToLower();
 
@@ -670,18 +670,6 @@ namespace BartenderWindow
             char[] charArray = outputString.ToCharArray();
             Array.Reverse(charArray);
             return new string(charArray);
-        }
-
-        static string RemoveStringWhitespace(string input)
-        {
-            string output = new string(input.ToCharArray()
-                .Where(c => !Char.IsWhiteSpace(c))
-                .ToArray());
-
-            output = output.Replace("\n", "");
-            output = output.Replace("\r", "");
-
-            return output;
         }
 
         private void SaveMenuItem_Click(object sender, RoutedEventArgs e)
@@ -1137,10 +1125,10 @@ namespace BartenderWindow
             TextRange textRange;
 
             textRange = new TextRange(forwardRichTextBox.Document.ContentStart, forwardRichTextBox.Document.ContentEnd);
-            textRange.Text = RemoveStringWhitespace(textRange.Text);
+            textRange.Text = Parser.RemoveStringWhitespace(textRange.Text);
 
             textRange = new TextRange(reverseRichTextBox.Document.ContentStart, reverseRichTextBox.Document.ContentEnd);
-            textRange.Text = RemoveStringWhitespace(textRange.Text);
+            textRange.Text = Parser.RemoveStringWhitespace(textRange.Text);
         }
 
         private void analyzeButton_Click(object sender, RoutedEventArgs e)
@@ -1148,7 +1136,7 @@ namespace BartenderWindow
             //If UMI tag length boxes are empty, auto-polulate them
             //If UMI tag length boxes have values, use those values to add appropriate number of Z's at beginning of each sequence
             TextRange textRange = new TextRange(forwardRichTextBox.Document.ContentStart, forwardRichTextBox.Document.ContentEnd);
-            textRange.Text = RemoveStringWhitespace(textRange.Text);
+            textRange.Text = Parser.RemoveStringWhitespace(textRange.Text);
 
             reverseComplementButton_Click(sender, e);
 
