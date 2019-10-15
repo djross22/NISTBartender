@@ -58,6 +58,10 @@ NISTBartender TODO List:
 
 Add parser (as dll?)
 
+Add multiplex tags analysis tools
+	Near neighbors, within 1 or 2 Hamming Distance
+	Substrings
+
 
 set up log file; in AddOutputText()
 
