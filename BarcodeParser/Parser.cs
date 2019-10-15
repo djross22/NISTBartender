@@ -51,6 +51,25 @@ namespace BarcodeParser
             return output;
         }
 
+        public static string ReverseComplement(string inputSequence)
+        {
+            string outputString = inputSequence.TrimEnd('\r', '\n');
+            outputString = Parser.RemoveStringWhitespace(outputString);
+
+            outputString = outputString.ToLower();
+
+            outputString = outputString.Replace('a', 'T');
+            outputString = outputString.Replace('t', 'A');
+            outputString = outputString.Replace('g', 'C');
+            outputString = outputString.Replace('c', 'G');
+
+            outputString = outputString.ToUpper();
+
+            char[] charArray = outputString.ToCharArray();
+            Array.Reverse(charArray);
+            return new string(charArray);
+        }
+
 
     }
 }

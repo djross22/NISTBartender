@@ -653,25 +653,6 @@ namespace BartenderWindow
             //AddOutputText("");
         }
 
-        static string ReverseComplement(string inputSequence)
-        {
-            string outputString = inputSequence.TrimEnd('\r', '\n');
-            outputString = Parser.RemoveStringWhitespace(outputString);
-
-            outputString = outputString.ToLower();
-
-            outputString = outputString.Replace('a', 'T');
-            outputString = outputString.Replace('t', 'A');
-            outputString = outputString.Replace('g', 'C');
-            outputString = outputString.Replace('c', 'G');
-
-            outputString = outputString.ToUpper();
-
-            char[] charArray = outputString.ToCharArray();
-            Array.Reverse(charArray);
-            return new string(charArray);
-        }
-
         private void SaveMenuItem_Click(object sender, RoutedEventArgs e)
         {
             Save();
@@ -1067,7 +1048,7 @@ namespace BartenderWindow
             textRange.Text = textRange.Text.ToUpper();
             string forwardSequence = textRange.Text;
 
-            string reverseSequence = ReverseComplement(forwardSequence);
+            string reverseSequence = Parser.ReverseComplement(forwardSequence);
 
             textRange = new TextRange(reverseRichTextBox.Document.ContentStart, reverseRichTextBox.Document.ContentEnd);
             textRange.Text = reverseSequence;
