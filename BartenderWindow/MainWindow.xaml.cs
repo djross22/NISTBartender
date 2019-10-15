@@ -1073,7 +1073,20 @@ namespace BartenderWindow
 
         private void parseButton_Click(object sender, RoutedEventArgs e)
         {
-            AddOutputText(parser.TestParser());
+            RunParser();
+
+        }
+
+        private void RunParser()
+        {
+            parser.write_directory = OutputDirectory;
+            parser.read_directory = InputDirectory;
+            parser.f_gzipped_fastqfile = ForwardGzFastQ;
+            parser.r_gzipped_fastqfile = ReverseGzFastQ;
+
+            parser.ParsingThreads = threadsForParsing;
+
+            AddOutputText(parser.RunParser());
         }
 
         private void CopyReverseComplement()
