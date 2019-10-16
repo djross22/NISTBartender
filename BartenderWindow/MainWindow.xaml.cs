@@ -51,13 +51,15 @@ namespace BartenderWindow
         private string forwardLinTag, reverseLinTag;
         private string forwardLinTagLengthStr, reverseLinTagLengthStr;
         private int forwardLinTagLength, reverseLinTagLength;
+        private string spacerInsRateStr, spacerDelRateStr;
+        private double spacerInsRate, spacerDelRate;
         private string forLintagRegexStr, revLintagRegexStr;
         private string[] forwardLinTagFlankStrs = new string[2];
         private string[] reverseLinTagFlankStrs = new string[2];
 
         //Parameters for Auto-RegEx
-        private string delRateStr, insRateStr;
-        private double delRate, insRate;
+        private string regexDelRateStr, regexInsRateStr;
+        private double regexDelRate, regexInsRate;
         private bool ignoreSingleConst;
 
         private string forwardMultiFlankStr, reverseMultiFlankStr;
@@ -88,6 +90,28 @@ namespace BartenderWindow
 
         #region Properties Getters and Setters
 
+        public string SpacerDelRateStr
+        {
+            get { return this.spacerDelRateStr; }
+            set
+            {
+                this.spacerDelRateStr = value;
+                OnPropertyChanged("SpacerDelRateStr");
+                double.TryParse(spacerDelRateStr, out spacerDelRate);
+            }
+        }
+
+        public string SpacerInsRateStr
+        {
+            get { return this.spacerInsRateStr; }
+            set
+            {
+                this.spacerInsRateStr = value;
+                OnPropertyChanged("SpacerInsRateStr");
+                double.TryParse(spacerInsRateStr, out spacerInsRate);
+            }
+        }
+
         public bool IgnoreSingleConst
         {
             get { return this.ignoreSingleConst; }
@@ -98,25 +122,25 @@ namespace BartenderWindow
             }
         }
 
-        public string DelRateStr
+        public string RegexDelRateStr
         {
-            get { return this.delRateStr; }
+            get { return this.regexDelRateStr; }
             set
             {
-                this.delRateStr = value;
-                OnPropertyChanged("DelRateStr");
-                double.TryParse(delRateStr, out delRate);
+                this.regexDelRateStr = value;
+                OnPropertyChanged("RegexDelRateStr");
+                double.TryParse(regexDelRateStr, out regexDelRate);
             }
         }
 
-        public string InsRateStr
+        public string RegexInsRateStr
         {
-            get { return this.insRateStr; }
+            get { return this.regexInsRateStr; }
             set
             {
-                this.insRateStr = value;
-                OnPropertyChanged("InsRateStr");
-                double.TryParse(insRateStr, out insRate);
+                this.regexInsRateStr = value;
+                OnPropertyChanged("RegexInsRateStr");
+                double.TryParse(regexInsRateStr, out regexInsRate);
             }
         }
 
@@ -415,6 +439,12 @@ namespace BartenderWindow
             LinTagFlankLengthStr = "4";
             MultiFlankLengthStr = "4";
 
+            RegexDelRateStr = "20";
+            RegexInsRateStr = "40";
+
+            SpacerDelRateStr = "5";
+            SpacerInsRateStr = "5";
+
             //FowardMultiTagText = "AGCTAGCTAG, A\n";
             //FowardMultiTagText += "CAATGCCTAG, B\n";
             //ReverseMultiTagText = "TAATGCCGTG, 1\n";
@@ -462,9 +492,12 @@ namespace BartenderWindow
             inputControlsList.Add(linTagFlankLengthTextBox);
             inputControlsList.Add(minQualityTextBox);
 
-            inputControlsList.Add(delRateTextBox);
-            inputControlsList.Add(insRateTextBox);
+            inputControlsList.Add(regexDelRateTextBox);
+            inputControlsList.Add(regexInsRateTextBox);
             inputControlsList.Add(ignoreSingleConstCheckBox);
+
+            inputControlsList.Add(spacerDelRateTextBox);
+            inputControlsList.Add(spacerInsRateTextBox);
         }
 
         private void CreateParamsList()
@@ -487,9 +520,13 @@ namespace BartenderWindow
             paramsList.Add("RevUmiTagLenStr");
             paramsList.Add("ForUmiTagLenStr");
             paramsList.Add("MinQualityStr");
+
             paramsList.Add("IgnoreSingleConst");
-            paramsList.Add("DelRateStr");
-            paramsList.Add("InsRateStr");
+            paramsList.Add("RegexDelRateStr");
+            paramsList.Add("RegexInsRateStr");
+
+            paramsList.Add("SpacerDelRateStr");
+            paramsList.Add("SpacerInsRateStr");
             //paramsList.Add("");
         }
 

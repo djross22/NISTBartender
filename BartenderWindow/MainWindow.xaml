@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BartenderWindow"
         mc:Ignorable="d"
-        Title="{Binding DisplayTitle}" Height="600" Width="900" Background="{DynamicResource PurpleBackgroundBrush}" MinWidth="900" MinHeight="600" Closing="Window_Closing">
+        Title="{Binding DisplayTitle}" Height="600" Width="1000" Background="{DynamicResource PurpleBackgroundBrush}" MinWidth="1000" MinHeight="600" Closing="Window_Closing">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
@@ -153,6 +153,7 @@
                         <ColumnDefinition Width="195"/>
                         <ColumnDefinition Width="1*"/>
                     </Grid.ColumnDefinitions>
+                    <Border BorderThickness="1" BorderBrush="White" Grid.Column="2" Grid.Row="1" Grid.ColumnSpan="2" Grid.RowSpan="2" Margin="14,0,0,0"/>
                     <TextBlock HorizontalAlignment="Left" Text="Multiplex Tag Flanking Length:" VerticalAlignment="Center" Foreground="White" ToolTip="Length of sequence after multiplexing tags used for sequence matching" Grid.Row="1" Margin="10,0,0,0" Height="15" Width="161"/>
                     <TextBox x:Name="multiFlankLengthTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="30" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="175,0,0,0" Grid.Row="1">
                         <TextBox.Text>
@@ -174,11 +175,11 @@
                         </TextBox.Text>
                     </TextBox>
                     <TextBlock HorizontalAlignment="Left" Text="Auto RegEx Settings:" VerticalAlignment="Center" Foreground="White"  Grid.Row="1" Margin="24,0,0,0" Grid.Column="2" Height="15"/>
-                    <CheckBox x:Name="ignoreSingleConstCheckBox" Content="Ingore single constants" Grid.Column="3" HorizontalAlignment="Left" Margin="10,0,0,0" Grid.Row="1" VerticalAlignment="Center" Foreground="White" ToolTip="Treat single constant bases as N's for auto-RegEx" IsChecked="{Binding IgnoreSingleConst}"/>
+                    <CheckBox x:Name="ignoreSingleConstCheckBox" Content="Ignore single constants" Grid.Column="3" HorizontalAlignment="Left" Margin="10,0,0,0" Grid.Row="1" VerticalAlignment="Center" Foreground="White" ToolTip="Treat single constant bases as N's for Auto-RegEx" IsChecked="{Binding IgnoreSingleConst}"/>
                     <TextBlock HorizontalAlignment="Center" Text="Deletion Rate (%):" VerticalAlignment="Center" Foreground="White"  Grid.Row="2" Grid.Column="2" Height="15" ToolTip="Allowance for shorter repeated N's"/>
-                    <TextBox x:Name="delRateTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="30" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="144,0,0,0" Grid.Row="2" Grid.Column="2">
+                    <TextBox x:Name="regexDelRateTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="30" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="144,0,0,0" Grid.Row="2" Grid.Column="2">
                         <TextBox.Text>
-                            <Binding Path="DelRateStr" UpdateSourceTrigger="PropertyChanged">
+                            <Binding Path="RegexDelRateStr" UpdateSourceTrigger="PropertyChanged">
                                 <Binding.ValidationRules>
                                     <local:RegexValidationRule RegexText = "^[0-9]{1,2}$" ErrorMessage="Deletion rate must be an integer etween 0 and 99." ValidationOptions="None"/>
                                 </Binding.ValidationRules>
@@ -186,19 +187,15 @@
                         </TextBox.Text>
                     </TextBox>
                     <TextBlock HorizontalAlignment="Left" Text="Insertion Rate (%):" VerticalAlignment="Center" Foreground="White"  Grid.Row="2" Margin="13,0,0,0" Grid.Column="3" Height="15" ToolTip="Allowance for longer repeated N's"/>
-                    <TextBox x:Name="insRateTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="30" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="115,0,0,0" Grid.Row="2" Grid.Column="3">
+                    <TextBox x:Name="regexInsRateTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="30" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="115,0,0,0" Grid.Row="2" Grid.Column="3">
                         <TextBox.Text>
-                            <Binding Path="InsRateStr" UpdateSourceTrigger="PropertyChanged">
+                            <Binding Path="RegexInsRateStr" UpdateSourceTrigger="PropertyChanged">
                                 <Binding.ValidationRules>
                                     <local:RegexValidationRule RegexText = "^[0-9]{1,2}$" ErrorMessage="Insertion rate must be an integer etween 0 and 99." ValidationOptions="None"/>
                                 </Binding.ValidationRules>
                             </Binding>
                         </TextBox.Text>
                     </TextBox>
-                    <TextBlock HorizontalAlignment="Left" Text="Forward Spacer Length:" VerticalAlignment="Center" Foreground="White" ToolTip="Length of constant sequence between multiplexing tags and lineage tags on forward reads" Grid.Row="5" Margin="4,0,0,0" Height="15" Width="124"/>
-                    <TextBox HorizontalAlignment="Left" Margin="133,0,0,0" Grid.Row="5" VerticalAlignment="Center" Text="{Binding ForwardSpacerLengthStr, Mode=TwoWay}" AcceptsReturn="False" IsReadOnly="True" Background="{DynamicResource ReadOnlyBackground}" Height="20" Width="30" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="{DynamicResource ReadOnlyForeground}"/>
-                    <TextBlock HorizontalAlignment="Left" Text="Reverse Spacer Length:" VerticalAlignment="Center" Foreground="White" ToolTip="Length of constant sequence between multiplexing tags and lineage tags on forward reads" Grid.Row="5" Margin="190,0,0,0" Height="15" Width="122" Grid.ColumnSpan="3"/>
-                    <TextBox HorizontalAlignment="Left" Margin="316,0,0,0" Grid.Row="5" VerticalAlignment="Center" Text="{Binding ReverseSpacerLengthStr, Mode=TwoWay}" AcceptsReturn="False" IsReadOnly="True" Background="{DynamicResource ReadOnlyBackground}" Height="20" Width="30" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="{DynamicResource ReadOnlyForeground}" Grid.ColumnSpan="3"/>
                     <TextBlock HorizontalAlignment="Left" Text="Forward Lin-Tag Length:" VerticalAlignment="Center" Foreground="White" ToolTip="Length of lineage tags on forward reads" Grid.Row="4" Margin="10,0,0,0" Grid.Column="2" Height="15" Width="124"/>
                     <TextBox HorizontalAlignment="Left" Margin="139,0,0,0" Grid.Row="4" VerticalAlignment="Center" Text="{Binding ForwardLinTagLengthStr, Mode=TwoWay}" AcceptsReturn="False" IsReadOnly="True" Background="{DynamicResource ReadOnlyBackground}" Height="20" Width="30" Grid.Column="2" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="{DynamicResource ReadOnlyForeground}"/>
                     <TextBlock HorizontalAlignment="Left" Text="Reverse Lin-Tag Length:" VerticalAlignment="Center" Foreground="White" ToolTip="Length of lineage tags on reverse reads" Grid.Row="4" Margin="10,0,0,0" Grid.Column="3" Height="15" Width="124"/>
@@ -213,7 +210,30 @@
                             </Binding>
                         </TextBox.Text>
                     </TextBox>
-                    <Border BorderThickness="1" BorderBrush="White" Grid.Column="2" Grid.Row="1" Grid.ColumnSpan="2" Grid.RowSpan="2" Margin="14,0,0,0"/>
+                    <TextBlock HorizontalAlignment="Left" Text="Forward Spacer Length:" VerticalAlignment="Center" Foreground="White" ToolTip="Length of constant sequence between multiplexing tags and lineage tags on forward reads" Grid.Row="5" Margin="4,0,0,0" Height="15" Width="124"/>
+                    <TextBox HorizontalAlignment="Left" Margin="133,0,0,0" Grid.Row="5" VerticalAlignment="Center" Text="{Binding ForwardSpacerLengthStr, Mode=TwoWay}" AcceptsReturn="False" IsReadOnly="True" Background="{DynamicResource ReadOnlyBackground}" Height="20" Width="30" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="{DynamicResource ReadOnlyForeground}"/>
+                    <TextBlock HorizontalAlignment="Left" Text="Reverse Spacer Length:" VerticalAlignment="Center" Foreground="White" ToolTip="Length of constant sequence between multiplexing tags and lineage tags on forward reads" Grid.Row="5" Margin="180,0,0,0" Height="15" Width="122" Grid.ColumnSpan="3"/>
+                    <TextBox HorizontalAlignment="Left" Margin="306,0,0,0" Grid.Row="5" VerticalAlignment="Center" Text="{Binding ReverseSpacerLengthStr, Mode=TwoWay}" AcceptsReturn="False" IsReadOnly="True" Background="{DynamicResource ReadOnlyBackground}" Height="20" Width="30" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="{DynamicResource ReadOnlyForeground}" Grid.ColumnSpan="3"/>
+                    <TextBlock HorizontalAlignment="Left" Text="Spacer Del Rate (%):" VerticalAlignment="Center" Foreground="White" ToolTip="Allowance for possible deletions in spacer sequences" Grid.Row="5" Margin="360,0,0,0" Height="15" Grid.ColumnSpan="4"/>
+                    <TextBox x:Name="spacerDelRateTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="30" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="470,0,0,0" Grid.Row="5" Grid.ColumnSpan="4">
+                        <TextBox.Text>
+                            <Binding Path="SpacerDelRateStr" UpdateSourceTrigger="PropertyChanged">
+                                <Binding.ValidationRules>
+                                    <local:RegexValidationRule RegexText = "^[0-9]{1,2}$" ErrorMessage="Deletion rate must be an integer etween 0 and 99." ValidationOptions="None"/>
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </TextBox.Text>
+                    </TextBox>
+                    <TextBlock HorizontalAlignment="Left" Text="Spacer Ins Rate (%):" VerticalAlignment="Center" Foreground="White" ToolTip="Allowance for possible insertions in spacer sequences" Grid.Row="5" Margin="515,0,0,0" Height="15" Grid.ColumnSpan="5"/>
+                    <TextBox x:Name="spacerInsRateTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="30" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="625,0,0,0" Grid.Row="5" Grid.ColumnSpan="5">
+                        <TextBox.Text>
+                            <Binding Path="SpacerInsRateStr" UpdateSourceTrigger="PropertyChanged">
+                                <Binding.ValidationRules>
+                                    <local:RegexValidationRule RegexText = "^[0-9]{1,2}$" ErrorMessage="Insertion rate must be an integer etween 0 and 99." ValidationOptions="None"/>
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </TextBox.Text>
+                    </TextBox>
                 </Grid>
             </Grid>
 
