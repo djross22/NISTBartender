@@ -11,6 +11,7 @@ namespace BarcodeParser
 {
     public class Parser
     {
+        IDisplaysOutputText outputReceiver;
         public string write_directory { get; set; } //directory where files are read and saved
         public string read_directory { get; set; } //directory where files are read and saved
 
@@ -65,8 +66,10 @@ namespace BarcodeParser
         static List<string> short_f_list;
         static List<string> long_f_list;
 
-        public Parser()
+        public Parser(IDisplaysOutputText receiver)
         {
+            outputReceiver = receiver;
+
             forwardLinTagRegex = new Regex(lintag_grep_filter1, RegexOptions.Compiled);
             reverseLinTagRegex = new Regex(lintag_grep_filter2, RegexOptions.Compiled);
 
@@ -79,13 +82,23 @@ namespace BarcodeParser
             long_f_list = new List<string>();
         }
 
-        public string RunParser()
+        private void SendOutputText(string text, bool newLine = true)
+        {
+            outputReceiver.DisplayOutput(text, newLine);
+        }
+
+        private void SendOutputText()
+        {
+            SendOutputText("");
+        }
+
+        public void RunParser()
         {
             foreach (string i in multitags)
             {
-                Console.Write($"{i}, ");
+                SendOutputText($"{i}, ", false);
             }
-            Console.WriteLine();
+            SendOutputText();
 
             //timer to test speed
             Stopwatch stopwatch = Stopwatch.StartNew(); //creates and start the instance of Stopwatch
@@ -118,7 +131,7 @@ namespace BarcodeParser
                 f_tag_arr = f_tag_list.ToArray();
                 //foreach (string f_t in f_tag_list)
                 //{
-                //    Console.WriteLine(f_t);
+                //    SendOutputText(f_t);
                 //}
             }
 
@@ -225,23 +238,23 @@ namespace BarcodeParser
                 //checks that the quality scores of forward and reverse lintags are OK
                 //foreach (int i in Quality(f_qual.Substring(f_boundries_to_use[3], f_lintag_length)))
                 //{
-                //    Console.Write($"{i}, ");
+                //    SendOutputText($"{i}, ", false);
                 //}
-                //Console.WriteLine();
+                //SendOutputText();
                 //foreach (int i in Quality(r_qual.Substring(r_boundries[3], r_lintag_length)))
                 //{
-                //    Console.Write($"{i}, ");
+                //    SendOutputText($"{i}, ", false);
                 //}
-                //Console.WriteLine();
+                //SendOutputText();
 
 
                 if ((MeanQuality(f_qual.Substring(f_boundries_to_use[3], f_lintag_length)) > min_qs) && (MeanQuality(r_qual.Substring(r_boundries[3], r_lintag_length)) > min_qs))
                 {
                     quality_readsAdd = 1;
 
-                    //Console.WriteLine($"{forwardLinTagRegex.IsMatch(f_seq.Substring(f_boundries_to_use[3], f_lintag_length))}");
-                    //Console.WriteLine($"{reverseLinTagRegex.IsMatch(r_seq.Substring(r_boundries[3], r_lintag_length))}");
-                    //Console.WriteLine();
+                    //SendOutputText($"{forwardLinTagRegex.IsMatch(f_seq.Substring(f_boundries_to_use[3], f_lintag_length))}");
+                    //SendOutputText($"{reverseLinTagRegex.IsMatch(r_seq.Substring(r_boundries[3], r_lintag_length))}");
+                    //SendOutputText();
                     //Console.ReadLine();
 
 
@@ -261,11 +274,11 @@ namespace BarcodeParser
                             {
                                 if (!use_short_tag)
                                 {
-                                    Console.WriteLine($"long forward tag, {combinedMultiTag}, matched to short tag sequence, {best}");
+                                    SendOutputText($"long forward tag, {combinedMultiTag}, matched to short tag sequence, {best}");
                                 }
                                 else
                                 {
-                                    //Console.WriteLine($"short forward tag, {combinedMultiTag}, matched to long tag sequence, {best}");
+                                    //SendOutputText($"short forward tag, {combinedMultiTag}, matched to long tag sequence, {best}");
                                 }
                             }
                         }
@@ -283,8 +296,8 @@ namespace BarcodeParser
                             r_tag = r_tag.Substring(rstart, rend - rstart);
                         }
 
-                        //Console.WriteLine($"{num_mis}");
-                        //Console.WriteLine();
+                        //SendOutputText($"{num_mis}");
+                        //SendOutputText();
                         //Console.ReadLine();
                         max_multitag_mismatch_2 = (total_multitag_length + 1) / 4;
 
@@ -351,10 +364,10 @@ namespace BarcodeParser
 
 
             //Summary output messages
-            Console.WriteLine($"{quality_reads} out of {total_reads} reads passed quality filters");
-            Console.WriteLine($"{grep_failures} out of {total_reads} did not match the barcode pattern");
-            Console.WriteLine($"{grep_matching_quality_reads} out of {total_reads} reads passed grep and quality filters");
-            Console.WriteLine($"{passing_reads_that_dont_match_a_multitag} out of {total_reads} reads passed grep and quality filters but did not match a multitag");
+            SendOutputText($"{quality_reads} out of {total_reads} reads passed quality filters");
+            SendOutputText($"{grep_failures} out of {total_reads} did not match the barcode pattern");
+            SendOutputText($"{grep_matching_quality_reads} out of {total_reads} reads passed grep and quality filters");
+            SendOutputText($"{passing_reads_that_dont_match_a_multitag} out of {total_reads} reads passed grep and quality filters but did not match a multitag");
 
             //Close output files
             foreach (string tag in multitags)
@@ -370,9 +383,7 @@ namespace BarcodeParser
             unmatched_multitag.Close();
 
             stopwatch.Stop();
-            Console.WriteLine($"time {stopwatch.ElapsedMilliseconds}");
-
-            return $"Done. Time: {stopwatch.ElapsedMilliseconds}";
+            SendOutputText($"time {stopwatch.ElapsedMilliseconds}");
         }
 
         public static string RegExStrWithOneSnip(string seq)
@@ -431,7 +442,6 @@ namespace BarcodeParser
             Array.Reverse(charArray);
             return new string(charArray);
         }
-
 
         public static int HammingDistance(string seq1, string seq2, int max = Int32.MaxValue, bool ignoreN = false)
         {
@@ -503,7 +513,6 @@ namespace BarcodeParser
         //    return distance;
         //}
 
-
         public static int LevenshteinDistance(string s, string t)
         {
             //LevenshteinDistance() from: https://www.csharpstar.com/csharp-string-distance-algorithm/
@@ -549,7 +558,6 @@ namespace BarcodeParser
             // Step 7
             return d[n, m];
         }
-
 
         public static (string, int) BestMatchMultiTag(string m, string[] tags, int max = Int32.MaxValue, bool ignoreN = false, bool useHamming = true)
         {

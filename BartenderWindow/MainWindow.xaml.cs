@@ -25,7 +25,7 @@ namespace BartenderWindow
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window, INotifyPropertyChanged
+    public partial class MainWindow : Window, INotifyPropertyChanged, IDisplaysOutputText
     {
         //Property change notification event required for INotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
@@ -342,7 +342,7 @@ namespace BartenderWindow
         {
             InitializeComponent();
 
-            parser = new Parser();
+            parser = new Parser(this);
 
             DataContext = this;
 
@@ -939,6 +939,14 @@ namespace BartenderWindow
             //        File.AppendAllText(logFilePath, txt);
             //    }
             //}
+        }
+
+        public void DisplayOutput(string text, bool newLine = true)
+        {
+            //this has to be delegated becasue it interacts with the GUI by sending text to the outputTextBox
+            this.Dispatcher.Invoke(() => {
+                AddOutputText(text, newLine);
+            });
         }
 
         private void inputDirMenuItme_Click(object sender, RoutedEventArgs e)
