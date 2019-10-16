@@ -1002,7 +1002,7 @@ namespace BartenderWindow
             if (propInfo != null && paramNode != null)
             {
                 string value = paramNode.InnerText;
-                propInfo.SetValue(this, (value=="True"));
+                propInfo.SetValue(this, (value=="True" || value=="true"));
             }
         }
 
