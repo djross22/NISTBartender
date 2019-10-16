@@ -64,7 +64,8 @@ namespace BartenderWindow
 
         private string forwardMultiFlankStr, reverseMultiFlankStr;
         private string multiFlankLengthStr, linTagFlankLengthStr, forwardSpacerLengthStr, reverseSpacerLengthStr;
-        private int multiFlankLength, linTagFlankLength, forwardSpacerLength, reverseSpacerLength;
+        private int multiFlankLength, linTagFlankLength; 
+        private int[] forwardSpacerLength, reverseSpacerLength;
 
         private string fowardMultiTagText, reverseMultiTagText, extraMultiTagText;
         private List<string> fowardMultiTagList, reverseMultiTagList;
@@ -255,6 +256,7 @@ namespace BartenderWindow
             {
                 this.reverseLinTagLengthStr = value;
                 OnPropertyChanged("ReverseLinTagLengthStr");
+                //reverseLinTagLength = LengthRangeStringToArray(reverseLinTagLengthStr);
                 int.TryParse(reverseLinTagLengthStr, out reverseLinTagLength);
             }
         }
@@ -266,6 +268,7 @@ namespace BartenderWindow
             {
                 this.forwardLinTagLengthStr = value;
                 OnPropertyChanged("ForwardLinTagLengthStr");
+                //forwardLinTagLength = LengthRangeStringToArray(forwardLinTagLengthStr);
                 int.TryParse(forwardLinTagLengthStr, out forwardLinTagLength);
             }
         }
@@ -277,7 +280,8 @@ namespace BartenderWindow
             {
                 this.reverseSpacerLengthStr = value;
                 OnPropertyChanged("ReverseSpacerLengthStr");
-                int.TryParse(reverseSpacerLengthStr, out reverseSpacerLength);
+                reverseSpacerLength = LengthRangeStringToArray(reverseSpacerLengthStr);
+                //int.TryParse(reverseSpacerLengthStr, out reverseSpacerLength);
             }
         }
 
@@ -288,7 +292,8 @@ namespace BartenderWindow
             {
                 this.forwardSpacerLengthStr = value;
                 OnPropertyChanged("ForwardSpacerLengthStr");
-                int.TryParse(forwardSpacerLengthStr, out forwardSpacerLength);
+                forwardSpacerLength = LengthRangeStringToArray(forwardSpacerLengthStr);
+                //int.TryParse(forwardSpacerLengthStr, out forwardSpacerLength);
             }
         }
 
@@ -529,6 +534,18 @@ namespace BartenderWindow
             paramsList.Add("SpacerDelRateStr");
             paramsList.Add("SpacerInsRateStr");
             //paramsList.Add("");
+        }
+
+        private int[] LengthRangeStringToArray(string range)
+        {
+            string[] split = range.Split('-', StringSplitOptions.RemoveEmptyEntries);
+            int[] lenArr = new int[split.Length];
+            for (int i=0; i<split.Length; i++)
+            {
+                int.TryParse(split[i], out lenArr[i]);
+            }
+
+            return lenArr;
         }
 
         private void UpdateTitle()
@@ -1714,14 +1731,25 @@ namespace BartenderWindow
                 //AddOutputText($"multiMatch: {multiMatch}");
                 int firstNonX = multiMatch.Length;
 
+                int spacerLength = tagStart - firstNonX;
+                double dMin = spacerLength * (1 - spacerDelRate / 100.0);
+                int minLength = (int)Math.Round(dMin);
+                double dMax = spacerLength * (1 + spacerInsRate / 100.0);
+                int maxLength = (int)Math.Round(dMax);
+
+                string spacerStr = "";
+                if (minLength != spacerLength) spacerStr += $"{minLength}-";
+                spacerStr += $"{spacerLength}";
+                if (maxLength != spacerLength) spacerStr += $"-{maxLength}";
+
                 if (Object.ReferenceEquals(rtb, forwardRichTextBox))
                 {
-                    ForwardSpacerLengthStr = $"{tagStart - firstNonX}";
+                    ForwardSpacerLengthStr = spacerStr;
                     //AddOutputText($"forwardSpacerLength: {forwardSpacerLength}");
                 }
                 if (Object.ReferenceEquals(rtb, reverseRichTextBox))
                 {
-                    ReverseSpacerLengthStr = $"{tagStart - firstNonX}";
+                    ReverseSpacerLengthStr = spacerStr;
                     //AddOutputText($"reverseSpacerLength: {reverseSpacerLength}");
                 }
             }
