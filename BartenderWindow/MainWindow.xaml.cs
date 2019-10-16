@@ -55,6 +55,11 @@ namespace BartenderWindow
         private string[] forwardLinTagFlankStrs = new string[2];
         private string[] reverseLinTagFlankStrs = new string[2];
 
+        //Parameters for Auto-RegEx
+        private string delRateStr, insRateStr;
+        private double delRate, insRate;
+        private bool ignoreSingleConst;
+
         private string forwardMultiFlankStr, reverseMultiFlankStr;
         private string multiFlankLengthStr, linTagFlankLengthStr, forwardSpacerLengthStr, reverseSpacerLengthStr;
         private int multiFlankLength, linTagFlankLength, forwardSpacerLength, reverseSpacerLength;
@@ -82,6 +87,38 @@ namespace BartenderWindow
         private List<Control> inputControlsList;
 
         #region Properties Getters and Setters
+
+        public bool IgnoreSingleConst
+        {
+            get { return this.ignoreSingleConst; }
+            set
+            {
+                this.ignoreSingleConst = value;
+                OnPropertyChanged("IgnoreSingleConst");
+            }
+        }
+
+        public string DelRateStr
+        {
+            get { return this.delRateStr; }
+            set
+            {
+                this.delRateStr = value;
+                OnPropertyChanged("DelRateStr");
+                double.TryParse(delRateStr, out delRate);
+            }
+        }
+
+        public string InsRateStr
+        {
+            get { return this.insRateStr; }
+            set
+            {
+                this.insRateStr = value;
+                OnPropertyChanged("InsRateStr");
+                double.TryParse(insRateStr, out insRate);
+            }
+        }
 
         public string MinQualityStr
         {
@@ -424,6 +461,10 @@ namespace BartenderWindow
             inputControlsList.Add(multiFlankLengthTextBox);
             inputControlsList.Add(linTagFlankLengthTextBox);
             inputControlsList.Add(minQualityTextBox);
+
+            inputControlsList.Add(delRateTextBox);
+            inputControlsList.Add(insRateTextBox);
+            inputControlsList.Add(ignoreSingleConstCheckBox);
         }
 
         private void CreateParamsList()
@@ -446,6 +487,9 @@ namespace BartenderWindow
             paramsList.Add("RevUmiTagLenStr");
             paramsList.Add("ForUmiTagLenStr");
             paramsList.Add("MinQualityStr");
+            paramsList.Add("IgnoreSingleConst");
+            paramsList.Add("DelRateStr");
+            paramsList.Add("InsRateStr");
             //paramsList.Add("");
         }
 
