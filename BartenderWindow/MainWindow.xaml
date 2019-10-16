@@ -142,14 +142,16 @@
                         <RowDefinition Height="5"/>
                         <RowDefinition Height="25"/>
                         <RowDefinition Height="25"/>
-                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="5"/>
                         <RowDefinition Height="25"/>
-                        <RowDefinition Height="25"/>
+                        <RowDefinition Height="30"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="218*"/>
-                        <ColumnDefinition Width="187*"/>
-                        <ColumnDefinition Width="195*"/>
+                        <ColumnDefinition Width="218"/>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="186"/>
+                        <ColumnDefinition Width="195"/>
+                        <ColumnDefinition Width="1*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock HorizontalAlignment="Left" Text="Multiplex Tag Flanking Length:" VerticalAlignment="Center" Foreground="White" ToolTip="Length of sequence after multiplexing tags used for sequence matching" Grid.Row="1" Margin="10,0,0,0" Height="15" Width="161"/>
                     <TextBox x:Name="multiFlankLengthTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="30" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="175,0,0,0" Grid.Row="1">
@@ -171,10 +173,10 @@
                             </Binding>
                         </TextBox.Text>
                     </TextBox>
-                    <TextBlock HorizontalAlignment="Left" Text="Auto RegEx Settings:" VerticalAlignment="Center" Foreground="White"  Grid.Row="1" Margin="30,0,0,0" Grid.Column="1" Height="15"/>
-                    <CheckBox x:Name="ignoreSingleConstCheckBox" Content="Ingore single constants" Grid.Column="2" HorizontalAlignment="Left" Margin="10,0,2,0" Grid.Row="1" VerticalAlignment="Center" Foreground="White" ToolTip="Treat single constant bases as N's for auto-RegEx" IsChecked="{Binding IgnoreSingleConst}"/>
-                    <TextBlock HorizontalAlignment="Left" Text="Deletion Rate (%):" VerticalAlignment="Center" Foreground="White"  Grid.Row="2" Margin="50,0,0,0" Grid.Column="1" Height="15" ToolTip="Allowance for shorter repeated N's" Grid.ColumnSpan="2"/>
-                    <TextBox x:Name="delRateTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="30" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="150,0,0,0" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2">
+                    <TextBlock HorizontalAlignment="Left" Text="Auto RegEx Settings:" VerticalAlignment="Center" Foreground="White"  Grid.Row="1" Margin="24,0,0,0" Grid.Column="2" Height="15"/>
+                    <CheckBox x:Name="ignoreSingleConstCheckBox" Content="Ingore single constants" Grid.Column="3" HorizontalAlignment="Left" Margin="10,0,0,0" Grid.Row="1" VerticalAlignment="Center" Foreground="White" ToolTip="Treat single constant bases as N's for auto-RegEx" IsChecked="{Binding IgnoreSingleConst}"/>
+                    <TextBlock HorizontalAlignment="Center" Text="Deletion Rate (%):" VerticalAlignment="Center" Foreground="White"  Grid.Row="2" Grid.Column="2" Height="15" ToolTip="Allowance for shorter repeated N's"/>
+                    <TextBox x:Name="delRateTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="30" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="144,0,0,0" Grid.Row="2" Grid.Column="2">
                         <TextBox.Text>
                             <Binding Path="DelRateStr" UpdateSourceTrigger="PropertyChanged">
                                 <Binding.ValidationRules>
@@ -183,8 +185,8 @@
                             </Binding>
                         </TextBox.Text>
                     </TextBox>
-                    <TextBlock HorizontalAlignment="Left" Text="Insertion Rate (%):" VerticalAlignment="Center" Foreground="White"  Grid.Row="2" Margin="200,0,0,0" Grid.Column="1" Height="15" ToolTip="Allowance for longer repeated N's" Grid.ColumnSpan="2"/>
-                    <TextBox x:Name="insRateTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="30" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="302,0,0,0" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2">
+                    <TextBlock HorizontalAlignment="Left" Text="Insertion Rate (%):" VerticalAlignment="Center" Foreground="White"  Grid.Row="2" Margin="13,0,0,0" Grid.Column="3" Height="15" ToolTip="Allowance for longer repeated N's"/>
+                    <TextBox x:Name="insRateTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="30" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="115,0,0,0" Grid.Row="2" Grid.Column="3">
                         <TextBox.Text>
                             <Binding Path="InsRateStr" UpdateSourceTrigger="PropertyChanged">
                                 <Binding.ValidationRules>
@@ -193,14 +195,14 @@
                             </Binding>
                         </TextBox.Text>
                     </TextBox>
-                    <TextBlock HorizontalAlignment="Left" Text="Forward Spacer Length:" VerticalAlignment="Center" Foreground="White" ToolTip="Length of constant sequence between multiplexing tags and lineage tags on forward reads" Grid.Row="4" Margin="10,0,0,0" Grid.Column="1" Height="15" Width="124"/>
-                    <TextBox HorizontalAlignment="Left" Margin="139,0,0,0" Grid.Row="4" VerticalAlignment="Center" Text="{Binding ForwardSpacerLengthStr, Mode=TwoWay}" AcceptsReturn="False" IsReadOnly="True" Background="{DynamicResource ReadOnlyBackground}" Height="20" Width="30" Grid.Column="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="{DynamicResource ReadOnlyForeground}"/>
-                    <TextBlock HorizontalAlignment="Left" Text="Reverse Spacer Length:" VerticalAlignment="Center" Foreground="White" ToolTip="Length of constant sequence between multiplexing tags and lineage tags on forward reads" Grid.Row="5" Margin="10,0,0,0" Grid.Column="1" Height="15" Width="122"/>
-                    <TextBox HorizontalAlignment="Left" Margin="139,0,0,0" Grid.Row="5" VerticalAlignment="Center" Text="{Binding ReverseSpacerLengthStr, Mode=TwoWay}" AcceptsReturn="False" IsReadOnly="True" Background="{DynamicResource ReadOnlyBackground}" Height="20" Width="30" Grid.Column="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="{DynamicResource ReadOnlyForeground}"/>
+                    <TextBlock HorizontalAlignment="Left" Text="Forward Spacer Length:" VerticalAlignment="Center" Foreground="White" ToolTip="Length of constant sequence between multiplexing tags and lineage tags on forward reads" Grid.Row="5" Margin="4,0,0,0" Height="15" Width="124"/>
+                    <TextBox HorizontalAlignment="Left" Margin="133,0,0,0" Grid.Row="5" VerticalAlignment="Center" Text="{Binding ForwardSpacerLengthStr, Mode=TwoWay}" AcceptsReturn="False" IsReadOnly="True" Background="{DynamicResource ReadOnlyBackground}" Height="20" Width="30" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="{DynamicResource ReadOnlyForeground}"/>
+                    <TextBlock HorizontalAlignment="Left" Text="Reverse Spacer Length:" VerticalAlignment="Center" Foreground="White" ToolTip="Length of constant sequence between multiplexing tags and lineage tags on forward reads" Grid.Row="5" Margin="190,0,0,0" Height="15" Width="122" Grid.ColumnSpan="3"/>
+                    <TextBox HorizontalAlignment="Left" Margin="316,0,0,0" Grid.Row="5" VerticalAlignment="Center" Text="{Binding ReverseSpacerLengthStr, Mode=TwoWay}" AcceptsReturn="False" IsReadOnly="True" Background="{DynamicResource ReadOnlyBackground}" Height="20" Width="30" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="{DynamicResource ReadOnlyForeground}" Grid.ColumnSpan="3"/>
                     <TextBlock HorizontalAlignment="Left" Text="Forward Lin-Tag Length:" VerticalAlignment="Center" Foreground="White" ToolTip="Length of lineage tags on forward reads" Grid.Row="4" Margin="10,0,0,0" Grid.Column="2" Height="15" Width="124"/>
                     <TextBox HorizontalAlignment="Left" Margin="139,0,0,0" Grid.Row="4" VerticalAlignment="Center" Text="{Binding ForwardLinTagLengthStr, Mode=TwoWay}" AcceptsReturn="False" IsReadOnly="True" Background="{DynamicResource ReadOnlyBackground}" Height="20" Width="30" Grid.Column="2" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="{DynamicResource ReadOnlyForeground}"/>
-                    <TextBlock HorizontalAlignment="Left" Text="Reverse Lin-Tag Length:" VerticalAlignment="Center" Foreground="White" ToolTip="Length of lineage tags on reverse reads" Grid.Row="5" Margin="10,0,0,0" Grid.Column="2" Height="15" Width="124"/>
-                    <TextBox HorizontalAlignment="Left" Margin="139,0,0,0" Grid.Row="5" VerticalAlignment="Center" Text="{Binding ReverseLinTagLengthStr, Mode=TwoWay}" AcceptsReturn="False" IsReadOnly="True" Background="{DynamicResource ReadOnlyBackground}" Height="20" Width="30" Grid.Column="2" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="{DynamicResource ReadOnlyForeground}"/>
+                    <TextBlock HorizontalAlignment="Left" Text="Reverse Lin-Tag Length:" VerticalAlignment="Center" Foreground="White" ToolTip="Length of lineage tags on reverse reads" Grid.Row="4" Margin="10,0,0,0" Grid.Column="3" Height="15" Width="124"/>
+                    <TextBox HorizontalAlignment="Left" Margin="139,0,0,0" Grid.Row="4" VerticalAlignment="Center" Text="{Binding ReverseLinTagLengthStr, Mode=TwoWay}" AcceptsReturn="False" IsReadOnly="True" Background="{DynamicResource ReadOnlyBackground}" Height="20" Width="30" Grid.Column="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="{DynamicResource ReadOnlyForeground}"/>
                     <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Minimum Quality Score:" VerticalAlignment="Center" Foreground="White" ToolTip="The minimum avareage fastq quality score for acceptance of lineage tags" Grid.Row="4" Height="15"/>
                     <TextBox x:Name="minQualityTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="60" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="145,0,0,0" Grid.Row="4">
                         <TextBox.Text>
@@ -211,6 +213,7 @@
                             </Binding>
                         </TextBox.Text>
                     </TextBox>
+                    <Border BorderThickness="1" BorderBrush="White" Grid.Column="2" Grid.Row="1" Grid.ColumnSpan="2" Grid.RowSpan="2" Margin="14,0,0,0"/>
                 </Grid>
             </Grid>
 
