@@ -70,11 +70,20 @@ Run parser in background thread
 
 Disable GUI controls during parsing
 
+Add controls: Spacer insertion and deletion rate controls
+
+Auto RegEx: replace repeated '.' with '{n, m}?'
+
+Change forward and reverse spacer lengths to range (array with min, nominal, max lengths)
+
 
 --------------------------------------------------------
 NISTBartender TODO List:
 
-Auto RegEx: replace repeated '.' with '{n, m}?'
+Change lin-tag lengths to range (array with min, nominal, max lengths)
+
+Add check that Read Sequence text contains only allowed characters (after ToUpper())
+	ATCGXZN
 
 
 

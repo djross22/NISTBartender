@@ -1370,13 +1370,19 @@ namespace BartenderWindow
         
         private void autoRegexButton_Click(object sender, RoutedEventArgs e)
         {
+            //Automatically generate RegEx's, and also calculate/update length range for Lin-tags 
+
             //Forward Lin-tag RegEx
             string regExStr = Parser.RegExStrWithOneSnip(forwardLinTagFlankStrs[0]);
             string linTag = forwardLinTag;
+            int linTagLen = forwardLinTag.Length;
             //look for single constants and replace with Ns if IgnoreSingleConst
             if (IgnoreSingleConst) {
                 linTag = Regex.Replace(linTag, "(?<=N).(?=N)", "N");
             }
+            //find runs of N's and use them, along with   to calculate the min and max length
+
+
             //find runs of one or more N's and replace them accordingly using CondenseRepeatedNs()
             MatchEvaluator evaluator = new MatchEvaluator(CondenseRepeatedNs);
             linTag = Regex.Replace(linTag, "N+", evaluator);
