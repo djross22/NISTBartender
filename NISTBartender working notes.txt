@@ -64,13 +64,17 @@ Add multiplex tags analysis tools
 
 When making forward and reverse multi-tag lists, avoid adding duplicates from extra multi-tag list
 
+Implement Interface for Parser class to send info/text back to Main Window for display, IDisplaysOutputText
+
+Run parser in background thread
+
+Disable GUI controls during parsing
+
 
 --------------------------------------------------------
 NISTBartender TODO List:
 
-
-
-Add parser (as dll?)
+Auto RegEx: replace repeated '.' with '{n, m}?'
 
 
 

@@ -79,6 +79,8 @@ namespace BartenderWindow
         private double minQuality;
         private Parser parser;
 
+        private List<Control> inputControlsList;
+
         #region Properties Getters and Setters
 
         public string MinQualityStr
@@ -342,6 +344,8 @@ namespace BartenderWindow
         {
             InitializeComponent();
 
+            InitInputControlsList();
+
             parser = new Parser(this);
 
             DataContext = this;
@@ -400,6 +404,26 @@ namespace BartenderWindow
             reverseMultiTagList = new List<string>();
             reverseIdDict = new Dictionary<string, string>();
             mutiTagIdDict = new Dictionary<string[], string>();
+        }
+
+        private void InitInputControlsList()
+        {
+            inputControlsList = new List<Control>();
+            inputControlsList.Add(mainMenu);
+            inputControlsList.Add(mainToolBar);
+            inputControlsList.Add(forwardRichTextBox);
+            inputControlsList.Add(reverseRichTextBox);
+            inputControlsList.Add(readLengthTextBox);
+            inputControlsList.Add(fowardMultiTagTextBox);
+            inputControlsList.Add(reverseMultiTagTextBox);
+            inputControlsList.Add(extraMultiTagTextBox);
+            inputControlsList.Add(forUmiTagLenTextBox);
+            inputControlsList.Add(revUmiTagLenTextBox);
+            inputControlsList.Add(forRegExTextBox);
+            inputControlsList.Add(revRegExTextBox);
+            inputControlsList.Add(multiFlankLengthTextBox);
+            inputControlsList.Add(linTagFlankLengthTextBox);
+            inputControlsList.Add(minQualityTextBox);
         }
 
         private void CreateParamsList()
@@ -1085,9 +1109,26 @@ namespace BartenderWindow
 
         }
 
+        private void DisableInputControls()
+        {
+            foreach (Control cont in inputControlsList)
+            {
+                cont.IsEnabled = false;
+            }
+        }
+
+        private void EnableInputControls()
+        {
+            foreach (Control cont in inputControlsList)
+            {
+                cont.IsEnabled = true;
+            }
+        }
+
         private void RunParser()
         {
             //TODO: Disable GUI controls
+            DisableInputControls();
 
             parser.write_directory = OutputDirectory;
             parser.read_directory = InputDirectory;
@@ -1112,6 +1153,7 @@ namespace BartenderWindow
         void parserWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             //TODO: Re-enable GUI controls
+            EnableInputControls();
         }
 
         private void CopyReverseComplement()
