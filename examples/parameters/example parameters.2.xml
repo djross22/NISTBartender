@@ -7,12 +7,12 @@
   <ForwardGzFastQ>sample_100000_1.fq.gz</ForwardGzFastQ>
   <OutputDirectory>C:\Users\djross\source\repos\NISTBartender\examples\output</OutputDirectory>
   <InputDirectory>C:\Users\djross\source\repos\NISTBartender\examples\input</InputDirectory>
-  <RevLintagRegexStr>(ACCG|.CCG|A.CG|AC.G|ACC.)..T...A..T...A..T...T..T...A..T...A..(AGCG|.GCG|A.CG|AG.G|AGC.)</RevLintagRegexStr>
-  <ForLintagRegexStr>(GCGT|.CGT|G.GT|GC.T|GCG.)..T...A..T...A..T...A..T...A..T...A..(ATAT|.TAT|A.AT|AT.T|ATA.)</ForLintagRegexStr>
+  <RevLintagRegexStr>(ACCG|.CCG|A.CG|AC.G|ACC.).{32,46}(AGCG|.GCG|A.CG|AG.G|AGC.)</RevLintagRegexStr>
+  <ForLintagRegexStr>(GCGT|.CGT|G.GT|GC.T|GCG.).{32,46}(ATAT|.TAT|A.AT|AT.T|ATA.)</ForLintagRegexStr>
   <LinTagFlankLengthStr>4</LinTagFlankLengthStr>
   <MultiFlankLengthStr>4</MultiFlankLengthStr>
   <ExtraMultiTagText>
-</ExtraMultiTagText>
+  </ExtraMultiTagText>
   <ReverseMultiTagText>TAGAGTTGGA, 1
 AGAGCACTAG, 2
 ACTCTACAGG, 3
@@ -39,4 +39,9 @@ TCTAGTCTTC, H
   <RevUmiTagLenStr>8</RevUmiTagLenStr>
   <ForUmiTagLenStr>8</ForUmiTagLenStr>
   <MinQualityStr>30</MinQualityStr>
+  <IgnoreSingleConst>True</IgnoreSingleConst>
+  <RegexDelRateStr>13</RegexDelRateStr>
+  <RegexInsRateStr>25</RegexInsRateStr>
+  <SpacerDelRateStr>5</SpacerDelRateStr>
+  <SpacerInsRateStr>5</SpacerInsRateStr>
 </parameters>

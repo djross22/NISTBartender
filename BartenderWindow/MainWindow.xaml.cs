@@ -1300,16 +1300,86 @@ namespace BartenderWindow
         {
 
         }
+
+        private string CondenseRepeatedNs(Match match)
+        {
+            //The code in this method assumes that the match.Value is a repeated string of N's
+            string matchStr = match.Value;
+            int matchLen = matchStr.Length;
+            if (matchLen == 1)
+            {
+                return ".";
+            }
+            else
+            {
+                double dMin = matchLen * (1 - regexDelRate/100.0);
+                int min = (int)Math.Round(dMin);
+                double dMax = matchLen * (1 + regexInsRate/100.0);
+                int max = (int)Math.Round(dMax);
+
+                if (max == min)
+                {
+                    if (max == matchLen)
+                    {
+                        if (matchLen == 2)
+                        {
+                            return "..";
+                        }
+                        else
+                        {
+                            string ret = ".{";
+                            ret += $"{matchLen}";
+                            ret += "}";
+                            return ret;
+                        }
+                    }
+                    else
+                    {
+                        string msg = "Something weird happened in the auto regex generation, CondenseRepeatedNs() method. ";
+                        msg += $"matching string: \"{matchStr}\"";
+                        MessageBox.Show(msg);
+                        return matchStr;
+                    }
+                }
+                else
+                {
+                    string ret = ".{";
+                    ret += $"{min},{max}";
+                    ret += "}";
+                    return ret;
+                }
+            }
+        }
         
         private void autoRegexButton_Click(object sender, RoutedEventArgs e)
         {
+            //Forward Lin-tag RegEx
             string regExStr = Parser.RegExStrWithOneSnip(forwardLinTagFlankStrs[0]);
-            regExStr += forwardLinTag.Replace('N', '.');
+            string linTag = forwardLinTag;
+            //look for single constants and replace with Ns if IgnoreSingleConst
+            if (IgnoreSingleConst) {
+                linTag = Regex.Replace(linTag, "(?<=N).(?=N)", "N");
+            }
+            //find runs of one or more N's and replace them accordingly using CondenseRepeatedNs()
+            MatchEvaluator evaluator = new MatchEvaluator(CondenseRepeatedNs);
+            linTag = Regex.Replace(linTag, "N+", evaluator);
+            //regExStr += linTag;
+            regExStr += linTag.Replace('N', '.'); //include the Replace() here just in case
             regExStr += Parser.RegExStrWithOneSnip(forwardLinTagFlankStrs[1]);
             ForLintagRegexStr = regExStr;
 
+            //Reverse Lin-tag RegEx
             regExStr = Parser.RegExStrWithOneSnip(reverseLinTagFlankStrs[0]);
-            regExStr += reverseLinTag.Replace('N', '.');
+            linTag = reverseLinTag;
+            //look for single constants and replace with Ns if IgnoreSingleConst
+            if (IgnoreSingleConst)
+            {
+                linTag = Regex.Replace(linTag, "(?<=N).(?=N)", "N");
+            }
+            //find runs of one or more N's and replace them accordingly using CondenseRepeatedNs()
+            linTag = Regex.Replace(linTag, "N+", evaluator);
+            //regExStr += linTag;
+            regExStr += linTag.Replace('N', '.'); //include the Replace() here just in case
             regExStr += Parser.RegExStrWithOneSnip(reverseLinTagFlankStrs[1]);
             RevLintagRegexStr = regExStr;
         }
