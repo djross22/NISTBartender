@@ -1087,6 +1087,8 @@ namespace BartenderWindow
 
         private void RunParser()
         {
+            //TODO: Disable GUI controls
+
             parser.write_directory = OutputDirectory;
             parser.read_directory = InputDirectory;
             parser.f_gzipped_fastqfile = ForwardGzFastQ;
@@ -1094,7 +1096,22 @@ namespace BartenderWindow
 
             parser.ParsingThreads = threadsForParsing;
 
-            AddOutputText(parser.RunParser());
+            BackgroundWorker parserWorker = new BackgroundWorker();
+            parserWorker.WorkerReportsProgress = false;
+            parserWorker.DoWork += parserWorker_DoWork;
+            parserWorker.RunWorkerCompleted += parserWorker_RunWorkerCompleted;
+
+            parserWorker.RunWorkerAsync();
+        }
+
+        void parserWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            parser.RunParser();
+        }
+
+        void parserWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            //TODO: Re-enable GUI controls
         }
 
         private void CopyReverseComplement()
