@@ -398,6 +398,7 @@ namespace BartenderWindow
                 {
                     ParamsChanged = true;
                 }
+                if (name == "IgnoreSingleConst") ParamsChanged = true;
             }
         }
 
@@ -521,7 +522,7 @@ namespace BartenderWindow
             paramsList.Add("ForUmiTagLenStr");
             paramsList.Add("MinQualityStr");
 
-            paramsList.Add("IgnoreSingleConst");
+            //paramsList.Add("IgnoreSingleConst"); this is a bool Property so nas to be dealt with separately
             paramsList.Add("RegexDelRateStr");
             paramsList.Add("RegexInsRateStr");
 
@@ -852,9 +853,10 @@ namespace BartenderWindow
             rootNode.AppendChild(paramNode);
 
             //add all the parameters values to the XML document
+            PropertyInfo propInfo;
             foreach (string param in paramsList)
             {
-                PropertyInfo propInfo = this.GetType().GetProperty(param);
+                propInfo = this.GetType().GetProperty(param);
                 if (propInfo != null)
                 {
                     value = $"{propInfo.GetValue(this)}";
@@ -864,6 +866,17 @@ namespace BartenderWindow
                 }
                 
             }
+            //handle bool Property as special case
+            string boolParam = "IgnoreSingleConst";
+            propInfo = this.GetType().GetProperty(boolParam);
+            if (propInfo != null)
+            {
+                value = $"{propInfo.GetValue(this)}";
+                paramNode = xmlDoc.CreateElement(boolParam);
+                paramNode.InnerText = value;
+                rootNode.AppendChild(paramNode);
+            }
+
         }
 
         private void ExitMenuItem_Click(object sender, RoutedEventArgs e)
@@ -968,10 +981,11 @@ namespace BartenderWindow
             textRange.Text = paramNode.InnerText;
 
             //Read all the paramsList parameter values from the XML document
+            PropertyInfo propInfo;
             foreach (string param in paramsList)
             {
                 paramNode = rootNode.SelectSingleNode($"descendant::{param}");
-                PropertyInfo propInfo = this.GetType().GetProperty(param);
+                propInfo = this.GetType().GetProperty(param);
 
                 if (propInfo != null && paramNode != null)
                 {
@@ -979,6 +993,16 @@ namespace BartenderWindow
                     propInfo.SetValue(this, value);
                 }
 
+            }
+            //handle bool Property as special case
+            string boolParam = "IgnoreSingleConst";
+            paramNode = rootNode.SelectSingleNode($"descendant::{boolParam}");
+            propInfo = this.GetType().GetProperty(boolParam);
+
+            if (propInfo != null && paramNode != null)
+            {
+                string value = paramNode.InnerText;
+                propInfo.SetValue(this, (value=="True"));
             }
         }
 
