@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BartenderWindow"
         mc:Ignorable="d"
-        Title="{Binding DisplayTitle}" Height="600" Width="1000" Background="{DynamicResource PurpleBackgroundBrush}" MinWidth="1000" MinHeight="600" Closing="Window_Closing">
+        Title="{Binding DisplayTitle}" Height="600" Width="1090" Background="{DynamicResource PurpleBackgroundBrush}" MinWidth="1090" MinHeight="600" Closing="Window_Closing">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
@@ -211,11 +211,11 @@
                         </TextBox.Text>
                     </TextBox>
                     <TextBlock HorizontalAlignment="Left" Text="Forward Spacer Length:" VerticalAlignment="Center" Foreground="White" ToolTip="Length of constant sequence between multiplexing tags and lineage tags on forward reads" Grid.Row="5" Margin="4,0,0,0" Height="15" Width="124"/>
-                    <TextBox HorizontalAlignment="Left" Margin="133,0,0,0" Grid.Row="5" VerticalAlignment="Center" Text="{Binding ForwardSpacerLengthStr, Mode=TwoWay}" AcceptsReturn="False" IsReadOnly="True" Background="{DynamicResource ReadOnlyBackground}" Height="20" Width="30" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="{DynamicResource ReadOnlyForeground}"/>
-                    <TextBlock HorizontalAlignment="Left" Text="Reverse Spacer Length:" VerticalAlignment="Center" Foreground="White" ToolTip="Length of constant sequence between multiplexing tags and lineage tags on forward reads" Grid.Row="5" Margin="180,0,0,0" Height="15" Width="122" Grid.ColumnSpan="3"/>
-                    <TextBox HorizontalAlignment="Left" Margin="306,0,0,0" Grid.Row="5" VerticalAlignment="Center" Text="{Binding ReverseSpacerLengthStr, Mode=TwoWay}" AcceptsReturn="False" IsReadOnly="True" Background="{DynamicResource ReadOnlyBackground}" Height="20" Width="30" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="{DynamicResource ReadOnlyForeground}" Grid.ColumnSpan="3"/>
-                    <TextBlock HorizontalAlignment="Left" Text="Spacer Del Rate (%):" VerticalAlignment="Center" Foreground="White" ToolTip="Allowance for possible deletions in spacer sequences" Grid.Row="5" Margin="360,0,0,0" Height="15" Grid.ColumnSpan="4"/>
-                    <TextBox x:Name="spacerDelRateTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="30" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="470,0,0,0" Grid.Row="5" Grid.ColumnSpan="4">
+                    <TextBox HorizontalAlignment="Left" Margin="133,0,0,0" Grid.Row="5" VerticalAlignment="Center" Text="{Binding ForwardSpacerLengthStr, Mode=TwoWay}" AcceptsReturn="False" IsReadOnly="True" Background="{DynamicResource ReadOnlyBackground}" Height="20" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="{DynamicResource ReadOnlyForeground}"/>
+                    <TextBlock HorizontalAlignment="Left" Text="Reverse Spacer Length:" VerticalAlignment="Center" Foreground="White" ToolTip="Length of constant sequence between multiplexing tags and lineage tags on forward reads" Grid.Row="5" Margin="210,0,0,0" Height="15" Width="122" Grid.ColumnSpan="3"/>
+                    <TextBox HorizontalAlignment="Left" Margin="336,0,0,0" Grid.Row="5" VerticalAlignment="Center" Text="{Binding ReverseSpacerLengthStr, Mode=TwoWay}" AcceptsReturn="False" IsReadOnly="True" Background="{DynamicResource ReadOnlyBackground}" Height="20" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="{DynamicResource ReadOnlyForeground}" Grid.ColumnSpan="3"/>
+                    <TextBlock HorizontalAlignment="Left" Text="Spacer Del Rate (%):" VerticalAlignment="Center" Foreground="White" ToolTip="Allowance for possible deletions in spacer sequences" Grid.Row="5" Margin="420,0,0,0" Height="15" Grid.ColumnSpan="4"/>
+                    <TextBox x:Name="spacerDelRateTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="30" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="530,0,0,0" Grid.Row="5" Grid.ColumnSpan="4">
                         <TextBox.Text>
                             <Binding Path="SpacerDelRateStr" UpdateSourceTrigger="PropertyChanged">
                                 <Binding.ValidationRules>
@@ -224,8 +224,8 @@
                             </Binding>
                         </TextBox.Text>
                     </TextBox>
-                    <TextBlock HorizontalAlignment="Left" Text="Spacer Ins Rate (%):" VerticalAlignment="Center" Foreground="White" ToolTip="Allowance for possible insertions in spacer sequences" Grid.Row="5" Margin="515,0,0,0" Height="15" Grid.ColumnSpan="5"/>
-                    <TextBox x:Name="spacerInsRateTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="30" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="625,0,0,0" Grid.Row="5" Grid.ColumnSpan="5">
+                    <TextBlock HorizontalAlignment="Left" Text="Spacer Ins Rate (%):" VerticalAlignment="Center" Foreground="White" ToolTip="Allowance for possible insertions in spacer sequences" Grid.Row="5" Margin="575,0,0,0" Height="15" Grid.ColumnSpan="5"/>
+                    <TextBox x:Name="spacerInsRateTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="30" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="685,0,0,0" Grid.Row="5" Grid.ColumnSpan="5">
                         <TextBox.Text>
                             <Binding Path="SpacerInsRateStr" UpdateSourceTrigger="PropertyChanged">
                                 <Binding.ValidationRules>
