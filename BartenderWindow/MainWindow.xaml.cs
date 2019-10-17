@@ -59,8 +59,8 @@ namespace BartenderWindow
         private int[] forMultiTagLen, revMultiTagLen;
         //Multi-tag flank sequences
         private string forwardMultiFlankStr, reverseMultiFlankStr;
-        private string multiFlankLengthStr, linTagFlankLengthStr;
-        private int multiFlankLength, linTagFlankLength;
+        private string multiFlankLengthStr;
+        private int multiFlankLength;
 
         //Spacer lengths
         private string forwardSpacerLengthStr, reverseSpacerLengthStr;
@@ -76,6 +76,8 @@ namespace BartenderWindow
         //Lin-tag flanking sequences
         private string[] forwardLinTagFlankStrs = new string[2];
         private string[] reverseLinTagFlankStrs = new string[2];
+        private string linTagFlankLengthStr;
+        private int linTagFlankLength;
 
         //Parameters for Auto-RegEx
         private string regexDelRateStr, regexInsRateStr;
