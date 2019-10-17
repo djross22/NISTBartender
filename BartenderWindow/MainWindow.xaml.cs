@@ -56,6 +56,7 @@ namespace BartenderWindow
         private List<string> fowardMultiTagList, reverseMultiTagList;
         private Dictionary<string, string> fowardIdDict, reverseIdDict;
         private Dictionary<string[], string> mutiTagIdDict;
+        private int[] forMultiTagLen, revMultiTagLen;
         //Multi-tag flank sequences
         private string forwardMultiFlankStr, reverseMultiFlankStr;
         private string multiFlankLengthStr, linTagFlankLengthStr;
@@ -1206,6 +1207,8 @@ namespace BartenderWindow
 
             AddOutputText("");
             AddOutputText("Nearest neighbor and minimum distances for Forward Multiplex Tags:");
+            int minLength = int.MaxValue;
+            int maxLength = 0;
             foreach (string tag in fowardMultiTagList)
             {
                 List<string> compList = new List<string>(fowardMultiTagList);
@@ -1217,10 +1220,17 @@ namespace BartenderWindow
                 {
                     if (s.Contains(tag)) AddOutputText($"!!Warning: {tag} is a substring of {s}.");
                 }
+                if (tag.Length < minLength) minLength = tag.Length;
+                if (tag.Length > maxLength) maxLength = tag.Length;
             }
+            //Set forMultiTagLen[]
+            if (minLength == maxLength) forMultiTagLen = new int[1] { minLength };
+            else forMultiTagLen = new int[2] { minLength, maxLength };
 
             AddOutputText("");
             AddOutputText("Nearest neighbor and minimum distances for Reverse Multiplex Tags:");
+            minLength = int.MaxValue;
+            maxLength = 0;
             foreach (string tag in reverseMultiTagList)
             {
                 List<string> compList = new List<string>(reverseMultiTagList);
@@ -1232,7 +1242,12 @@ namespace BartenderWindow
                 {
                     if (s.Contains(tag)) AddOutputText($"!!Warning: {tag} is a substring of {s}.");
                 }
+                if (tag.Length < minLength) minLength = tag.Length;
+                if (tag.Length > maxLength) maxLength = tag.Length;
             }
+            //Set forMultiTagLen[]
+            if (minLength == maxLength) revMultiTagLen = new int[1] { minLength };
+            else revMultiTagLen = new int[2] { minLength, maxLength };
             AddOutputText("");
         }
 
