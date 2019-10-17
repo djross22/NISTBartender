@@ -18,6 +18,9 @@ namespace BarcodeParser
         public string f_gzipped_fastqfile { get; set; } //The forward reads, gzipped fastq file
         public string r_gzipped_fastqfile { get; set; } //The reverse reads, gzipped fastq file
 
+        public List<string> FowardMultiTagList { get; set; } //List of forward multiplexing tags
+        public List<string> ReverseMultiTagList { get; set; } //List of reverse multiplexing tags
+
         //lock for multi-thread file reading
         private static readonly Object file_lock = new Object();
 
@@ -94,14 +97,22 @@ namespace BarcodeParser
 
         public void ParseDoubleBarcodes()
         {
-            foreach (string i in multitags)
+            DateTime startTime = DateTime.Now;
+            SendOutputText();
+            SendOutputText("*********************************************");
+            SendOutputText("Running Parser for Double Barcodes.");
+            SendOutputText($"Parser started: {startTime}.");
+            SendOutputText("    Forward Multiplexing Tags:");
+            foreach (string i in FowardMultiTagList)
             {
-                SendOutputText($"{i}, ", false);
+                SendOutputText($"        {i}, ");
+            }
+            SendOutputText("    Reverse Multiplexing Tags:");
+            foreach (string i in ReverseMultiTagList)
+            {
+                SendOutputText($"        {i}, ");
             }
             SendOutputText();
-
-            //timer to test speed
-            Stopwatch stopwatch = Stopwatch.StartNew(); //creates and start the instance of Stopwatch
             
             //Set up boundaries to use for detecting barcodes
             int[] f_boundries = new int[5] {0, f_seqtag_length ,
@@ -382,8 +393,13 @@ namespace BarcodeParser
             unmatched_lintag2.Close();
             unmatched_multitag.Close();
 
-            stopwatch.Stop();
-            SendOutputText($"time {stopwatch.ElapsedMilliseconds}");
+
+            DateTime endTime = DateTime.Now;
+            SendOutputText();
+            SendOutputText($"Parser finished: {endTime}.");
+            SendOutputText($"Elapsed time: {endTime - startTime}.");
+            SendOutputText("*********************************************");
+            SendOutputText();
         }
 
         public static string RegExStrWithOneSnip(string seq)

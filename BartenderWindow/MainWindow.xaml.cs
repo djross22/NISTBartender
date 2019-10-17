@@ -1256,6 +1256,9 @@ namespace BartenderWindow
             parser.f_gzipped_fastqfile = ForwardGzFastQ;
             parser.r_gzipped_fastqfile = ReverseGzFastQ;
 
+            parser.FowardMultiTagList = fowardMultiTagList;
+            parser.ReverseMultiTagList = reverseMultiTagList;
+
             parser.ParsingThreads = threadsForParsing;
 
             BackgroundWorker parserWorker = new BackgroundWorker();
