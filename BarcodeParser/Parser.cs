@@ -131,6 +131,12 @@ namespace BarcodeParser
             //   reads that don't sort to a multiplexing tag or don't match the lineage tag RegEx, this file for debugging 
             TextWriter unmatchedWriter = TextWriter.Synchronized(new StreamWriter($"unmatched_sequences.txt"));
 
+            //Maximum useful sequence read length based on input settings
+            int maxForSeqLength = forUmiTagLen.Last() + forMultiTagLen.Last() + forSpacerLength.Last() + forLinTagLength.Last() + linTagFlankLength;
+
+            //Minimum length of sequence before Lineage tag flanking sequence
+            int minPreLinFlankLength = forUmiTagLen.First() + forMultiTagLen.First() + forSpacerLength.First() - linTagFlankLength;
+
             // Keep track of how many reads pass each check
             int quality_reads = 0;
             int total_reads = 0;
