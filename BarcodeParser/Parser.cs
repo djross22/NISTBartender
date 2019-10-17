@@ -33,6 +33,8 @@ namespace BarcodeParser
         public int multiFlankLength; //length of flanking regions around multi-tags
         public int linTagFlankLength; //length of flanking regions around lineage tags
 
+        private Dictionary<string[], string> mutiTagIdDict;  //Dictionary for sample IDs, keys are from forward multi-tag and reverse multi-tag
+
         //lock for multi-thread file reading
         private static readonly Object file_lock = new Object();
 
@@ -43,13 +45,15 @@ namespace BarcodeParser
         static double min_qs = 30; //the minimum avareage quality score for both lineage tags
 
 
+        //Consider changing the way these are used/defined
+
+
         static string lintag_grep_filter1 = @"(.ACC|T.CC|TA.C|TAC.).{4,7}?AA.{4,7}?TT.{4,7}?TT.{4,7}?(.TAA|A.AA|AT.A|ATA.)"; //first barcode
         static string lintag_grep_filter2 = @"(.ACC|T.CC|TA.C|TAC.).{4,7}?AA.{4,7}?AA.{4,7}?TT.{4,7}?(.TAC|T.AC|TT.C|TTA.)"; //second barcode
         Regex forwardLinTagRegex;
         Regex reverseLinTagRegex;
 
 
-        //Consider changing the way these are used/defined
         static int f_seqtag_length = 8; //the length of the sequencing tag on the first read (UMI1)
         static int r_seqtag_length = 8; //the length of the sequencing tag on the second read (UMI2)
 
@@ -87,6 +91,7 @@ namespace BarcodeParser
 
             forMultiTagRegexDict = new Dictionary<string, Regex>();
             revMultiTagRegexDict = new Dictionary<string, Regex>();
+            mutiTagIdDict = new Dictionary<string[], string>();
 
             forwardLinTagRegex = new Regex(lintag_grep_filter1, RegexOptions.Compiled);
             reverseLinTagRegex = new Regex(lintag_grep_filter2, RegexOptions.Compiled);
@@ -118,14 +123,14 @@ namespace BarcodeParser
             SendOutputText("Running Parser for Double Barcodes.");
             SendOutputText($"Parser started: {startTime}.");
             SendOutputText("    Forward Multiplexing Tags:");
-            foreach (string i in forMultiTagList)
+            foreach (string tag in forMultiTagList)
             {
-                SendOutputText($"        {i}, ");
+                SendOutputText($"        {tag}, ");
             }
             SendOutputText("    Reverse Multiplexing Tags:");
-            foreach (string i in revMultiTagList)
+            foreach (string tag in revMultiTagList)
             {
-                SendOutputText($"        {i}, ");
+                SendOutputText($"        {tag}, ");
             }
             SendOutputText();
             
@@ -133,6 +138,7 @@ namespace BarcodeParser
             //  lineage tags for reads that sort to a multiplexing tag, these files are for input into clustering method
             TextWriter forwardWriter = TextWriter.Synchronized(new StreamWriter($"forward_lintags.txt"));
             TextWriter reverseWriter = TextWriter.Synchronized(new StreamWriter($"reverse_lintags.txt"));
+
             //  actual multi-plexing tag sequencess for reads that sort to a multiplexing tag, this files is for debugging
             TextWriter multiTagWriter = TextWriter.Synchronized(new StreamWriter($"multiplexing_tags.txt"));
             //   reads that don't sort to a multiplexing tag or don't match the lineage tag RegEx, this file for debugging 
@@ -145,6 +151,10 @@ namespace BarcodeParser
             //Minimum length of sequence before Lineage tag flanking sequence
             int minForPreLinFlankLength = forUmiTagLen.First() + forMultiTagLen.First() + forSpacerLength.First() - linTagFlankLength;
             int minRevPreLinFlankLength = revUmiTagLen.First() + revMultiTagLen.First() + revSpacerLength.First() - linTagFlankLength;
+
+            //lengths to use for recording UMI tags (max of range)
+            int forUmiTagLenUse = forUmiTagLen.Last();
+            int revUmiTagLenUse = revUmiTagLen.Last(); 
 
             //Regex lists for detecting multi-tags
             foreach (string tag in forMultiTagList)
@@ -173,7 +183,7 @@ namespace BarcodeParser
 
 
 
-            /*
+            
 
             // Keep track of how many reads pass each check
             int quality_reads = 0;
@@ -194,65 +204,98 @@ namespace BarcodeParser
                 string counter = stringArr[4];
 
                 int quality_readsAdd = 0;
-                
-                //string f_line, r_line;
-                string f_seq, f_qual, f_tag;
-                string r_seq, r_qual, r_tag;
-                string best;
-                int num_mis;
-                int fstart, rstart;
-                int fend, rend;
 
-                string combinedMultiTag; //concatintated multiplexing tag
+                string forRead = stringArr[0];
+                string revRead = stringArr[1];
+                string forQaul = stringArr[2];
+                string revQual = stringArr[3];
 
-                bool use_short_tag = false;
-                string f_tag_seq, f_tag_best;
-                int f_tag_mismatches;
-                f_seq = stringArr[0];
-                r_seq = stringArr[1];
-                f_qual = stringArr[2];
-                r_qual = stringArr[3];
+                bool forMatchFound = false;
+                bool revMatchFound = false;
+                bool validSampleFound = false;
+                string forMultiMatch = ""; //matching seqeunces from list of nominal multi-tags
+                string revMultiMatch = ""; //matching seqeunces from list of nominal multi-tags
+                string forMultiActual, revMultiActual; //actual sequence matching tag
+                string forUmi, revUmi; //UMI tag sequences
+                string sampleId; //Identifier for sample (forward x reverse multi-tag pairs)
 
 
-                //first check whether the forward multitag is a short multitag or a regular length multitag
-                if (f_multitag_short > 0)
+                //To make things run faster, work with just the substring of length maxForSeqLength/maxRevSeqLength
+                string forSeq = forRead.Substring(0, maxForSeqLength);
+                string revSeq = revRead.Substring(0, maxRevSeqLength);
+
+                forUmi = forSeq.Substring(0, forUmiTagLenUse);
+                revUmi = revSeq.Substring(0, revUmiTagLenUse);
+
+                //Find Match to multi-tag
+                foreach (string tag in forMultiTagList)
                 {
-                    f_tag_seq = f_seq.Substring(f_boundries[1], f_multitag_length);
-                    //set max: 3 in the next line so that if there are >= 3 mismatches, f_tag_best will be returned as ""
-                    //(f_tag_best, f_tag_mismatches) = MatchMultiTag(f_tag_seq, f_tag_arr, max: 3, ignoreN: true);
-                    (f_tag_best, f_tag_mismatches) = BestMatchMultiTag(f_tag_seq, f_tag_arr, ignoreN: true);
-                    if (f_tag_best != "")
+                    Match match = forMultiTagRegexDict[tag].Match(forRead);
+                    forMatchFound = match.Success;
+                    if (forMatchFound)
                     {
-                        use_short_tag = (f_tag_best[f_tag_best.Length - 1] == 'N');
+                        forMultiMatch = tag;
+                        string matchStr = match.Value;
+                        forMultiActual = matchStr.Substring(matchStr.Length - multiFlankLength - tag.Length, tag.Length);
+                        
+                        break;
                     }
                 }
-
-                if (use_short_tag)
+                //TODO: code to allow for 2-base-pair missmatches (or greater)
+                //Procede if a multi-tag match was found;
+                if (forMatchFound)
                 {
-                    f_boundries_to_use = f_boundries_short;
-                    f_multitag_length_to_use = f_multitag_short;
-                    total_multitag_length = f_multitag_short + r_multitag_length;
+                    foreach (string tag in revMultiTagList)
+                    {
+
+                        Match match = revMultiTagRegexDict[tag].Match(revRead);
+                        revMatchFound = match.Success;
+                        if (revMatchFound)
+                        {
+                            revMultiMatch = tag;
+                            string matchStr = match.Value;
+                            revMultiActual = matchStr.Substring(matchStr.Length - multiFlankLength - tag.Length, tag.Length);
+                            
+                            break;
+                        }
+                    }
+                    //TODO: code to allow for 2-base-pair missmatches (or greater)
+                    //Procede if a multi-tag match was found;
+                    if (revMatchFound)
+                    {
+                        //Look up sample ID, if there is a match, procede
+                        string[] keys = new string[2] { forMultiMatch, revMultiMatch };
+                        validSampleFound = mutiTagIdDict.TryGetValue(keys, out sampleId);
+                        if (validSampleFound)
+                        {
+                            sampleId += $"_{forUmi}_{revUmi}";
+
+                            //Check mean quality score for lin-tag pattern
+
+                            //if quality good, find match to lin-tag pattern
+
+                            //For counters, if revMatchFound==true that means a multi-tag match was found; 
+                            //    validSampleFound indicates that a valid sample match was found
+                        }
+                        else
+                        {
+                            sampleId = $"unexpected_{forUmi}_{revUmi}";
+                            //TODO: handle unexpected multi-tag pair 
+                        }
+                        
+                    }
+                    else
+                    {
+                        //TODO: failed to find a multi-tag match
+                    }
                 }
                 else
                 {
-                    f_boundries_to_use = f_boundries;
-                    f_multitag_length_to_use = f_multitag_length;
-                    total_multitag_length = f_multitag_length + r_multitag_length;
+                    //TODO: failed to find a multi-tag match
                 }
 
-                max_multitag_mismatch = (total_multitag_length + 1) / 3;
 
-                //checks that the quality scores of forward and reverse lintags are OK
-                //foreach (int i in Quality(f_qual.Substring(f_boundries_to_use[3], f_lintag_length)))
-                //{
-                //    SendOutputText($"{i}, ", false);
-                //}
-                //SendOutputText();
-                //foreach (int i in Quality(r_qual.Substring(r_boundries[3], r_lintag_length)))
-                //{
-                //    SendOutputText($"{i}, ", false);
-                //}
-                //SendOutputText();
+                /*
 
 
                 if ((MeanQuality(f_qual.Substring(f_boundries_to_use[3], f_lintag_length)) > min_qs) && (MeanQuality(r_qual.Substring(r_boundries[3], r_lintag_length)) > min_qs))
@@ -351,22 +394,10 @@ namespace BarcodeParser
                     //}
                 }
 
-                //test write
-                //lin_tag_1_files[multitags[0]].Write($"{f_seq}\n");
-                //lin_tag_2_files[multitags[0]].Write($"{r_seq}\n");
-                //lin_tag_1_files[multitags[0]].Write($"{f_qual}\n");
-                //lin_tag_2_files[multitags[0]].Write($"{r_qual}\n");
-                //lin_tag_1_files[multitags[0]].Write($"\n");
-                //lin_tag_2_files[multitags[0]].Write($"\n");
 
-                //counter++;
-                //if (num_reads > 0)
-                //{
-                //    //if (counter > num_reads - 1)
-                //    //{
-                //    //    break;
-                //    //}
-                //}
+                */
+
+
             });
 
 
@@ -377,17 +408,10 @@ namespace BarcodeParser
             SendOutputText($"{passing_reads_that_dont_match_a_multitag} out of {total_reads} reads passed grep and quality filters but did not match a multitag");
 
             //Close output files
-            foreach (string tag in multitags)
-            {
-                seq_tag_files[tag].Close();
-                lin_tag_1_files[tag].Close();
-                lin_tag_2_files[tag].Close();
-                multi_tag_files[tag].Close();
-            }
-            unmatched_seqtag.Close();
-            unmatched_lintag1.Close();
-            unmatched_lintag2.Close();
-            unmatched_multitag.Close();
+            forwardWriter.Close();
+            reverseWriter.Close();
+            multiTagWriter.Close();
+            unmatchedWriter.Close();
 
 
             DateTime endTime = DateTime.Now;
@@ -396,11 +420,18 @@ namespace BarcodeParser
             SendOutputText($"Elapsed time: {endTime - startTime}.");
             SendOutputText("*********************************************");
             SendOutputText();
+
+
+            
         }
 
-        public static string RegExStrWithOneSnip(string seq)
+        public static string RegExStrWithOneSnip(string seq, bool includePerfectMatch = true)
         {
-            string regExStr = $"({seq}|";
+            string regExStr;
+
+            if (includePerfectMatch) regExStr = $"({seq}|";
+            else regExStr = "(";
+
             char[] seqChars = seq.ToCharArray();
             for (int i = 0; i < seqChars.Length; i++)
             {

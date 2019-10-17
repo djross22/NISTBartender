@@ -76,11 +76,14 @@ Auto RegEx: replace repeated '.' with '{n, m}?'
 
 Change forward and reverse spacer lengths to range (array with min, nominal, max lengths)
 
+Change lin-tag lengths to range (array with min, nominal, max lengths), autoRegexButton_Click() method
+	Add AnalyzeSequences() at beginning of autoRegexButton_Click() method 
+
 
 --------------------------------------------------------
 NISTBartender TODO List:
 
-Change lin-tag lengths to range (array with min, nominal, max lengths)
+checking for multi-tag match: TODO: code to allow for 2-base-pair missmatches (or greater)
 
 Add check that Read Sequence text contains only allowed characters (after ToUpper())
 	ATCGXZN

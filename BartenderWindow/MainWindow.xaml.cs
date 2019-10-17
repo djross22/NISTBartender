@@ -55,7 +55,7 @@ namespace BartenderWindow
         private string fowardMultiTagText, reverseMultiTagText, extraMultiTagText;
         private List<string> forwardMultiTagList, reverseMultiTagList;
         private Dictionary<string, string> fowardIdDict, reverseIdDict;
-        private Dictionary<string[], string> mutiTagIdDict;
+        private Dictionary<string[], string> mutiTagIdDict; //Dictionary for sample IDs, keys are from forward multi-tag and reverse multi-tag
         private int[] forMultiTagLen, revMultiTagLen;
         //Multi-tag flank sequences
         private string forwardMultiFlankStr, reverseMultiFlankStr;
@@ -656,6 +656,7 @@ namespace BartenderWindow
                     forwardMultiTagList.Add(splitTag[0]);
                     if (splitTag.Length > 1)
                     {
+                        //key is sequence of multi-tag; value is sampleID (if given)
                         fowardIdDict[splitTag[0]] = splitTag[1];
                     }
                     else
@@ -670,6 +671,7 @@ namespace BartenderWindow
                     reverseMultiTagList.Add(splitTag[0]);
                     if (splitTag.Length > 1)
                     {
+                        //key is sequence of multi-tag; value is sampleID (if given)
                         reverseIdDict[splitTag[0]] = splitTag[1];
                     }
                     else
@@ -1287,8 +1289,8 @@ namespace BartenderWindow
             parser.forUmiTagLen = forUmiTagLen;
             parser.revUmiTagLen = revUmiTagLen;
 
-            parser.ForMultiTagList = forwardMultiTagList;
-            parser.RevMultiTagList = reverseMultiTagList;
+            parser.forMultiTagList = forwardMultiTagList;
+            parser.revMultiTagList = reverseMultiTagList;
             parser.forMultiTagLen = forMultiTagLen;
             parser.revMultiTagLen = revMultiTagLen;
 
@@ -1297,6 +1299,9 @@ namespace BartenderWindow
 
             parser.forLinTagLength = forwardLinTagLength;
             parser.revLinTagLength = reverseLinTagLength;
+
+            parser.forMultiFlankStr = forwardMultiFlankStr;
+            parser.revMultiFlankStr = reverseMultiFlankStr;
 
 
 
@@ -1312,7 +1317,17 @@ namespace BartenderWindow
 
         void parserWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            parser.ParseDoubleBarcodes();
+            try
+            {
+                parser.ParseDoubleBarcodes();
+            }
+            catch (Exception ex)
+            {
+                //this has to be delegated becasue it interacts with the GUI by sending text to the outputTextBox
+                this.Dispatcher.Invoke(() => {
+                    AddOutputText($"Excpetion in Parser.ParseDoubleBarcodes(): {ex})");
+                });
+            }
         }
 
         void parserWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
