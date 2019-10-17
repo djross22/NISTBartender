@@ -12,14 +12,13 @@ namespace BarcodeParser
     public class Parser
     {
         IDisplaysOutputText outputReceiver;
-        public string write_directory { get; set; } //directory where files are read and saved
-        public string read_directory { get; set; } //directory where files are read and saved
+        public string write_directory; //directory where files are read and saved
+        public string read_directory; //directory where files are read and saved
 
-        public string f_gzipped_fastqfile { get; set; } //The forward reads, gzipped fastq file
-        public string r_gzipped_fastqfile { get; set; } //The reverse reads, gzipped fastq file
+        public string f_gzipped_fastqfile; //The forward reads, gzipped fastq file
+        public string r_gzipped_fastqfile; //The reverse reads, gzipped fastq file
 
-        public List<string> ForMultiTagList { get; set; } //List of forward multiplexing tags
-        public List<string> RevMultiTagList { get; set; } //List of reverse multiplexing tags
+        public List<string> forMultiTagList; //List of forward multiplexing tags
 
         //Length arrays
         public int[] forUmiTagLen, revUmiTagLen; //range of possible UMI tag lengths
@@ -111,12 +110,12 @@ namespace BarcodeParser
             SendOutputText("Running Parser for Double Barcodes.");
             SendOutputText($"Parser started: {startTime}.");
             SendOutputText("    Forward Multiplexing Tags:");
-            foreach (string i in ForMultiTagList)
+            foreach (string i in forMultiTagList)
             {
                 SendOutputText($"        {i}, ");
             }
             SendOutputText("    Reverse Multiplexing Tags:");
-            foreach (string i in RevMultiTagList)
+            foreach (string i in revMultiTagList)
             {
                 SendOutputText($"        {i}, ");
             }
