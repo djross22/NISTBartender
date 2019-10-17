@@ -19,8 +19,13 @@ namespace BarcodeParser
         public string r_gzipped_fastqfile; //The reverse reads, gzipped fastq file
 
         public List<string> forMultiTagList; //List of forward multiplexing tags
+        private Dictionary<string, Regex> forMultiTagRegexDict; //Dictionary of Regex's for detecting forward multi-tags, keys are multi-tag sequences
 
-        //Length arrays
+        public List<string> revMultiTagList; //List of reverse multiplexing tags
+        private Dictionary<string, Regex> revMultiTagRegexDict; //Dictionary of Regex's for detecting reverse multi-tags, keys are multi-tag sequences
+
+        public string forMultiFlankStr, revMultiFlankStr; //string for flanking sequence after multi-tags
+
         public int[] forUmiTagLen, revUmiTagLen; //range of possible UMI tag lengths
         public int[] forMultiTagLen, revMultiTagLen; //range of possible Multi-tag lengths
         public int[] forSpacerLength, revSpacerLength; //range of possible spacer lengths
@@ -80,6 +85,9 @@ namespace BarcodeParser
         {
             outputReceiver = receiver;
 
+            forMultiTagRegexDict = new Dictionary<string, Regex>();
+            revMultiTagRegexDict = new Dictionary<string, Regex>();
+
             forwardLinTagRegex = new Regex(lintag_grep_filter1, RegexOptions.Compiled);
             reverseLinTagRegex = new Regex(lintag_grep_filter2, RegexOptions.Compiled);
 
@@ -132,9 +140,40 @@ namespace BarcodeParser
 
             //Maximum useful sequence read length based on input settings
             int maxForSeqLength = forUmiTagLen.Last() + forMultiTagLen.Last() + forSpacerLength.Last() + forLinTagLength.Last() + linTagFlankLength;
+            int maxRevSeqLength = revUmiTagLen.Last() + revMultiTagLen.Last() + revSpacerLength.Last() + revLinTagLength.Last() + linTagFlankLength;
 
             //Minimum length of sequence before Lineage tag flanking sequence
-            int minPreLinFlankLength = forUmiTagLen.First() + forMultiTagLen.First() + forSpacerLength.First() - linTagFlankLength;
+            int minForPreLinFlankLength = forUmiTagLen.First() + forMultiTagLen.First() + forSpacerLength.First() - linTagFlankLength;
+            int minRevPreLinFlankLength = revUmiTagLen.First() + revMultiTagLen.First() + revSpacerLength.First() - linTagFlankLength;
+
+            //Regex lists for detecting multi-tags
+            foreach (string tag in forMultiTagList)
+            {
+                string regexStr = "^{";
+                if (forUmiTagLen.Length == 1) regexStr += $"{forUmiTagLen[0]}";
+                else regexStr += $"{forUmiTagLen[0]},{forUmiTagLen[1]}";
+                regexStr += "}";
+                regexStr += RegExStrWithOneSnip(tag, includePerfectMatch:false);
+                regexStr += RegExStrWithOneSnip(forMultiFlankStr);
+                SendOutputText($"Forward multi-tag RegEx: {regexStr}");
+                forMultiTagRegexDict[tag] = new Regex(regexStr, RegexOptions.Compiled);
+            }
+            foreach (string tag in revMultiTagList)
+            {
+                string regexStr = "^{";
+                if (revUmiTagLen.Length == 1) regexStr += $"{revUmiTagLen[0]}";
+                else regexStr += $"{revUmiTagLen[0]},{revUmiTagLen[1]}";
+                regexStr += "}";
+                regexStr += RegExStrWithOneSnip(tag, includePerfectMatch: false);
+                regexStr += RegExStrWithOneSnip(revMultiFlankStr);
+                SendOutputText($"Reverse multi-tag RegEx: {regexStr}");
+                revMultiTagRegexDict[tag] = new Regex(regexStr, RegexOptions.Compiled);
+            }
+
+
+
+
+            /*
 
             // Keep track of how many reads pass each check
             int quality_reads = 0;
