@@ -1249,7 +1249,6 @@ namespace BartenderWindow
 
         private void RunParser()
         {
-            //TODO: Disable GUI controls
             DisableInputControls();
 
             parser.write_directory = OutputDirectory;
@@ -1274,7 +1273,6 @@ namespace BartenderWindow
 
         void parserWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            //TODO: Re-enable GUI controls
             EnableInputControls();
         }
 
