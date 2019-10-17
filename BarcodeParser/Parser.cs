@@ -156,13 +156,7 @@ namespace BarcodeParser
                 string counter = stringArr[4];
 
                 int quality_readsAdd = 0;
-
-                int[] f_boundries_to_use;
-                int total_multitag_length;
-                int max_multitag_mismatch;
-                int max_multitag_mismatch_2;
-                int f_multitag_length_to_use;
-
+                
                 //string f_line, r_line;
                 string f_seq, f_qual, f_tag;
                 string r_seq, r_qual, r_tag;
