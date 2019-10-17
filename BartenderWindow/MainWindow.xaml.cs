@@ -50,7 +50,7 @@ namespace BartenderWindow
 
         private string forwardLinTag, reverseLinTag;
         private string forwardLinTagLengthStr, reverseLinTagLengthStr;
-        private int forwardLinTagLength, reverseLinTagLength;
+        private int[] forwardLinTagLength, reverseLinTagLength;
         private string spacerInsRateStr, spacerDelRateStr;
         private double spacerInsRate, spacerDelRate;
         private string forLintagRegexStr, revLintagRegexStr;
@@ -256,8 +256,8 @@ namespace BartenderWindow
             {
                 this.reverseLinTagLengthStr = value;
                 OnPropertyChanged("ReverseLinTagLengthStr");
-                //reverseLinTagLength = LengthRangeStringToArray(reverseLinTagLengthStr);
-                int.TryParse(reverseLinTagLengthStr, out reverseLinTagLength);
+                reverseLinTagLength = LengthRangeStringToArray(reverseLinTagLengthStr);
+                //int.TryParse(reverseLinTagLengthStr, out reverseLinTagLength);
             }
         }
 
@@ -268,8 +268,8 @@ namespace BartenderWindow
             {
                 this.forwardLinTagLengthStr = value;
                 OnPropertyChanged("ForwardLinTagLengthStr");
-                //forwardLinTagLength = LengthRangeStringToArray(forwardLinTagLengthStr);
-                int.TryParse(forwardLinTagLengthStr, out forwardLinTagLength);
+                forwardLinTagLength = LengthRangeStringToArray(forwardLinTagLengthStr);
+                //int.TryParse(forwardLinTagLengthStr, out forwardLinTagLength);
             }
         }
 
@@ -1370,6 +1370,9 @@ namespace BartenderWindow
         
         private void autoRegexButton_Click(object sender, RoutedEventArgs e)
         {
+            //First update everything that needs updating by runnint AnalyzeSequences()
+            AnalyzeSequences();
+
             //Automatically generate RegEx's, and also calculate/update length range for Lin-tags 
 
             //Forward Lin-tag RegEx
@@ -1380,10 +1383,26 @@ namespace BartenderWindow
             if (IgnoreSingleConst) {
                 linTag = Regex.Replace(linTag, "(?<=N).(?=N)", "N");
             }
-            //find runs of N's and use them, along with   to calculate the min and max length
-
-
-            //find runs of one or more N's and replace them accordingly using CondenseRepeatedNs()
+            //find runs of N's and use them, along with spacerInsRate and spacerDelRate to calculate the min and max length
+            int midLen = 0;
+            MatchCollection matches = Regex.Matches(linTag, "N+");
+            foreach (Match match in matches)
+            {
+                midLen += match.Value.Length;
+            }
+            double dMin = midLen * (1 - regexDelRate / 100.0);
+            int min = (int)Math.Round(dMin);
+            double dMax = midLen * (1 + regexInsRate / 100.0);
+            int max = (int)Math.Round(dMax);
+            min += linTagLen - midLen;
+            max += linTagLen - midLen;
+            // write result to ForwardLinTagLengthStr (which also assigns values to forwardLinTagLength[])
+            string lengthStr = "";
+            if (min != linTagLen) lengthStr += $"{min}-";
+            lengthStr += $"{linTagLen}";
+            if (max != linTagLen) lengthStr += $"-{max}";
+            ForwardLinTagLengthStr = lengthStr;
+            //Find runs of one or more N's (again) and replace them accordingly using CondenseRepeatedNs()
             MatchEvaluator evaluator = new MatchEvaluator(CondenseRepeatedNs);
             linTag = Regex.Replace(linTag, "N+", evaluator);
             //regExStr += linTag;
@@ -1394,12 +1413,33 @@ namespace BartenderWindow
             //Reverse Lin-tag RegEx
             regExStr = Parser.RegExStrWithOneSnip(reverseLinTagFlankStrs[0]);
             linTag = reverseLinTag;
+            linTagLen = reverseLinTag.Length;
             //look for single constants and replace with Ns if IgnoreSingleConst
             if (IgnoreSingleConst)
             {
                 linTag = Regex.Replace(linTag, "(?<=N).(?=N)", "N");
             }
-            //find runs of one or more N's and replace them accordingly using CondenseRepeatedNs()
+
+            //find runs of N's and use them, along with spacerInsRate and spacerDelRate to calculate the min and max length
+            midLen = 0;
+            matches = Regex.Matches(linTag, "N+");
+            foreach (Match match in matches)
+            {
+                midLen += match.Value.Length;
+            }
+            dMin = midLen * (1 - regexDelRate / 100.0);
+            min = (int)Math.Round(dMin);
+            dMax = midLen * (1 + regexInsRate / 100.0);
+            max = (int)Math.Round(dMax);
+            min += linTagLen - midLen;
+            max += linTagLen - midLen;
+            // write result to ForwardLinTagLengthStr (which also assigns values to forwardLinTagLength[])
+            lengthStr = "";
+            if (min != linTagLen) lengthStr += $"{min}-";
+            lengthStr += $"{linTagLen}";
+            if (max != linTagLen) lengthStr += $"-{max}";
+            ReverseLinTagLengthStr = lengthStr;
+            //find runs of one or more N's (again) and replace them accordingly using CondenseRepeatedNs()
             linTag = Regex.Replace(linTag, "N+", evaluator);
             //regExStr += linTag;
             regExStr += linTag.Replace('N', '.'); //include the Replace() here just in case
@@ -1428,12 +1468,14 @@ namespace BartenderWindow
 
         private void analyzeButton_Click(object sender, RoutedEventArgs e)
         {
-            //If UMI tag length boxes are empty, auto-polulate them
-            //If UMI tag length boxes have values, use those values to add appropriate number of Z's at beginning of each sequence
-            TextRange textRange = new TextRange(forwardRichTextBox.Document.ContentStart, forwardRichTextBox.Document.ContentEnd);
-            textRange.Text = Parser.RemoveStringWhitespace(textRange.Text);
+            AnalyzeSequences();
+        }
 
-            reverseComplementButton_Click(sender, e);
+        private void AnalyzeSequences()
+        {
+            clearWhiteSpaces();
+
+            //reverseComplementButton_Click(sender, e);
 
             ClearSequenceFormatting();
 
@@ -1450,7 +1492,6 @@ namespace BartenderWindow
             UnderLineReadLength();
 
             UnselectSequenceText();
-
         }
 
         private void ClearSequenceFormatting()
