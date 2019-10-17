@@ -53,7 +53,7 @@ namespace BartenderWindow
 
         //Multiplexing tags
         private string fowardMultiTagText, reverseMultiTagText, extraMultiTagText;
-        private List<string> fowardMultiTagList, reverseMultiTagList;
+        private List<string> forwardMultiTagList, reverseMultiTagList;
         private Dictionary<string, string> fowardIdDict, reverseIdDict;
         private Dictionary<string[], string> mutiTagIdDict;
         private int[] forMultiTagLen, revMultiTagLen;
@@ -484,7 +484,7 @@ namespace BartenderWindow
 
         private void InitMultiTagLists()
         {
-            fowardMultiTagList = new List<string>();
+            forwardMultiTagList = new List<string>();
             fowardIdDict = new Dictionary<string, string>();
             reverseMultiTagList = new List<string>();
             reverseIdDict = new Dictionary<string, string>();
@@ -651,7 +651,7 @@ namespace BartenderWindow
                 foreach (string tagPlusId in forwardTagArr)
                 {
                     string[] splitTag = tagPlusId.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                    fowardMultiTagList.Add(splitTag[0]);
+                    forwardMultiTagList.Add(splitTag[0]);
                     if (splitTag.Length > 1)
                     {
                         fowardIdDict[splitTag[0]] = splitTag[1];
@@ -677,7 +677,7 @@ namespace BartenderWindow
                 }
 
                 //Then combine Forward and Reverse tags in all possible ways and add IDs to mutiTagIDDict
-                foreach (string forTag in fowardMultiTagList)
+                foreach (string forTag in forwardMultiTagList)
                 {
                     foreach (string revTag in reverseMultiTagList)
                     {
@@ -700,7 +700,7 @@ namespace BartenderWindow
                     string forTag = splitTag[0];
                     string revTag = splitTag[1];
                     string[] keys = new string[2] { forTag, revTag };
-                    if (!fowardMultiTagList.Contains(forTag)) fowardMultiTagList.Add(forTag);
+                    if (!forwardMultiTagList.Contains(forTag)) forwardMultiTagList.Add(forTag);
                     if (!reverseMultiTagList.Contains(revTag)) reverseMultiTagList.Add(revTag);
 
                     if (splitTag.Length > 2)
@@ -1209,9 +1209,9 @@ namespace BartenderWindow
             AddOutputText("Nearest neighbor and minimum distances for Forward Multiplex Tags:");
             int minLength = int.MaxValue;
             int maxLength = 0;
-            foreach (string tag in fowardMultiTagList)
+            foreach (string tag in forwardMultiTagList)
             {
-                List<string> compList = new List<string>(fowardMultiTagList);
+                List<string> compList = new List<string>(forwardMultiTagList);
                 compList.Remove(tag);
                 AddOutputText($"{tag}: Hamming", false);
                 AddOutputText($"{Parser.BestMatchMultiTag(tag, compList.ToArray())}, Levenshtein: ", false);
@@ -1285,16 +1285,16 @@ namespace BartenderWindow
             parser.forUmiTagLen = forUmiTagLen;
             parser.revUmiTagLen = revUmiTagLen;
 
-            parser.FowardMultiTagList = fowardMultiTagList;
-            parser.ReverseMultiTagList = reverseMultiTagList;
+            parser.ForMultiTagList = forwardMultiTagList;
+            parser.RevMultiTagList = reverseMultiTagList;
             parser.forMultiTagLen = forMultiTagLen;
             parser.revMultiTagLen = revMultiTagLen;
 
-            parser.forwardSpacerLength = forwardSpacerLength;
-            parser.reverseSpacerLength = reverseSpacerLength;
+            parser.forSpacerLength = forwardSpacerLength;
+            parser.revSpacerLength = reverseSpacerLength;
 
-            parser.forwardLinTagLength = forwardLinTagLength;
-            parser.reverseLinTagLength = reverseLinTagLength;
+            parser.forLinTagLength = forwardLinTagLength;
+            parser.revLinTagLength = reverseLinTagLength;
 
 
 
@@ -1669,7 +1669,7 @@ namespace BartenderWindow
                 if (Object.ReferenceEquals(rtb, forwardRichTextBox))
                 {
                     //if (!String.IsNullOrEmpty(FowardMultiTagText))
-                    if (fowardMultiTagList.Count>0)
+                    if (forwardMultiTagList.Count>0)
                     {
                         rtb.Selection.Text = new String('X', GetMaxMultiTagLength(forward: true));
                     }
@@ -1848,7 +1848,7 @@ namespace BartenderWindow
             List<string> tagList;
             if (forward)
             {
-                tagList = fowardMultiTagList;
+                tagList = forwardMultiTagList;
             }
             else
             {

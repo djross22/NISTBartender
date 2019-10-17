@@ -18,14 +18,16 @@ namespace BarcodeParser
         public string f_gzipped_fastqfile { get; set; } //The forward reads, gzipped fastq file
         public string r_gzipped_fastqfile { get; set; } //The reverse reads, gzipped fastq file
 
-        public List<string> FowardMultiTagList { get; set; } //List of forward multiplexing tags
-        public List<string> ReverseMultiTagList { get; set; } //List of reverse multiplexing tags
+        public List<string> ForMultiTagList { get; set; } //List of forward multiplexing tags
+        public List<string> RevMultiTagList { get; set; } //List of reverse multiplexing tags
 
         //Length arrays
         public int[] forUmiTagLen, revUmiTagLen; //range of possible UMI tag lengths
         public int[] forMultiTagLen, revMultiTagLen; //range of possible Multi-tag lengths
-        public int[] forwardSpacerLength, reverseSpacerLength; //range of possible spacer lengths
-        public int[] forwardLinTagLength, reverseLinTagLength; //range of possible lineage tag lengths
+        public int[] forSpacerLength, revSpacerLength; //range of possible spacer lengths
+        public int[] forLinTagLength, revLinTagLength; //range of possible lineage tag lengths
+        public int multiFlankLength; //length of flanking regions around multi-tags
+        public int linTagFlankLength; //length of flanking regions around lineage tags
 
         //lock for multi-thread file reading
         private static readonly Object file_lock = new Object();
@@ -109,12 +111,12 @@ namespace BarcodeParser
             SendOutputText("Running Parser for Double Barcodes.");
             SendOutputText($"Parser started: {startTime}.");
             SendOutputText("    Forward Multiplexing Tags:");
-            foreach (string i in FowardMultiTagList)
+            foreach (string i in ForMultiTagList)
             {
                 SendOutputText($"        {i}, ");
             }
             SendOutputText("    Reverse Multiplexing Tags:");
-            foreach (string i in ReverseMultiTagList)
+            foreach (string i in RevMultiTagList)
             {
                 SendOutputText($"        {i}, ");
             }
