@@ -409,7 +409,7 @@ namespace BarcodeParser
             return new string(charArray);
         }
 
-        public static int HammingDistance(string seq1, string seq2, int max = Int32.MaxValue, bool ignoreN = false)
+        public static int HammingDistance(string seq1, string seq2, int max = int.MaxValue, bool ignoreN = false)
         {
             //This Hamming distance, from Levy lab (mostly), included max and ignoreN parameters
             //     It assumes that seq1.Length <= seq2.Length, otherwise it returns max
@@ -525,7 +525,7 @@ namespace BarcodeParser
             return d[n, m];
         }
 
-        public static (string, int) BestMatchMultiTag(string m, string[] tags, int max = Int32.MaxValue, bool ignoreN = false, bool useHamming = true)
+        public static (string, int) BestMatchMultiTag(string m, string[] tags, int max = int.MaxValue, bool ignoreN = false, bool useHamming = true)
         {
             //Combines the best_match and mismatches functions
             //returns the best matching multitag and the number of mismathces
