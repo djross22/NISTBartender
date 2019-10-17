@@ -1268,7 +1268,7 @@ namespace BartenderWindow
 
         void parserWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            parser.RunParser();
+            parser.ParseDoubleBarcodes();
         }
 
         void parserWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)

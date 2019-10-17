@@ -92,7 +92,7 @@ namespace BarcodeParser
             SendOutputText("");
         }
 
-        public void RunParser()
+        public void ParseDoubleBarcodes()
         {
             foreach (string i in multitags)
             {
