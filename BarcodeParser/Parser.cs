@@ -114,44 +114,6 @@ namespace BarcodeParser
             }
             SendOutputText();
             
-            //Set up boundaries to use for detecting barcodes
-            int[] f_boundries = new int[5] {0, f_seqtag_length ,
-                f_multitag_length + f_seqtag_length,
-                f_multitag_length + f_seqtag_length + f_spacer_length,
-                f_multitag_length + f_seqtag_length + f_spacer_length + f_lintag_length};
-
-            //if f_multitag_short>0, then there are some forward multitags that are shorter than others, so need a separate list of boundaries
-            int[] f_boundries_short = new int[1];
-            string[] f_tag_arr = new string[1];
-            List<string> f_tag_list;
-            if (f_multitag_short > 0)
-            {
-                f_boundries_short = new int[5] {0, f_seqtag_length,
-                    f_multitag_short + f_seqtag_length,
-                    f_multitag_short + f_seqtag_length + f_spacer_length,
-                    f_multitag_short + f_seqtag_length + f_spacer_length + f_lintag_length };
-                f_tag_list = new List<string>();
-                foreach (string f_t in short_f_list)
-                {
-                    f_tag_list.Add(f_t + new string('N', f_multitag_length - f_multitag_short));
-                }
-                foreach (string f_t in long_f_list)
-                {
-                    f_tag_list.Add(f_t);
-                }
-                f_tag_arr = f_tag_list.ToArray();
-                //foreach (string f_t in f_tag_list)
-                //{
-                //    SendOutputText(f_t);
-                //}
-            }
-
-            int[] r_boundries = new int[5] {0, r_seqtag_length ,
-            r_multitag_length + r_seqtag_length,
-            r_multitag_length + r_seqtag_length + r_spacer_length,
-            r_multitag_length + r_seqtag_length + r_spacer_length + r_lintag_length};
-
-
             //open files for writing
             //  lineage tags for reads that sort to a multiplexing tag, these files are for input into clustering method
             TextWriter forwardWriter = TextWriter.Synchronized(new StreamWriter($"forward_lintags.txt"));
