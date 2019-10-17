@@ -1282,8 +1282,21 @@ namespace BartenderWindow
             parser.f_gzipped_fastqfile = ForwardGzFastQ;
             parser.r_gzipped_fastqfile = ReverseGzFastQ;
 
+            parser.forUmiTagLen = forUmiTagLen;
+            parser.revUmiTagLen = revUmiTagLen;
+
             parser.FowardMultiTagList = fowardMultiTagList;
             parser.ReverseMultiTagList = reverseMultiTagList;
+            parser.forMultiTagLen = forMultiTagLen;
+            parser.revMultiTagLen = revMultiTagLen;
+
+            parser.forwardSpacerLength = forwardSpacerLength;
+            parser.reverseSpacerLength = reverseSpacerLength;
+
+            parser.forwardLinTagLength = forwardLinTagLength;
+            parser.reverseLinTagLength = reverseLinTagLength;
+
+
 
             parser.ParsingThreads = threadsForParsing;
 

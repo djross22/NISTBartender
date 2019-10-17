@@ -21,6 +21,12 @@ namespace BarcodeParser
         public List<string> FowardMultiTagList { get; set; } //List of forward multiplexing tags
         public List<string> ReverseMultiTagList { get; set; } //List of reverse multiplexing tags
 
+        //Length arrays
+        public int[] forUmiTagLen, revUmiTagLen; //range of possible UMI tag lengths
+        public int[] forMultiTagLen, revMultiTagLen; //range of possible Multi-tag lengths
+        public int[] forwardSpacerLength, reverseSpacerLength; //range of possible spacer lengths
+        public int[] forwardLinTagLength, reverseLinTagLength; //range of possible lineage tag lengths
+
         //lock for multi-thread file reading
         private static readonly Object file_lock = new Object();
 
