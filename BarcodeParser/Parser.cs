@@ -153,25 +153,13 @@ namespace BarcodeParser
 
 
             //open files for writing
-            //  reads that sort to a multiplexing tag
-            Dictionary<string, TextWriter> seq_tag_files, lin_tag_1_files, lin_tag_2_files, multi_tag_files;
-            seq_tag_files = new Dictionary<string, TextWriter>();
-            lin_tag_1_files = new Dictionary<string, TextWriter>();
-            lin_tag_2_files = new Dictionary<string, TextWriter>();
-            multi_tag_files = new Dictionary<string, TextWriter>();
-            foreach (string tag in multitags)
-            {
-                seq_tag_files[tag] = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\{tag}_seqtag.txt"));
-                lin_tag_1_files[tag] = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\{tag}_lintag1.txt"));
-                lin_tag_2_files[tag] = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\{tag}_lintag2.txt"));
-                multi_tag_files[tag] = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\{tag}_multitag.txt"));
-            }
-
-            //reads that do not sort to a multiplexing tag
-            TextWriter unmatched_seqtag = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\unmatched_seqtag.txt"));
-            TextWriter unmatched_lintag1 = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\unmatched_lintag1.txt"));
-            TextWriter unmatched_lintag2 = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\unmatched_lintag2.txt"));
-            TextWriter unmatched_multitag = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\unmatched_multitag.txt"));
+            //  lineage tags for reads that sort to a multiplexing tag, these files are for input into clustering method
+            TextWriter forwardWriter = TextWriter.Synchronized(new StreamWriter($"forward_lintags.txt"));
+            TextWriter reverseWriter = TextWriter.Synchronized(new StreamWriter($"reverse_lintags.txt"));
+            //  actual multi-plexing tag sequencess for reads that sort to a multiplexing tag, this files is for debugging
+            TextWriter multiTagWriter = TextWriter.Synchronized(new StreamWriter($"multiplexing_tags.txt"));
+            //   reads that don't sort to a multiplexing tag or don't match the lineage tag RegEx, this file for debugging 
+            TextWriter unmatchedWriter = TextWriter.Synchronized(new StreamWriter($"unmatched_sequences.txt"));
 
             // Keep track of how many reads pass each check
             int quality_reads = 0;
