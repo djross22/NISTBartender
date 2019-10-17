@@ -386,6 +386,37 @@ namespace BarcodeParser
             return regExStr;
         }
 
+        public static string RegExStrWithTwoSnips(string seq)
+        {
+            string regExStr = "(";
+
+            char[] seqChars = seq.ToCharArray();
+            for (int i = 0; i < seqChars.Length; i++)
+            {
+                for (int k = i+1; k < seqChars.Length; k++)
+                {
+                    for (int j = 0; j < seqChars.Length; j++)
+                    {
+                        if (i == j || k == j)
+                        {
+                            regExStr += ".";
+                        }
+                        else
+                        {
+                            regExStr += seqChars[j];
+                        }
+                    }
+                    regExStr += "|";
+                }
+                
+            }
+
+            regExStr = regExStr.Remove(regExStr.Length - 1);
+            regExStr += ")";
+
+            return regExStr;
+        }
+
         public static string RemoveStringWhitespace(string input)
         {
             string output = new string(input.ToCharArray()
