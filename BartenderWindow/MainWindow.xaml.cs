@@ -43,17 +43,36 @@ namespace BartenderWindow
         private string inputDirectory, outputDirectory, forwardGzFastQ, reverseGzFastQ;
         private string defaultDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);//@"C:";
 
-        private string forUmiTagLenStr, revUmiTagLenStr;
-        private int[] forUmiTagLen, revUmiTagLen;
+        //Length of read from sequencer, used for underlining sequence
         private string readLengthStr;
         private int readLength;
 
+        //UMI tage lengths
+        private string forUmiTagLenStr, revUmiTagLenStr;
+        private int[] forUmiTagLen, revUmiTagLen;
+
+        //Multiplexing tags
+        private string fowardMultiTagText, reverseMultiTagText, extraMultiTagText;
+        private List<string> fowardMultiTagList, reverseMultiTagList;
+        private Dictionary<string, string> fowardIdDict, reverseIdDict;
+        private Dictionary<string[], string> mutiTagIdDict;
+        //Multi-tag flank sequences
+        private string forwardMultiFlankStr, reverseMultiFlankStr;
+        private string multiFlankLengthStr, linTagFlankLengthStr;
+        private int multiFlankLength, linTagFlankLength;
+
+        //Spacer lengths
+        private string forwardSpacerLengthStr, reverseSpacerLengthStr;
+        private int[] forwardSpacerLength, reverseSpacerLength;
+        private string spacerInsRateStr, spacerDelRateStr;
+        private double spacerInsRate, spacerDelRate;
+
+        //Lineage tags
         private string forwardLinTag, reverseLinTag;
         private string forwardLinTagLengthStr, reverseLinTagLengthStr;
         private int[] forwardLinTagLength, reverseLinTagLength;
-        private string spacerInsRateStr, spacerDelRateStr;
-        private double spacerInsRate, spacerDelRate;
         private string forLintagRegexStr, revLintagRegexStr;
+        //Lin-tag flanking sequences
         private string[] forwardLinTagFlankStrs = new string[2];
         private string[] reverseLinTagFlankStrs = new string[2];
 
@@ -62,18 +81,10 @@ namespace BartenderWindow
         private double regexDelRate, regexInsRate;
         private bool ignoreSingleConst;
 
-        private string forwardMultiFlankStr, reverseMultiFlankStr;
-        private string multiFlankLengthStr, linTagFlankLengthStr, forwardSpacerLengthStr, reverseSpacerLengthStr;
-        private int multiFlankLength, linTagFlankLength; 
-        private int[] forwardSpacerLength, reverseSpacerLength;
-
-        private string fowardMultiTagText, reverseMultiTagText, extraMultiTagText;
-        private List<string> fowardMultiTagList, reverseMultiTagList;
-        private Dictionary<string, string> fowardIdDict, reverseIdDict;
-        private Dictionary<string[], string> mutiTagIdDict;
 
         private string outputText;
 
+        //Highlight colors for sequence annotations
         private static Brush UmiTagHighlight = Brushes.Yellow;
         //private static Brush MultiTagHighlight = Brushes.LightGreen;
         //private static Brush LineageTagHighlight = Brushes.Thistle;
