@@ -55,7 +55,7 @@ namespace BartenderWindow
         private string fowardMultiTagText, reverseMultiTagText, extraMultiTagText;
         private List<string> forwardMultiTagList, reverseMultiTagList;
         private Dictionary<string, string> fowardIdDict, reverseIdDict;
-        private Dictionary<string[], string> mutiTagIdDict; //Dictionary for sample IDs, keys are from forward multi-tag and reverse multi-tag
+        private Dictionary<string, string> mutiTagIdDict; //Dictionary for sample IDs, keys are: $"{forwardMultiTag}_{reverseMultiTag}"
         private int[] forMultiTagLen, revMultiTagLen;
         //Multi-tag flank sequences
         private string forwardMultiFlankStr, reverseMultiFlankStr;
@@ -490,7 +490,7 @@ namespace BartenderWindow
             fowardIdDict = new Dictionary<string, string>();
             reverseMultiTagList = new List<string>();
             reverseIdDict = new Dictionary<string, string>();
-            mutiTagIdDict = new Dictionary<string[], string>();
+            mutiTagIdDict = new Dictionary<string, string>();
         }
 
         private void InitInputControlsList()
@@ -685,7 +685,8 @@ namespace BartenderWindow
                 {
                     foreach (string revTag in reverseMultiTagList)
                     {
-                        string[] keys = new string[2] { forTag, revTag };
+                        string keys = $"{forTag}_{revTag}";
+                        AddOutputText($"keys: {keys}");
                         string value = $"{fowardIdDict[forTag]}{reverseIdDict[revTag]}";
                         value = value.Replace("__", "_");
                         mutiTagIdDict[keys] = value;
@@ -703,7 +704,8 @@ namespace BartenderWindow
                     string[] splitTag = tagPlusId.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
                     string forTag = splitTag[0];
                     string revTag = splitTag[1];
-                    string[] keys = new string[2] { forTag, revTag };
+                    string keys = $"{forTag}_{revTag}";
+                    AddOutputText($"keys: {keys}");
                     if (!forwardMultiTagList.Contains(forTag)) forwardMultiTagList.Add(forTag);
                     if (!reverseMultiTagList.Contains(revTag)) reverseMultiTagList.Add(revTag);
 
@@ -719,7 +721,7 @@ namespace BartenderWindow
             }
 
             AddOutputText($"Multi-tag sample IDs: ", false);
-            foreach (string[] keys in mutiTagIdDict.Keys)
+            foreach (string keys in mutiTagIdDict.Keys)
             {
                 AddOutputText($"{mutiTagIdDict[keys]}, ", false);
             }
@@ -1294,6 +1296,8 @@ namespace BartenderWindow
             parser.forMultiTagLen = forMultiTagLen;
             parser.revMultiTagLen = revMultiTagLen;
 
+            parser.mutiTagIdDict = mutiTagIdDict;
+
             parser.forSpacerLength = forwardSpacerLength;
             parser.revSpacerLength = reverseSpacerLength;
 
@@ -1303,9 +1307,13 @@ namespace BartenderWindow
             parser.forMultiFlankStr = forwardMultiFlankStr;
             parser.revMultiFlankStr = reverseMultiFlankStr;
 
+            parser.linTagFlankLength = linTagFlankLength;
+            parser.multiFlankLength = multiFlankLength;
 
+            parser.forLintagRegexStr = forLintagRegexStr;
+            parser.revLintagRegexStr = revLintagRegexStr;
 
-            parser.ParsingThreads = threadsForParsing;
+            parser.parsingThreads = threadsForParsing;
 
             BackgroundWorker parserWorker = new BackgroundWorker();
             parserWorker.WorkerReportsProgress = false;
@@ -1403,7 +1411,7 @@ namespace BartenderWindow
                         {
                             string ret = ".{";
                             ret += $"{matchLen}";
-                            ret += "}";
+                            ret += "}?";
                             return ret;
                         }
                     }
@@ -1419,7 +1427,7 @@ namespace BartenderWindow
                 {
                     string ret = ".{";
                     ret += $"{min},{max}";
-                    ret += "}";
+                    ret += "}?";
                     return ret;
                 }
             }

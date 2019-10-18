@@ -33,57 +33,20 @@ namespace BarcodeParser
         public int multiFlankLength; //length of flanking regions around multi-tags
         public int linTagFlankLength; //length of flanking regions around lineage tags
 
-        private Dictionary<string[], string> mutiTagIdDict;  //Dictionary for sample IDs, keys are from forward multi-tag and reverse multi-tag
+        //Regex's for matching to lineage tag patterns (with flanking sequences)
+        public string forLintagRegexStr, revLintagRegexStr;
+        private Regex forLinTagRegex, revLinTagRegex;
 
-        //lock for multi-thread file reading
-        private static readonly Object file_lock = new Object();
+        public Dictionary<string, string> mutiTagIdDict;  //Dictionary for sample IDs, keys are: $"{forwardMultiTag}_{reverseMultiTag}"
 
-        
-        public int ParsingThreads { get; set; } //number of threads to use for parsing
+        private static readonly Object fileLock = new Object(); //lock for multi-thread file writing
+        private static readonly Object unmatchedFileLock = new Object(); //lock for multi-thread file writing
+        private static readonly Object counterLock = new Object(); //lock for multi-thread counter updates
 
+
+        public int parsingThreads; //number of threads to use for parsing
 
         static double min_qs = 30; //the minimum avareage quality score for both lineage tags
-
-
-        //Consider changing the way these are used/defined
-
-
-        static string lintag_grep_filter1 = @"(.ACC|T.CC|TA.C|TAC.).{4,7}?AA.{4,7}?TT.{4,7}?TT.{4,7}?(.TAA|A.AA|AT.A|ATA.)"; //first barcode
-        static string lintag_grep_filter2 = @"(.ACC|T.CC|TA.C|TAC.).{4,7}?AA.{4,7}?AA.{4,7}?TT.{4,7}?(.TAC|T.AC|TT.C|TTA.)"; //second barcode
-        Regex forwardLinTagRegex;
-        Regex reverseLinTagRegex;
-
-
-        static int f_seqtag_length = 8; //the length of the sequencing tag on the first read (UMI1)
-        static int r_seqtag_length = 8; //the length of the sequencing tag on the second read (UMI2)
-
-        static int f_multitag_length = 6; //the length of the multiplexing tag on the first read
-        static int f_multitag_short = 0; //the length of the shorter multiplexing tags on the first read
-        static int r_multitag_length = 6; //the length of the multiplexing tag on the second read
-
-        static int f_lintag_length = 38; //the length of the lineage tag on the first read (first barcode)
-        static int r_lintag_length = 38; //the length of the lineage tag on the second read (second barcode)
-
-        static int f_spacer_length = 43; //distance to first barcode in forward read, not including the multitag and the seqtag
-        static int r_spacer_length = 29; //distance second barcode in reverse read, not including the multitag and the seqtag
-
-        static bool clip_ends = true; //logical of whether or not to clip the front and back ends off of lintag1 and lintag2
-        static int clipper_length = 4; //length of clippers
-
-        static string lintag1_front_clipper = "(.ACC|T.CC|TA.C|TAC.)"; //only report lintag1 after this sequence
-        static string lintag2_front_clipper = "(.ACC|T.CC|TA.C|TAC.)"; //only report lintag2 after this sequence
-        static string lintag1_rear_clipper = "(.ATA|A.TA|AA.A|AAT.)"; //only report lintag1 before this sequence, this must be the REVERSE of the true sequence
-        static string lintag2_rear_clipper = "(.ATT|C.TT|CA.T|CAT.)"; //only report lintag2 before this sequence, this must be the REVERSE of the true sequence
-
-        Regex forwardFrontClipperRegex;
-        Regex reverseFrontClipperRegex;
-        Regex forwardRearClipperRegex;
-        Regex reverseRearClipperRegex;
-
-        static string[] multitags = new string[2] { "TTCGGTGCTTAA", "CGCATACACCGA" }; //concatenated multiplexing tags from the first and second reads that uniquely identify a sample, currently must have 2 or more multitags
-
-        static List<string> short_f_list;
-        static List<string> long_f_list;
 
         public Parser(IDisplaysOutputText receiver)
         {
@@ -91,18 +54,7 @@ namespace BarcodeParser
 
             forMultiTagRegexDict = new Dictionary<string, Regex>();
             revMultiTagRegexDict = new Dictionary<string, Regex>();
-            mutiTagIdDict = new Dictionary<string[], string>();
-
-            forwardLinTagRegex = new Regex(lintag_grep_filter1, RegexOptions.Compiled);
-            reverseLinTagRegex = new Regex(lintag_grep_filter2, RegexOptions.Compiled);
-
-            forwardFrontClipperRegex = new Regex(lintag1_front_clipper, RegexOptions.Compiled);
-            reverseFrontClipperRegex = new Regex(lintag2_front_clipper, RegexOptions.Compiled);
-            forwardRearClipperRegex = new Regex(lintag1_rear_clipper, RegexOptions.Compiled);
-            reverseRearClipperRegex = new Regex(lintag2_rear_clipper, RegexOptions.Compiled);
-
-            short_f_list = new List<string>();
-            long_f_list = new List<string>();
+            mutiTagIdDict = new Dictionary<string, string>();
         }
 
         private void SendOutputText(string text, bool newLine = true)
@@ -136,21 +88,26 @@ namespace BarcodeParser
             
             //open files for writing
             //  lineage tags for reads that sort to a multiplexing tag, these files are for input into clustering method
-            TextWriter forwardWriter = TextWriter.Synchronized(new StreamWriter($"forward_lintags.txt"));
-            TextWriter reverseWriter = TextWriter.Synchronized(new StreamWriter($"reverse_lintags.txt"));
+            TextWriter forwardWriter = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\forward_lintags.txt"));
+            TextWriter reverseWriter = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\reverse_lintags.txt"));
 
-            //  actual multi-plexing tag sequencess for reads that sort to a multiplexing tag, this files is for debugging
-            TextWriter multiTagWriter = TextWriter.Synchronized(new StreamWriter($"multiplexing_tags.txt"));
-            //   reads that don't sort to a multiplexing tag or don't match the lineage tag RegEx, this file for debugging 
-            TextWriter unmatchedWriter = TextWriter.Synchronized(new StreamWriter($"unmatched_sequences.txt"));
+            //  actual multi-plexing tag sequences for reads that sort to a multiplexing tag, this files is for debugging
+            TextWriter multiTagWriter = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\multiplexing_tags.txt"));
+
+            //  reads that don't sort to a multiplexing tag or don't match the lineage tag RegEx, this file for debugging 
+            TextWriter unmatchedWriter = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\unmatched_sequences.txt"));
 
             //Maximum useful sequence read length based on input settings
             int maxForSeqLength = forUmiTagLen.Last() + forMultiTagLen.Last() + forSpacerLength.Last() + forLinTagLength.Last() + linTagFlankLength;
             int maxRevSeqLength = revUmiTagLen.Last() + revMultiTagLen.Last() + revSpacerLength.Last() + revLinTagLength.Last() + linTagFlankLength;
+            SendOutputText($"maxForSeqLength: {maxForSeqLength}");
+            SendOutputText($"maxRevSeqLength: {maxRevSeqLength}");
 
             //Minimum length of sequence before Lineage tag flanking sequence
             int minForPreLinFlankLength = forUmiTagLen.First() + forMultiTagLen.First() + forSpacerLength.First() - linTagFlankLength;
             int minRevPreLinFlankLength = revUmiTagLen.First() + revMultiTagLen.First() + revSpacerLength.First() - linTagFlankLength;
+            SendOutputText($"minForPreLinFlankLength: {minForPreLinFlankLength}");
+            SendOutputText($"minRevPreLinFlankLength: {minRevPreLinFlankLength}");
 
             //lengths to use for recording UMI tags (max of range)
             int forUmiTagLenUse = forUmiTagLen.Last();
@@ -159,7 +116,7 @@ namespace BarcodeParser
             //Regex lists for detecting multi-tags
             foreach (string tag in forMultiTagList)
             {
-                string regexStr = "^{";
+                string regexStr = "^.{";
                 if (forUmiTagLen.Length == 1) regexStr += $"{forUmiTagLen[0]}";
                 else regexStr += $"{forUmiTagLen[0]},{forUmiTagLen[1]}";
                 regexStr += "}";
@@ -170,7 +127,7 @@ namespace BarcodeParser
             }
             foreach (string tag in revMultiTagList)
             {
-                string regexStr = "^{";
+                string regexStr = "^.{";
                 if (revUmiTagLen.Length == 1) regexStr += $"{revUmiTagLen[0]}";
                 else regexStr += $"{revUmiTagLen[0]},{revUmiTagLen[1]}";
                 regexStr += "}";
@@ -179,18 +136,33 @@ namespace BarcodeParser
                 SendOutputText($"Reverse multi-tag RegEx: {regexStr}");
                 revMultiTagRegexDict[tag] = new Regex(regexStr, RegexOptions.Compiled);
             }
+            SendOutputText();
+
+            //RegEx's for lineage tages.
+            forLinTagRegex = new Regex(forLintagRegexStr, RegexOptions.Compiled);
+            revLinTagRegex = new Regex(revLintagRegexStr, RegexOptions.Compiled);
+            SendOutputText($"Forward lin-tag RegEx: {forLintagRegexStr}");
+            SendOutputText($"Reverse lin-tag RegEx: {revLintagRegexStr}");
 
 
+            //SendOutputText($"Multi-tag sample IDs: ");
+            //foreach (string keys in mutiTagIdDict.Keys)
+            //{
+            //    SendOutputText($"keys: {keys}; value: {mutiTagIdDict[keys]}, ");
+            //    string samp;
+            //    bool test = mutiTagIdDict.TryGetValue(keys, out samp);
+            //    SendOutputText($"test: {test}");
+            //}
+            //SendOutputText($"");
 
 
-            
 
             // Keep track of how many reads pass each check
-            int quality_reads = 0;
-            int total_reads = 0;
-            int grep_matching_quality_reads = 0;
-            int passing_reads_that_dont_match_a_multitag = 0;
-            int grep_failures = 0;
+            int totalReads = 0;
+            int multiTagMatchingReads = 0; //reads that match to both forward and reverse multi-tags, bool revMatchFound
+            int validSampleReads = 0; //reads with multi-tags that mapped to a valid/defined sample ID (out of multi_tag_matching_reads), bool validSampleFound
+            int qualityReads = 0; //reads that passed the quality check (out of valid_sample_reads), bool meanQualOk
+            int lineageTagReads = 0; //reads that match lin-tag pattern (out of quality_reads), bool revLinTagMatchFound
 
 
 
@@ -201,26 +173,32 @@ namespace BarcodeParser
             //Parallel.ForEach(GetNextSequencesFromGZip($"{inDir}{f_gzipped_fastqfile}", $"{inDir}{r_gzipped_fastqfile}"), stringArr =>
             Parallel.ForEach(GetNextSequencesFromGZip($"{read_directory}\\{f_gzipped_fastqfile}", $"{read_directory}\\{r_gzipped_fastqfile}"), new ParallelOptions { MaxDegreeOfParallelism = 1 }, stringArr =>
             {
-                string counter = stringArr[4];
-
-                int quality_readsAdd = 0;
+                string counter = stringArr[4]; //TODO: use this to display progress
+                int count = 0;
+                int.TryParse(counter, out count);
 
                 string forRead = stringArr[0];
                 string revRead = stringArr[1];
-                string forQaul = stringArr[2];
+                string forQual = stringArr[2];
                 string revQual = stringArr[3];
 
                 bool forMatchFound = false;
                 bool revMatchFound = false;
                 bool validSampleFound = false;
+                bool meanQualOk = false;
+                bool forLinTagMatchFound = false;
+                bool revLinTagMatchFound = false;
+
                 string forMultiMatch = ""; //matching seqeunces from list of nominal multi-tags
                 string revMultiMatch = ""; //matching seqeunces from list of nominal multi-tags
-                string forMultiActual, revMultiActual; //actual sequence matching tag
+                string forMultiActual = ""; //actual sequence matched to multi-tag
+                string revMultiActual = ""; //actual sequence matched to multi-tag
                 string forUmi, revUmi; //UMI tag sequences
                 string sampleId; //Identifier for sample (forward x reverse multi-tag pairs)
 
 
                 //To make things run faster, work with just the substring of length maxForSeqLength/maxRevSeqLength
+                //    TODO: check this assumption with performance comparison
                 string forSeq = forRead.Substring(0, maxForSeqLength);
                 string revSeq = revRead.Substring(0, maxRevSeqLength);
 
@@ -230,7 +208,7 @@ namespace BarcodeParser
                 //Find Match to multi-tag
                 foreach (string tag in forMultiTagList)
                 {
-                    Match match = forMultiTagRegexDict[tag].Match(forRead);
+                    Match match = forMultiTagRegexDict[tag].Match(forSeq);
                     forMatchFound = match.Success;
                     if (forMatchFound)
                     {
@@ -248,7 +226,7 @@ namespace BarcodeParser
                     foreach (string tag in revMultiTagList)
                     {
 
-                        Match match = revMultiTagRegexDict[tag].Match(revRead);
+                        Match match = revMultiTagRegexDict[tag].Match(revSeq);
                         revMatchFound = match.Success;
                         if (revMatchFound)
                         {
@@ -264,18 +242,74 @@ namespace BarcodeParser
                     if (revMatchFound)
                     {
                         //Look up sample ID, if there is a match, procede
-                        string[] keys = new string[2] { forMultiMatch, revMultiMatch };
+                        string keys = $"{forMultiMatch}_{revMultiMatch}";
+                        //if (count < 10) SendOutputText($"keys: {keys[0]}, {keys[1]}; value: {mutiTagIdDict[keys]}, ");
                         validSampleFound = mutiTagIdDict.TryGetValue(keys, out sampleId);
+                        //if (count < 10) SendOutputText($"validSampleFound: {validSampleFound}");
                         if (validSampleFound)
                         {
                             sampleId += $"_{forUmi}_{revUmi}";
 
-                            //Check mean quality score for lin-tag pattern
+                            //Check mean quality score for potential forward lin-tag sequence
+                            string linTagQualStr = forQual.Substring(minForPreLinFlankLength);
+                            meanQualOk = MeanQuality(linTagQualStr) > min_qs;
+                            if (meanQualOk)
+                            {
+                                //If quality good on forward read, check reverse read
+                                linTagQualStr = revQual.Substring(minRevPreLinFlankLength);
+                                meanQualOk = MeanQuality(linTagQualStr) > min_qs;
+                                if (meanQualOk)
+                                {
+                                    //if quality good, find match to lin-tag pattern, forwardLinTagRegex/reverseLinTagRegex
+                                    if (count < 20) SendOutputText($"Forward string: {forSeq.Substring(minForPreLinFlankLength)}");
+                                    Match forLinTagMatch = forLinTagRegex.Match(forSeq.Substring(minForPreLinFlankLength));
+                                    forLinTagMatchFound = forLinTagMatch.Success;
+                                    if (forLinTagMatchFound)
+                                    {
+                                        if (count < 20) SendOutputText($"Reverse string: {revSeq.Substring(minRevPreLinFlankLength)}");
+                                        Match revLinTagMatch = revLinTagRegex.Match(revSeq.Substring(minRevPreLinFlankLength));
+                                        revLinTagMatchFound = revLinTagMatch.Success;
+                                        if (revLinTagMatchFound) {
+                                            //If a match is found to both lin-tag patterns, then call it a lineage tag and write it to the output files
+                                            string forLinTag = forLinTagMatch.Value;
+                                            forLinTag = forLinTag.Substring(linTagFlankLength, forLinTag.Length - 2* linTagFlankLength);
+                                            string revLinTag = revLinTagMatch.Value;
+                                            revLinTag = revLinTag.Substring(linTagFlankLength, revLinTag.Length - 2 * linTagFlankLength);
 
-                            //if quality good, find match to lin-tag pattern
+                                            lock (fileLock)
+                                            {
+                                                //TODO: checked if clustering tool cares whether or not there is a space after the comma:
+                                                forwardWriter.Write($"{forLinTag},{sampleId}\n");
+                                                reverseWriter.Write($"{revLinTag},{sampleId}\n");
 
-                            //For counters, if revMatchFound==true that means a multi-tag match was found; 
-                            //    validSampleFound indicates that a valid sample match was found
+                                                multiTagWriter.Write($"{forMultiMatch}, {forMultiActual}\n{revMultiMatch}, {revMultiActual}\n\n");
+                                            }
+                                            //lock (counter_lock)
+                                            //{
+                                            //    grep_matching_quality_reads += 1;
+                                            //    total_reads += 1;
+                                            //}
+                                        }
+                                        else
+                                        {
+                                            //TODO: failed to find a lin-tag match
+                                        }
+                                    }
+                                    else
+                                    {
+                                        //TODO: failed to find a lin-tag match
+                                    }
+
+                                }
+                                else
+                                {
+                                    //TODO: fail quality check
+                                }
+                            }
+                            else
+                            {
+                                //TODO: fail quality check
+                            }
                         }
                         else
                         {
@@ -292,6 +326,41 @@ namespace BarcodeParser
                 else
                 {
                     //TODO: failed to find a multi-tag match
+                }
+
+                //Check for false values to decide which bins to assign counts to
+                //    revMatchFound indicates that a multi-tag match was found; 
+                //    validSampleFound indicates that a valid sample match was found
+                //    meanQualOk
+                //    revLinTagMatchFound
+                
+                if (!revLinTagMatchFound)
+                {
+                    lock (unmatchedFileLock)
+                    {
+                        unmatchedWriter.Write($"{forRead}\n{revRead}\n\n");
+                    }
+                }
+
+                lock (counterLock)
+                {
+                    totalReads += 1;
+                    if (revMatchFound)
+                    {
+                        multiTagMatchingReads += 1;
+                        if (validSampleFound)
+                        {
+                            validSampleReads += 1;
+                            if (meanQualOk)
+                            {
+                                qualityReads += 1;
+                                if (revLinTagMatchFound)
+                                {
+                                    lineageTagReads += 1;
+                                }
+                            }
+                        }
+                    }
                 }
 
 
@@ -402,10 +471,15 @@ namespace BarcodeParser
 
 
             //Summary output messages
-            SendOutputText($"{quality_reads} out of {total_reads} reads passed quality filters");
-            SendOutputText($"{grep_failures} out of {total_reads} did not match the barcode pattern");
-            SendOutputText($"{grep_matching_quality_reads} out of {total_reads} reads passed grep and quality filters");
-            SendOutputText($"{passing_reads_that_dont_match_a_multitag} out of {total_reads} reads passed grep and quality filters but did not match a multitag");
+            SendOutputText();
+            string percentStr = $"{(double)multiTagMatchingReads / totalReads * 100:0.##}";
+            SendOutputText($"{multiTagMatchingReads} out of {totalReads} reads match to both forward and reverse multi-tags ({percentStr}%).");
+            percentStr = $"{(double)validSampleReads / multiTagMatchingReads * 100:0.##}";
+            SendOutputText($"{validSampleReads} of those mapped to a valid/defined sample ID ({percentStr}%).");
+            percentStr = $"{(double)qualityReads / validSampleReads * 100:0.##}";
+            SendOutputText($"{qualityReads} of those passed the qualtity filter ({percentStr}%).");
+            percentStr = $"{(double)lineageTagReads / qualityReads * 100:0.##}";
+            SendOutputText($"{lineageTagReads} of those matched the lineage tag RegEx patttern and counted as valid barcode reads ({percentStr}%).");
 
             //Close output files
             forwardWriter.Close();
