@@ -121,7 +121,7 @@ namespace BarcodeParser
                 else regexStr += $"{forUmiTagLen[0]},{forUmiTagLen[1]}";
                 regexStr += "}";
                 regexStr += RegExStrWithOneSnip(tag, includePerfectMatch:false);
-                regexStr += RegExStrWithOneSnip(forMultiFlankStr);
+                regexStr += RegExStrWithOneSnip(forMultiFlankStr, includePerfectMatch: false);
                 SendOutputText($"Forward multi-tag RegEx: {regexStr}");
                 forMultiTagRegexDict[tag] = new Regex(regexStr, RegexOptions.Compiled);
             }
@@ -132,7 +132,7 @@ namespace BarcodeParser
                 else regexStr += $"{revUmiTagLen[0]},{revUmiTagLen[1]}";
                 regexStr += "}";
                 regexStr += RegExStrWithOneSnip(tag, includePerfectMatch: false);
-                regexStr += RegExStrWithOneSnip(revMultiFlankStr);
+                regexStr += RegExStrWithOneSnip(revMultiFlankStr, includePerfectMatch: false);
                 SendOutputText($"Reverse multi-tag RegEx: {regexStr}");
                 revMultiTagRegexDict[tag] = new Regex(regexStr, RegexOptions.Compiled);
             }
