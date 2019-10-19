@@ -107,8 +107,6 @@ namespace BarcodeParser
             //Maximum useful sequence read length based on input settings
             int maxForSeqLength = forUmiTagLen.Last() + forMultiTagLen.Last() + forSpacerLength.Last() + forLinTagLength.Last() + linTagFlankLength;
             int maxRevSeqLength = revUmiTagLen.Last() + revMultiTagLen.Last() + revSpacerLength.Last() + revLinTagLength.Last() + linTagFlankLength;
-            SendOutputText($"maxForSeqLength: {maxForSeqLength}");
-            SendOutputText($"maxRevSeqLength: {maxRevSeqLength}");
 
             //Minimum length of sequences uncluding UMI tags, multi-tags, and multi-tag flanking sequences
             int minForMultiTestLength = forUmiTagLen.First() + forMultiTagLen.First() + multiFlankLength;
@@ -149,8 +147,6 @@ namespace BarcodeParser
             //Minimum length of sequence before Lineage tag flanking sequence
             int minForPreLinFlankLength = forUmiTagLen.First() + forMultiTagLen.First() + forSpacerLength.First() - linTagFlankLength;
             int minRevPreLinFlankLength = revUmiTagLen.First() + revMultiTagLen.First() + revSpacerLength.First() - linTagFlankLength;
-            SendOutputText($"minForPreLinFlankLength: {minForPreLinFlankLength}");
-            SendOutputText($"minRevPreLinFlankLength: {minRevPreLinFlankLength}");
 
             //lengths to use for recording UMI tags (max of range)
             int forUmiTagLenUse = forUmiTagLen.Last();
@@ -186,19 +182,6 @@ namespace BarcodeParser
             revLinTagRegex = new Regex(revLintagRegexStr, RegexOptions.Compiled);
             SendOutputText($"Forward lin-tag RegEx: {forLintagRegexStr}");
             SendOutputText($"Reverse lin-tag RegEx: {revLintagRegexStr}");
-
-
-            //SendOutputText($"Multi-tag sample IDs: ");
-            //foreach (string keys in mutiTagIdDict.Keys)
-            //{
-            //    SendOutputText($"keys: {keys}; value: {mutiTagIdDict[keys]}, ");
-            //    string samp;
-            //    bool test = mutiTagIdDict.TryGetValue(keys, out samp);
-            //    SendOutputText($"test: {test}");
-            //}
-            //SendOutputText($"");
-
-
 
             // Keep track of how many reads pass each check
             int totalReads = 0;
@@ -387,11 +370,6 @@ namespace BarcodeParser
                     //TODO: failed to find a multi-tag match
                 }
 
-                //Check for false values to decide which bins to assign counts to
-                //    revMatchFound indicates that a multi-tag match was found; 
-                //    validSampleFound indicates that a valid sample match was found
-                //    meanQualOk
-                //    revLinTagMatchFound
                 
                 if (!revLinTagMatchFound)
                 {
@@ -422,123 +400,23 @@ namespace BarcodeParser
                     }
                 }
 
-
-                /*
-
-
-                if ((MeanQuality(f_qual.Substring(f_boundries_to_use[3], f_lintag_length)) > min_qs) && (MeanQuality(r_qual.Substring(r_boundries[3], r_lintag_length)) > min_qs))
-                {
-                    quality_readsAdd = 1;
-
-                    //SendOutputText($"{forwardLinTagRegex.IsMatch(f_seq.Substring(f_boundries_to_use[3], f_lintag_length))}");
-                    //SendOutputText($"{reverseLinTagRegex.IsMatch(r_seq.Substring(r_boundries[3], r_lintag_length))}");
-                    //SendOutputText();
-                    //Console.ReadLine();
-
-
-                    //checks that both lineage tags meet the regular expression filter
-                    if (forwardLinTagRegex.IsMatch(f_seq.Substring(f_boundries_to_use[3], f_lintag_length)) && reverseLinTagRegex.IsMatch(r_seq.Substring(r_boundries[3], r_lintag_length)))
-                    {
-                        grep_matching_quality_reads += 1;
-
-                        //next, find the closest matching multitag
-                        combinedMultiTag = f_seq.Substring(f_boundries_to_use[1], f_multitag_length_to_use) + r_seq.Substring(r_boundries[1], r_multitag_length);
-                        (best, num_mis) = BestMatchMultiTag(combinedMultiTag, multitags, max: max_multitag_mismatch, ignoreN: true);
-
-                        if (best.Length != total_multitag_length)
-                        {
-                            num_mis = 1000;
-                            if (best != "")
-                            {
-                                if (!use_short_tag)
-                                {
-                                    SendOutputText($"long forward tag, {combinedMultiTag}, matched to short tag sequence, {best}");
-                                }
-                                else
-                                {
-                                    //SendOutputText($"short forward tag, {combinedMultiTag}, matched to long tag sequence, {best}");
-                                }
-                            }
-                        }
-
-                        f_tag = f_seq.Substring(f_boundries_to_use[3], f_lintag_length);
-                        r_tag = r_seq.Substring(r_boundries[3], r_lintag_length);
-                        if (clip_ends)
-                        {
-                            fstart = forwardFrontClipperRegex.Match(f_tag).Index + clipper_length;
-                            fend = f_tag.Length - forwardRearClipperRegex.Match(Reverse(f_tag)).Index - clipper_length;
-                            rstart = reverseFrontClipperRegex.Match(r_tag).Index + clipper_length;
-                            rend = r_tag.Length - reverseRearClipperRegex.Match(Reverse(r_tag)).Index - clipper_length;
-
-                            f_tag = f_tag.Substring(fstart, fend - fstart);
-                            r_tag = r_tag.Substring(rstart, rend - rstart);
-                        }
-
-                        //SendOutputText($"{num_mis}");
-                        //SendOutputText();
-                        //Console.ReadLine();
-                        max_multitag_mismatch_2 = (total_multitag_length + 1) / 4;
-
-                        lock (file_lock)
-                        {
-                            quality_reads += quality_readsAdd;
-                            grep_failures += 1 - quality_readsAdd;
-
-                            if (num_mis < max_multitag_mismatch_2)
-                            {
-                                //A multitag match has been found, so write to the appropriate multitag file
-                                seq_tag_files[best].Write($"{f_seq.Substring(0, f_seqtag_length)}{r_seq.Substring(0, r_seqtag_length)}\n");
-                                lin_tag_1_files[best].Write($"{f_tag}\n");
-                                lin_tag_2_files[best].Write($"{r_tag}\n");
-                                multi_tag_files[best].Write($"{combinedMultiTag}\n");
-
-                                //seq_tag_files[best].Write($"{counter}, {f_seq.Substring(0, f_seqtag_length)}{r_seq.Substring(0, r_seqtag_length)}\n");
-                                //lin_tag_1_files[best].Write($"{counter}, {f_tag}\n");
-                                //lin_tag_2_files[best].Write($"{counter}, {r_tag}\n");
-                                //multi_tag_files[best].Write($"{counter}, {combinedMultiTag}\n");
-                            }
-                            else
-                            {
-                                //Sequence did not match a multitag, so write to unmatched output files
-                                passing_reads_that_dont_match_a_multitag += 1;
-
-                                unmatched_seqtag.Write($"{f_seq.Substring(0, f_seqtag_length)}{r_seq.Substring(0, r_seqtag_length)}\n");
-                                unmatched_lintag1.Write($"{f_tag}\n");
-                                unmatched_lintag2.Write($"{r_tag}\n");
-                                unmatched_multitag.Write($"{combinedMultiTag}\n");
-
-                                //unmatched_seqtag.Write($"{counter}, {f_seq.Substring(0, f_seqtag_length)}{r_seq.Substring(0, r_seqtag_length)}\n");
-                                //unmatched_lintag1.Write($"{counter}, {f_tag}\n");
-                                //unmatched_lintag2.Write($"{counter}, {r_tag}\n");
-                                //unmatched_multitag.Write($"{counter}, {combinedMultiTag}\n");
-                            }
-
-                            total_reads += 1;
-                        }
-
-                    }
-                    //else
-                    //{
-                    //}
-                }
-
-
-                */
-
-
             });
 
 
             //Summary output messages
             SendOutputText();
+
             string percentStr = $"{(double)multiTagMatchingReads / totalReads * 100:0.##}";
             SendOutputText($"{multiTagMatchingReads} out of {totalReads} reads match to both forward and reverse multi-tags ({percentStr}%).");
+
             percentStr = $"{(double)validSampleReads / multiTagMatchingReads * 100:0.##}";
-            SendOutputText($"{validSampleReads} of those mapped to a valid/defined sample ID ({percentStr}%).");
-            percentStr = $"{(double)qualityReads / validSampleReads * 100:0.##}";
-            SendOutputText($"{qualityReads} of those passed the qualtity filter ({percentStr}%).");
-            percentStr = $"{(double)lineageTagReads / qualityReads * 100:0.##}";
-            SendOutputText($"{lineageTagReads} of those matched the lineage tag RegEx patttern and counted as valid barcode reads ({percentStr}%).");
+            SendOutputText($"{validSampleReads} of the multi-tag matching reads mapped to a valid/defined sample ID ({percentStr}%).");
+
+            percentStr = $"{(double)qualityReads / multiTagMatchingReads * 100:0.##}";
+            SendOutputText($"{qualityReads} of the multi-tag matching reads passed the qualtity filter ({percentStr}%).");
+
+            percentStr = $"{(double)lineageTagReads / totalReads * 100:0.##}";
+            SendOutputText($"{lineageTagReads} of the total reads passed all the quality and matching checks and counted as valid barcode reads ({percentStr}%).");
 
             //Close output files
             forwardWriter.Close();
