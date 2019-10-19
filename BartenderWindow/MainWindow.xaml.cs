@@ -110,9 +110,12 @@ namespace BartenderWindow
             get { return this.spacerDelRateStr; }
             set
             {
-                this.spacerDelRateStr = value;
-                OnPropertyChanged("SpacerDelRateStr");
-                double.TryParse(spacerDelRateStr, out spacerDelRate);
+                if (this.spacerDelRateStr != value)
+                {
+                    this.spacerDelRateStr = value;
+                    OnPropertyChanged("SpacerDelRateStr");
+                    double.TryParse(spacerDelRateStr, out spacerDelRate);
+                }
             }
         }
 
@@ -121,9 +124,12 @@ namespace BartenderWindow
             get { return this.spacerInsRateStr; }
             set
             {
-                this.spacerInsRateStr = value;
-                OnPropertyChanged("SpacerInsRateStr");
-                double.TryParse(spacerInsRateStr, out spacerInsRate);
+                if (this.spacerInsRateStr != value)
+                {
+                    this.spacerInsRateStr = value;
+                    OnPropertyChanged("SpacerInsRateStr");
+                    double.TryParse(spacerInsRateStr, out spacerInsRate);
+                }
             }
         }
 
@@ -132,8 +138,11 @@ namespace BartenderWindow
             get { return this.ignoreSingleConst; }
             set
             {
-                this.ignoreSingleConst = value;
-                OnPropertyChanged("IgnoreSingleConst");
+                if (this.ignoreSingleConst != value)
+                {
+                    this.ignoreSingleConst = value;
+                    OnPropertyChanged("IgnoreSingleConst");
+                }
             }
         }
 
@@ -142,9 +151,12 @@ namespace BartenderWindow
             get { return this.regexDelRateStr; }
             set
             {
-                this.regexDelRateStr = value;
-                OnPropertyChanged("RegexDelRateStr");
-                double.TryParse(regexDelRateStr, out regexDelRate);
+                if (this.regexDelRateStr != value)
+                {
+                    this.regexDelRateStr = value;
+                    OnPropertyChanged("RegexDelRateStr");
+                    double.TryParse(regexDelRateStr, out regexDelRate);
+                }
             }
         }
 
@@ -153,9 +165,12 @@ namespace BartenderWindow
             get { return this.regexInsRateStr; }
             set
             {
-                this.regexInsRateStr = value;
-                OnPropertyChanged("RegexInsRateStr");
-                double.TryParse(regexInsRateStr, out regexInsRate);
+                if (this.regexInsRateStr != value)
+                {
+                    this.regexInsRateStr = value;
+                    OnPropertyChanged("RegexInsRateStr");
+                    double.TryParse(regexInsRateStr, out regexInsRate);
+                }
             }
         }
 
@@ -164,9 +179,12 @@ namespace BartenderWindow
             get { return this.minQualityStr; }
             set
             {
-                this.minQualityStr = value;
-                OnPropertyChanged("MinQualityStr");
-                double.TryParse(minQualityStr, out minQuality);
+                if (this.minQualityStr != value)
+                {
+                    this.minQualityStr = value;
+                    OnPropertyChanged("MinQualityStr");
+                    double.TryParse(minQualityStr, out minQuality);
+                }
             }
         }
 
@@ -186,9 +204,12 @@ namespace BartenderWindow
             get { return this.paramsFilePath; }
             set
             {
-                this.paramsFilePath = value;
-                UpdateTitle();
-                OnPropertyChanged("ParamsFileName");
+                if (this.paramsFilePath != value)
+                {
+                    this.paramsFilePath = value;
+                    UpdateTitle();
+                    OnPropertyChanged("ParamsFileName");
+                }
             }
         }
 
@@ -197,8 +218,11 @@ namespace BartenderWindow
             get { return this.displayTitle; }
             set
             {
-                this.displayTitle = value;
-                OnPropertyChanged("DisplayTitle");
+                if (this.displayTitle != value)
+                {
+                    this.displayTitle = value;
+                    OnPropertyChanged("DisplayTitle");
+                }
             }
         }
 
@@ -207,8 +231,11 @@ namespace BartenderWindow
             get { return this.reverseGzFastQ; }
             set
             {
-                this.reverseGzFastQ = value;
-                OnPropertyChanged("ReverseGzFastQ");
+                if (this.reverseGzFastQ != value)
+                {
+                    this.reverseGzFastQ = value;
+                    OnPropertyChanged("ReverseGzFastQ");
+                }
             }
         }
         
@@ -218,8 +245,11 @@ namespace BartenderWindow
             get { return this.forwardGzFastQ; }
             set
             {
-                this.forwardGzFastQ = value;
-                OnPropertyChanged("ForwardGzFastQ");
+                if (this.forwardGzFastQ != value)
+                {
+                    this.forwardGzFastQ = value;
+                    OnPropertyChanged("ForwardGzFastQ");
+                }
             }
         }
 
@@ -228,8 +258,11 @@ namespace BartenderWindow
             get { return this.outputDirectory; }
             set
             {
-                this.outputDirectory = value;
-                OnPropertyChanged("OutputDirectory");
+                if (this.outputDirectory != value)
+                {
+                    this.outputDirectory = value;
+                    OnPropertyChanged("OutputDirectory");
+                }
             }
         }
 
@@ -238,8 +271,11 @@ namespace BartenderWindow
             get { return this.inputDirectory; }
             set
             {
-                this.inputDirectory = value;
-                OnPropertyChanged("InputDirectory");
+                if (this.inputDirectory != value)
+                {
+                    this.inputDirectory = value;
+                    OnPropertyChanged("InputDirectory");
+                }
             }
         }
 
@@ -248,8 +284,11 @@ namespace BartenderWindow
             get { return this.revLintagRegexStr; }
             set
             {
-                this.revLintagRegexStr = value;
-                OnPropertyChanged("RevLintagRegexStr");
+                if (this.revLintagRegexStr != value)
+                {
+                    this.revLintagRegexStr = value;
+                    OnPropertyChanged("RevLintagRegexStr");
+                }
             }
         }
 
@@ -258,8 +297,11 @@ namespace BartenderWindow
             get { return this.forLintagRegexStr; }
             set
             {
-                this.forLintagRegexStr = value;
-                OnPropertyChanged("ForLintagRegexStr");
+                if (this.forLintagRegexStr != value)
+                {
+                    this.forLintagRegexStr = value;
+                    OnPropertyChanged("ForLintagRegexStr");
+                }
             }
         }
 
@@ -268,10 +310,13 @@ namespace BartenderWindow
             get { return this.reverseLinTagLengthStr; }
             set
             {
-                this.reverseLinTagLengthStr = value;
-                OnPropertyChanged("ReverseLinTagLengthStr");
-                reverseLinTagLength = LengthRangeStringToArray(reverseLinTagLengthStr);
-                //int.TryParse(reverseLinTagLengthStr, out reverseLinTagLength);
+                if (this.reverseLinTagLengthStr != value)
+                {
+                    this.reverseLinTagLengthStr = value;
+                    OnPropertyChanged("ReverseLinTagLengthStr");
+                    reverseLinTagLength = LengthRangeStringToArray(reverseLinTagLengthStr);
+                    //int.TryParse(reverseLinTagLengthStr, out reverseLinTagLength);
+                }
             }
         }
 
@@ -280,10 +325,13 @@ namespace BartenderWindow
             get { return this.forwardLinTagLengthStr; }
             set
             {
-                this.forwardLinTagLengthStr = value;
-                OnPropertyChanged("ForwardLinTagLengthStr");
-                forwardLinTagLength = LengthRangeStringToArray(forwardLinTagLengthStr);
-                //int.TryParse(forwardLinTagLengthStr, out forwardLinTagLength);
+                if (this.forwardLinTagLengthStr != value)
+                {
+                    this.forwardLinTagLengthStr = value;
+                    OnPropertyChanged("ForwardLinTagLengthStr");
+                    forwardLinTagLength = LengthRangeStringToArray(forwardLinTagLengthStr);
+                    //int.TryParse(forwardLinTagLengthStr, out forwardLinTagLength);
+                }
             }
         }
 
@@ -292,10 +340,13 @@ namespace BartenderWindow
             get { return this.reverseSpacerLengthStr; }
             set
             {
-                this.reverseSpacerLengthStr = value;
-                OnPropertyChanged("ReverseSpacerLengthStr");
-                reverseSpacerLength = LengthRangeStringToArray(reverseSpacerLengthStr);
-                //int.TryParse(reverseSpacerLengthStr, out reverseSpacerLength);
+                if (this.reverseSpacerLengthStr != value)
+                {
+                    this.reverseSpacerLengthStr = value;
+                    OnPropertyChanged("ReverseSpacerLengthStr");
+                    reverseSpacerLength = LengthRangeStringToArray(reverseSpacerLengthStr);
+                    //int.TryParse(reverseSpacerLengthStr, out reverseSpacerLength);
+                }
             }
         }
 
@@ -304,10 +355,13 @@ namespace BartenderWindow
             get { return this.forwardSpacerLengthStr; }
             set
             {
-                this.forwardSpacerLengthStr = value;
-                OnPropertyChanged("ForwardSpacerLengthStr");
-                forwardSpacerLength = LengthRangeStringToArray(forwardSpacerLengthStr);
-                //int.TryParse(forwardSpacerLengthStr, out forwardSpacerLength);
+                if (this.forwardSpacerLengthStr != value)
+                {
+                    this.forwardSpacerLengthStr = value;
+                    OnPropertyChanged("ForwardSpacerLengthStr");
+                    forwardSpacerLength = LengthRangeStringToArray(forwardSpacerLengthStr);
+                    //int.TryParse(forwardSpacerLengthStr, out forwardSpacerLength);
+                }
             }
         }
 
@@ -316,9 +370,12 @@ namespace BartenderWindow
             get { return this.linTagFlankLengthStr; }
             set
             {
-                this.linTagFlankLengthStr = value;
-                OnPropertyChanged("LinTagFlankLengthStr");
-                int.TryParse(linTagFlankLengthStr, out linTagFlankLength);
+                if (this.linTagFlankLengthStr != value)
+                {
+                    this.linTagFlankLengthStr = value;
+                    OnPropertyChanged("LinTagFlankLengthStr");
+                    int.TryParse(linTagFlankLengthStr, out linTagFlankLength);
+                }
             }
         }
 
@@ -327,9 +384,12 @@ namespace BartenderWindow
             get { return this.multiFlankLengthStr; }
             set
             {
-                this.multiFlankLengthStr = value;
-                OnPropertyChanged("MultiFlankLengthStr");
-                int.TryParse(multiFlankLengthStr, out multiFlankLength);
+                if (this.multiFlankLengthStr != value)
+                {
+                    this.multiFlankLengthStr = value;
+                    OnPropertyChanged("MultiFlankLengthStr");
+                    int.TryParse(multiFlankLengthStr, out multiFlankLength);
+                }
             }
         }
 
@@ -338,8 +398,11 @@ namespace BartenderWindow
             get { return this.extraMultiTagText; }
             set
             {
-                this.extraMultiTagText = value;
-                OnPropertyChanged("ExtraMultiTagText");
+                if (this.extraMultiTagText != value)
+                {
+                    this.extraMultiTagText = value;
+                    OnPropertyChanged("ExtraMultiTagText");
+                }
             }
         }
 
@@ -348,8 +411,11 @@ namespace BartenderWindow
             get { return this.reverseMultiTagText; }
             set
             {
-                this.reverseMultiTagText = value;
-                OnPropertyChanged("ReverseMultiTagText");
+                if (this.reverseMultiTagText != value)
+                {
+                    this.reverseMultiTagText = value;
+                    OnPropertyChanged("ReverseMultiTagText");
+                }
             }
         }
 
@@ -358,8 +424,11 @@ namespace BartenderWindow
             get { return this.fowardMultiTagText; }
             set
             {
-                this.fowardMultiTagText = value;
-                OnPropertyChanged("FowardMultiTagText");
+                if (this.fowardMultiTagText != value)
+                {
+                    this.fowardMultiTagText = value;
+                    OnPropertyChanged("FowardMultiTagText");
+                }
             }
         }
 
@@ -368,9 +437,12 @@ namespace BartenderWindow
             get { return this.readLengthStr; }
             set
             {
-                this.readLengthStr = value;
-                OnPropertyChanged("ReadLengthStr");
-                SetReadLength();
+                if (this.readLengthStr != value)
+                {
+                    this.readLengthStr = value;
+                    OnPropertyChanged("ReadLengthStr");
+                    SetReadLength();
+                }
             }
         }
 
@@ -379,8 +451,11 @@ namespace BartenderWindow
             get { return this.outputText; }
             set
             {
-                this.outputText = value;
-                OnPropertyChanged("OutputText");
+                if (this.outputText != value)
+                {
+                    this.outputText = value;
+                    OnPropertyChanged("OutputText");
+                }
             }
         }
 
@@ -389,9 +464,12 @@ namespace BartenderWindow
             get { return this.revUmiTagLenStr; }
             set
             {
-                this.revUmiTagLenStr = value;
-                OnPropertyChanged("RevUmiTagLenStr");
-                SetUmiTagLength(forward: false);
+                if (this.revUmiTagLenStr != value)
+                {
+                    this.revUmiTagLenStr = value;
+                    OnPropertyChanged("RevUmiTagLenStr");
+                    SetUmiTagLength(forward: false);
+                }
             }
         }
 
@@ -400,9 +478,12 @@ namespace BartenderWindow
             get { return this.forUmiTagLenStr; }
             set
             {
-                this.forUmiTagLenStr = value;
-                OnPropertyChanged("ForUmiTagLenStr");
-                SetUmiTagLength(forward: true);
+                if (this.forUmiTagLenStr != value)
+                {
+                    this.forUmiTagLenStr = value;
+                    OnPropertyChanged("ForUmiTagLenStr");
+                    SetUmiTagLength(forward: true);
+                }
             }
         }
         #endregion
