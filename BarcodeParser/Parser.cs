@@ -19,9 +19,11 @@ namespace BarcodeParser
         public string r_gzipped_fastqfile; //The reverse reads, gzipped fastq file
 
         public List<string> forMultiTagList; //List of forward multiplexing tags
+        public string[] forMultiTagArr; //Array of forward multiplexing tags, set from forMultiTagList before parsing to increase spped
         private Dictionary<string, Regex> forMultiTagRegexDict; //Dictionary of Regex's for detecting forward multi-tags, keys are multi-tag sequences
 
         public List<string> revMultiTagList; //List of reverse multiplexing tags
+        public string[] revMultiTagArr; //Array of reverse multiplexing tags, set from revMultiTagList before parsing to increase spped
         private Dictionary<string, Regex> revMultiTagRegexDict; //Dictionary of Regex's for detecting reverse multi-tags, keys are multi-tag sequences
 
         public string forMultiFlankStr, revMultiFlankStr; //string for flanking sequence after multi-tags
@@ -85,7 +87,12 @@ namespace BarcodeParser
                 SendOutputText($"        {tag}, ");
             }
             SendOutputText();
-            
+
+            //Set multi-plexing tag arrays for faster loop itteration
+            //TODO: test this assumption
+            forMultiTagArr = forMultiTagList.ToArray();
+            revMultiTagArr = revMultiTagList.ToArray();
+
             //open files for writing
             //  lineage tags for reads that sort to a multiplexing tag, these files are for input into clustering method
             TextWriter forwardWriter = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\forward_lintags.txt"));
@@ -102,6 +109,42 @@ namespace BarcodeParser
             int maxRevSeqLength = revUmiTagLen.Last() + revMultiTagLen.Last() + revSpacerLength.Last() + revLinTagLength.Last() + linTagFlankLength;
             SendOutputText($"maxForSeqLength: {maxForSeqLength}");
             SendOutputText($"maxRevSeqLength: {maxRevSeqLength}");
+
+            //Minimum length of sequences uncluding UMI tags, multi-tags, and multi-tag flanking sequences
+            int minForMultiTestLength = forUmiTagLen.First() + forMultiTagLen.First() + multiFlankLength;
+            int minRevMultiTestLength = revUmiTagLen.First() + revMultiTagLen.First() + multiFlankLength;
+            //Maximum length of sequences uncluding UMI tags, multi-tags, and multi-tag flanking sequences
+            int maxForMultiTestLength = forUmiTagLen.Last() + forMultiTagLen.Last() + multiFlankLength;
+            int maxRevMultiTestLength = revUmiTagLen.Last() + revMultiTagLen.Last() + multiFlankLength;
+            //Multi-tag flank sequence regex, used for finding matches to multi-tags if Regex search for single-mismatch fails
+            //    Done as a look-ahead so that the multi-tag sequence will be at the end of the returned matching string 
+            string multiRegexStr = RegExStrWithOneSnip(forMultiFlankStr, includePerfectMatch: false);
+            if (maxForMultiTestLength == minForMultiTestLength)
+            {
+                multiRegexStr = $"^.*(?=({multiRegexStr}$))";
+            }
+            else
+            {
+                multiRegexStr = $"^.*(?=({multiRegexStr}";
+                multiRegexStr += ".{";
+                multiRegexStr += $"0,{maxForMultiTestLength - minForMultiTestLength}";
+                multiRegexStr += "}$))";
+            }
+            Regex forMultiRegex = new Regex(multiRegexStr, RegexOptions.Compiled);
+
+            multiRegexStr = RegExStrWithOneSnip(revMultiFlankStr, includePerfectMatch: false);
+            if (maxRevMultiTestLength == minRevMultiTestLength)
+            {
+                multiRegexStr = $"^.*(?=({multiRegexStr}$))";
+            }
+            else
+            {
+                multiRegexStr = $"^.*(?=({multiRegexStr}";
+                multiRegexStr += ".{";
+                multiRegexStr += $"0,{maxRevMultiTestLength - minRevMultiTestLength}";
+                multiRegexStr += "}$))";
+            }
+            Regex revMultiRegex = new Regex(multiRegexStr, RegexOptions.Compiled);
 
             //Minimum length of sequence before Lineage tag flanking sequence
             int minForPreLinFlankLength = forUmiTagLen.First() + forMultiTagLen.First() + forSpacerLength.First() - linTagFlankLength;
@@ -219,7 +262,22 @@ namespace BarcodeParser
                         break;
                     }
                 }
-                //TODO: code to allow for 2-base-pair missmatches (or greater)
+                if (!forMatchFound)
+                {
+                    //Check for 2-base-pair mismatches (could be adjusted to allow for a greater number of mismatches by incresing max parameter)
+                    string matchSeq = forSeq.Substring(0, maxForMultiTestLength);
+                    Match match = forMultiRegex.Match(matchSeq);
+                    if (match.Success)
+                    {
+                        int misMatches;
+                        (forMultiMatch, misMatches) = BestMatchMultiTag(match.Value, forMultiTagArr, max: 3, trimUmi: true, ignoreN: true);
+                        forMatchFound = (forMultiMatch != "");
+                        if (forMatchFound)
+                        {
+                            forMultiActual = match.Value.Substring(match.Value.Length - forMultiMatch.Length);
+                        }
+                    }
+                }
                 //Procede if a multi-tag match was found;
                 if (forMatchFound)
                 {
@@ -237,74 +295,76 @@ namespace BarcodeParser
                             break;
                         }
                     }
-                    //TODO: code to allow for 2-base-pair missmatches (or greater)
+                    if (!revMatchFound)
+                    {
+                        //Check for 2-base-pair mismatches (could be adjusted to allow for a greater number of mismatches by incresing max parameter)
+                        string matchSeq = revSeq.Substring(0, maxRevMultiTestLength);
+                        Match match = revMultiRegex.Match(matchSeq);
+                        if (match.Success)
+                        {
+                            int i;
+                            //found match to flanking sequence, now test for match to multi-tag
+                            (revMultiMatch, i) = BestMatchMultiTag(match.Value, revMultiTagArr, max: 3, trimUmi: true, ignoreN:true);
+                            revMatchFound = (revMultiMatch != "");
+                            if (revMatchFound)
+                            {
+                                revMultiActual = match.Value.Substring(match.Value.Length - revMultiMatch.Length);
+                            }
+                        }
+                    }
                     //Procede if a multi-tag match was found;
                     if (revMatchFound)
                     {
-                        //Look up sample ID, if there is a match, procede
+                        //Look up sample ID, and label accordingly
                         string keys = $"{forMultiMatch}_{revMultiMatch}";
-                        //if (count < 10) SendOutputText($"keys: {keys[0]}, {keys[1]}; value: {mutiTagIdDict[keys]}, ");
                         validSampleFound = mutiTagIdDict.TryGetValue(keys, out sampleId);
-                        //if (count < 10) SendOutputText($"validSampleFound: {validSampleFound}");
-                        if (validSampleFound)
-                        {
-                            sampleId += $"_{forUmi}_{revUmi}";
+                        if (validSampleFound) sampleId += $"_{forUmi}_{revUmi}";
+                        else sampleId = $"unexpected_F{forMultiMatch}_R{revMultiMatch}_{forUmi}_{revUmi}";
 
-                            //Check mean quality score for potential forward lin-tag sequence
-                            string linTagQualStr = forQual.Substring(minForPreLinFlankLength);
+                        //Check mean quality score for potential forward lin-tag sequence
+                        string linTagQualStr = forQual.Substring(minForPreLinFlankLength);
+                        meanQualOk = MeanQuality(linTagQualStr) > min_qs;
+                        if (meanQualOk)
+                        {
+                            //If quality good on forward read, check reverse read
+                            linTagQualStr = revQual.Substring(minRevPreLinFlankLength);
                             meanQualOk = MeanQuality(linTagQualStr) > min_qs;
                             if (meanQualOk)
                             {
-                                //If quality good on forward read, check reverse read
-                                linTagQualStr = revQual.Substring(minRevPreLinFlankLength);
-                                meanQualOk = MeanQuality(linTagQualStr) > min_qs;
-                                if (meanQualOk)
+                                //if quality good, find match to lin-tag pattern, forwardLinTagRegex/reverseLinTagRegex
+                                Match forLinTagMatch = forLinTagRegex.Match(forSeq.Substring(minForPreLinFlankLength));
+                                forLinTagMatchFound = forLinTagMatch.Success;
+                                if (forLinTagMatchFound)
                                 {
-                                    //if quality good, find match to lin-tag pattern, forwardLinTagRegex/reverseLinTagRegex
-                                    if (count < 20) SendOutputText($"Forward string: {forSeq.Substring(minForPreLinFlankLength)}");
-                                    Match forLinTagMatch = forLinTagRegex.Match(forSeq.Substring(minForPreLinFlankLength));
-                                    forLinTagMatchFound = forLinTagMatch.Success;
-                                    if (forLinTagMatchFound)
+                                    Match revLinTagMatch = revLinTagRegex.Match(revSeq.Substring(minRevPreLinFlankLength));
+                                    revLinTagMatchFound = revLinTagMatch.Success;
+                                    if (revLinTagMatchFound)
                                     {
-                                        if (count < 20) SendOutputText($"Reverse string: {revSeq.Substring(minRevPreLinFlankLength)}");
-                                        Match revLinTagMatch = revLinTagRegex.Match(revSeq.Substring(minRevPreLinFlankLength));
-                                        revLinTagMatchFound = revLinTagMatch.Success;
-                                        if (revLinTagMatchFound) {
-                                            //If a match is found to both lin-tag patterns, then call it a lineage tag and write it to the output files
-                                            string forLinTag = forLinTagMatch.Value;
-                                            forLinTag = forLinTag.Substring(linTagFlankLength, forLinTag.Length - 2* linTagFlankLength);
-                                            string revLinTag = revLinTagMatch.Value;
-                                            revLinTag = revLinTag.Substring(linTagFlankLength, revLinTag.Length - 2 * linTagFlankLength);
+                                        //If a match is found to both lin-tag patterns, then call it a lineage tag and write it to the output files
+                                        string forLinTag = forLinTagMatch.Value;
+                                        forLinTag = forLinTag.Substring(linTagFlankLength, forLinTag.Length - 2 * linTagFlankLength);
+                                        string revLinTag = revLinTagMatch.Value;
+                                        revLinTag = revLinTag.Substring(linTagFlankLength, revLinTag.Length - 2 * linTagFlankLength);
 
-                                            lock (fileLock)
-                                            {
-                                                //TODO: checked if clustering tool cares whether or not there is a space after the comma:
-                                                forwardWriter.Write($"{forLinTag},{sampleId}\n");
-                                                reverseWriter.Write($"{revLinTag},{sampleId}\n");
-
-                                                multiTagWriter.Write($"{forMultiMatch}, {forMultiActual}\n{revMultiMatch}, {revMultiActual}\n\n");
-                                            }
-                                            //lock (counter_lock)
-                                            //{
-                                            //    grep_matching_quality_reads += 1;
-                                            //    total_reads += 1;
-                                            //}
-                                        }
-                                        else
+                                        lock (fileLock)
                                         {
-                                            //TODO: failed to find a lin-tag match
+                                            //TODO: checked if clustering tool cares whether or not there is a space after the comma:
+                                            forwardWriter.Write($"{forLinTag},{sampleId}\n");
+                                            reverseWriter.Write($"{revLinTag},{sampleId}\n");
+
+                                            multiTagWriter.Write($"{forMultiMatch}, {forMultiActual}\n{revMultiMatch}, {revMultiActual}\n\n");
                                         }
                                     }
                                     else
                                     {
                                         //TODO: failed to find a lin-tag match
                                     }
-
                                 }
                                 else
                                 {
-                                    //TODO: fail quality check
+                                    //TODO: failed to find a lin-tag match
                                 }
+
                             }
                             else
                             {
@@ -313,10 +373,9 @@ namespace BarcodeParser
                         }
                         else
                         {
-                            sampleId = $"unexpected_{forUmi}_{revUmi}";
-                            //TODO: handle unexpected multi-tag pair 
+                            //TODO: fail quality check
                         }
-                        
+
                     }
                     else
                     {
@@ -707,7 +766,7 @@ namespace BarcodeParser
             return d[n, m];
         }
 
-        public static (string, int) BestMatchMultiTag(string m, string[] tags, int max = int.MaxValue, bool ignoreN = false, bool useHamming = true)
+        public static (string, int) BestMatchMultiTag(string m, string[] tags, int max = int.MaxValue, bool ignoreN = false, bool useHamming = true, bool trimUmi = false)
         {
             //Combines the best_match and mismatches functions
             //returns the best matching multitag and the number of mismathces
@@ -719,14 +778,18 @@ namespace BarcodeParser
             //        If the best match has >= max mismatches, the return value for the best match tag will be an empty string
             //    IGNORE_N = true will ignore mismatches with N.
             //    useHamming controls whether the distance metric is Hamming (true) or Levenshtein (false)
+            //    trimUmi should be set to true if the string for testing (m) has a UMI seqeunce at the beginning that needs to be trimmed off
             string bestMatch = "";
             int leastMismatches = max;
             int mismatches;
-
+            string mTest;
             //first search for exact matach
             foreach (string t in tags)
             {
-                if (m.Equals(t))
+                if (trimUmi) mTest = m.Substring(m.Length - t.Length);
+                else mTest = m;
+
+                if (mTest.Equals(t))
                 {
                     return (t, 0);
                 }
@@ -734,11 +797,11 @@ namespace BarcodeParser
                 {
                     if (useHamming)
                     {
-                        mismatches = HammingDistance(m, t, max, ignoreN);
+                        mismatches = HammingDistance(mTest, t, max, ignoreN);
                     }
                     else
                     {
-                        mismatches = LevenshteinDistance(m, t);
+                        mismatches = LevenshteinDistance(mTest, t);
                     }
                     
                     if (mismatches < leastMismatches)
