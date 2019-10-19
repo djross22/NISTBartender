@@ -9,9 +9,9 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
-            <RowDefinition Height="50"/>
+            <RowDefinition Height="75"/>
             <RowDefinition Height="400"/>
-            <RowDefinition/>
+            <RowDefinition MinHeight="50"/>
         </Grid.RowDefinitions>
         <DockPanel LastChildFill="False" Grid.RowSpan="2">
             <Menu x:Name="mainMenu" DockPanel.Dock="Top" VerticalAlignment="Top" HorizontalAlignment="Stretch">
@@ -42,8 +42,9 @@
         </DockPanel>
         <Grid Grid.Row="1">
             <Grid.RowDefinitions>
-                <RowDefinition Height="1*"/>
-                <RowDefinition Height="1*"/>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="25"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="3*"/>
@@ -53,6 +54,8 @@
             <TextBox Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="115,0,10,0" FontFamily="Courier New" MaxLines="1" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Text="{Binding InputDirectory, Mode=TwoWay}" IsReadOnly="True" Background="{DynamicResource ReadOnlyBackground}" Foreground="{DynamicResource ReadOnlyForeground}"/>
             <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Output Directory:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="Directory to save output files." Height="16" Grid.Row="1"/>
             <TextBox Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="115,0,10,0" FontFamily="Courier New" MaxLines="1" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Text="{Binding OutputDirectory, Mode=TwoWay}" Grid.Row="1" IsReadOnly="True" Background="{DynamicResource ReadOnlyBackground}" Foreground="{DynamicResource ReadOnlyForeground}"/>
+            <TextBlock HorizontalAlignment="Left" Margin="82,0,0,0" Text="Output File Label:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="Text to include at beginning of all output filenames" Height="16" Grid.Row="2"/>
+            <TextBox Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="180,0,10,0" FontFamily="Courier New" MaxLines="1" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Text="{Binding OutputFileLabel, Mode=TwoWay}" Grid.Row="2" IsReadOnly="False"/>
             <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Forward Fastq file:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="Gzipped fastq file containing forward reads." Height="16" Grid.Column="1"/>
             <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Reverse Fastq file:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="Gzipped fastq file containing reverse reads." Height="16" Grid.Column="1" Grid.Row="1"/>
             <TextBox Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="115,0,10,0" FontFamily="Courier New" MaxLines="1" HorizontalContentAlignment="Left"  VerticalContentAlignment="Center" Text="{Binding ForwardGzFastQ, Mode=TwoWay}" Grid.Column="1" IsReadOnly="True" Background="{DynamicResource ReadOnlyBackground}" Foreground="{DynamicResource ReadOnlyForeground}"/>

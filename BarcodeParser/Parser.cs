@@ -14,6 +14,7 @@ namespace BarcodeParser
         IDisplaysOutputText outputReceiver;
         public string write_directory; //directory where files are read and saved
         public string read_directory; //directory where files are read and saved
+        public string outputFileLabel; //text used at the start of output filenames
 
         public string f_gzipped_fastqfile; //The forward reads, gzipped fastq file
         public string r_gzipped_fastqfile; //The reverse reads, gzipped fastq file
@@ -95,14 +96,17 @@ namespace BarcodeParser
 
             //open files for writing
             //  lineage tags for reads that sort to a multiplexing tag, these files are for input into clustering method
-            TextWriter forwardWriter = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\forward_lintags.txt"));
-            TextWriter reverseWriter = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\reverse_lintags.txt"));
+            TextWriter forwardWriter = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\{outputFileLabel}_forward_lintags.txt"));
+            TextWriter reverseWriter = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\{outputFileLabel}_reverse_lintags.txt"));
 
             //  actual multi-plexing tag sequences for reads that sort to a multiplexing tag, this files is for debugging
-            TextWriter multiTagWriter = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\multiplexing_tags.txt"));
+            TextWriter multiTagWriter = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\{outputFileLabel}_multiplexing_tags.txt"));
 
             //  reads that don't sort to a multiplexing tag or don't match the lineage tag RegEx, this file for debugging 
-            TextWriter unmatchedWriter = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\unmatched_sequences.txt"));
+            TextWriter unmatchedWriter = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\{outputFileLabel}_unmatched_sequences.txt"));
+
+            //  reads that don't sort to a multiplexing tag or don't match the lineage tag RegEx, this file for debugging 
+            TextWriter logFileWriter = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\{outputFileLabel}_NISTBartender_log.txt"));
 
             //Maximum useful sequence read length based on input settings
             int maxForSeqLength = forUmiTagLen.Last() + forMultiTagLen.Last() + forSpacerLength.Last() + forLinTagLength.Last() + linTagFlankLength;
@@ -433,7 +437,8 @@ namespace BarcodeParser
             SendOutputText();
 
 
-            
+            logFileWriter.Close();
+
         }
 
         public static string RegExStrWithOneSnip(string seq, bool includePerfectMatch = true)

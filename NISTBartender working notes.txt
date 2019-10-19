@@ -83,7 +83,7 @@ Change lin-tag lengths to range (array with min, nominal, max lengths), autoRege
 --------------------------------------------------------
 NISTBartender TODO List:
 
-checking for multi-tag match: TODO: code to allow for 2-base-pair missmatches (or greater)
+add regex to output file label
 
 in Parser: use counter to display progress
 

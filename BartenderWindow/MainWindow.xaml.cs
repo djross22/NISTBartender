@@ -40,7 +40,7 @@ namespace BartenderWindow
         private XmlDocument xmlDoc;
         private XmlNode rootNode;
 
-        private string inputDirectory, outputDirectory, forwardGzFastQ, reverseGzFastQ;
+        private string inputDirectory, outputDirectory, outputFileLabel, forwardGzFastQ, reverseGzFastQ;
         private string defaultDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);//@"C:";
 
         //Length of read from sequencer, used for underlining sequence
@@ -249,6 +249,19 @@ namespace BartenderWindow
                 {
                     this.forwardGzFastQ = value;
                     OnPropertyChanged("ForwardGzFastQ");
+                }
+            }
+        }
+
+        public string OutputFileLabel
+        {
+            get { return this.outputFileLabel; }
+            set
+            {
+                if (this.outputFileLabel != value)
+                {
+                    this.outputFileLabel = value;
+                    OnPropertyChanged("OutputFileLabel");
                 }
             }
         }
@@ -528,6 +541,8 @@ namespace BartenderWindow
             ParamsFilePath = "";
             CreateParamsList();
 
+            OutputFileLabel = "Barcoded_Samples";
+
             //CopyReverseComplement();
 
             //TextRange textRange = new TextRange(forwardRichTextBox.Document.ContentStart, forwardRichTextBox.Document.ContentEnd);
@@ -607,6 +622,7 @@ namespace BartenderWindow
             paramsList.Add("ReverseGzFastQ");
             paramsList.Add("ForwardGzFastQ");
             paramsList.Add("OutputDirectory");
+            paramsList.Add("OutputFileLabel");
             paramsList.Add("InputDirectory");
             paramsList.Add("ForwardReadSequence");
             paramsList.Add("ReverseReadSequence");
@@ -1364,7 +1380,11 @@ namespace BartenderWindow
         {
             DisableInputControls();
 
+            ParamsFilePath = System.IO.Path.Combine(outputDirectory, outputFileLabel);
+            Save();
+
             parser.write_directory = OutputDirectory;
+            parser.outputFileLabel = outputFileLabel;
             parser.read_directory = InputDirectory;
             parser.f_gzipped_fastqfile = ForwardGzFastQ;
             parser.r_gzipped_fastqfile = ReverseGzFastQ;
