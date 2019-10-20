@@ -240,6 +240,10 @@ namespace BarcodeParser
                 string forSeq = forRead.Substring(0, maxForSeqLength);
                 string revSeq = revRead.Substring(0, maxRevSeqLength);
 
+                //For quality checks, only use the relevant portions of the sequence (bases later in the read tend to have lower quality, but are not relevant) 
+                forQual = forQual.Substring(0, maxForSeqLength);
+                revQual = revQual.Substring(0, maxRevSeqLength);
+
                 forUmi = forSeq.Substring(0, forUmiTagLenUse);
                 revUmi = revSeq.Substring(0, revUmiTagLenUse);
 
