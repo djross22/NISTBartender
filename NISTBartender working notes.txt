@@ -87,7 +87,7 @@ in Parser: use counter to display progress
 --------------------------------------------------------
 NISTBartender TODO List:
 
-add regex to output file label
+add regex to output text
 
 Add check that Read Sequence text contains only allowed characters (after ToUpper())
 	ATCGXZN

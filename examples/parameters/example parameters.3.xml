@@ -6,6 +6,7 @@
   <ReverseGzFastQ>sample_100000_2.fq.gz</ReverseGzFastQ>
   <ForwardGzFastQ>sample_100000_1.fq.gz</ForwardGzFastQ>
   <OutputDirectory>C:\Users\djross\Documents\temp\csharp_test</OutputDirectory>
+  <OutputFileLabel>barcode_analysis</OutputFileLabel>
   <InputDirectory>C:\Users\djross\Documents\temp\csharp_test</InputDirectory>
   <RevLintagRegexStr>(TACC|.ACC|T.CC|TA.C|TAC.).{4,7}?AA.{4,7}?AA.{4,7}?TT.{4,7}?(TTAC|.TAC|T.AC|TT.C|TTA.)</RevLintagRegexStr>
   <ForLintagRegexStr>(TACC|.ACC|T.CC|TA.C|TAC.).{4,7}?AA.{4,7}?TT.{4,7}?TT.{4,7}?(ATAA|.TAA|A.AA|AT.A|ATA.)</ForLintagRegexStr>

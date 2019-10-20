@@ -3,13 +3,14 @@
 </ForwardReadSequence>
   <ReverseReadSequence>ZZZZZZZZXXXXXXXXXXCCTCTACGCCGGACGCATCGTGCGGCCGCCCGGGCCACCGNNTNNNANNTNNNANNTNNNTNNTNNNANNTNNNANNAGCGTGGCCGGCCTGCTGGCATATNNTNNNANNTNNNANNTNNNANNTNNNANNTNNNANNACGCCGACAGCCCGGGCTCACCGATGXXXXXXXXXXZZZZZZZZ
 </ReverseReadSequence>
-  <ReverseGzFastQ>sample_100000_2.fq.gz</ReverseGzFastQ>
-  <ForwardGzFastQ>sample_100000_1.fq.gz</ForwardGzFastQ>
-  <OutputDirectory>C:\Users\djross\source\repos\NISTBartender\examples\output</OutputDirectory>
-  <InputDirectory>C:\Users\djross\source\repos\NISTBartender\examples\input</InputDirectory>
-  <RevLintagRegexStr>(ACCG|.CCG|A.CG|AC.G|ACC.).{32,46}(AGCG|.GCG|A.CG|AG.G|AGC.)</RevLintagRegexStr>
-  <ForLintagRegexStr>(GCGT|.CGT|G.GT|GC.T|GCG.).{32,46}(ATAT|.TAT|A.AT|AT.T|ATA.)</ForLintagRegexStr>
-  <LinTagFlankLengthStr>4</LinTagFlankLengthStr>
+  <ReverseGzFastQ>RSlibSel_S1_L001_R2_001.fastq.gz</ReverseGzFastQ>
+  <ForwardGzFastQ>RSlibSel_S1_L001_R1_001.fastq.gz</ForwardGzFastQ>
+  <OutputDirectory>C:\Users\djross\Documents\Sequencing_data_downloads\2019-10-08_IPTG_Select-DNA-5-plates\barcode_analysis</OutputDirectory>
+  <OutputFileLabel>2019-10-08</OutputFileLabel>
+  <InputDirectory>C:\Users\djross\Documents\Sequencing_data_downloads\2019-10-08_IPTG_Select-DNA-5-plates</InputDirectory>
+  <RevLintagRegexStr>(CACCG|.ACCG|C.CCG|CA.CG|CAC.G|CACC.).{32,46}?(AGCGT|.GCGT|A.CGT|AG.GT|AGC.T|AGCG.)</RevLintagRegexStr>
+  <ForLintagRegexStr>(GGCGT|.GCGT|G.CGT|GG.GT|GGC.T|GGCG.).{32,46}?(ATATG|.TATG|A.ATG|AT.TG|ATA.G|ATAT.)</ForLintagRegexStr>
+  <LinTagFlankLengthStr>5</LinTagFlankLengthStr>
   <MultiFlankLengthStr>4</MultiFlankLengthStr>
   <ExtraMultiTagText>
   </ExtraMultiTagText>
@@ -36,12 +37,12 @@ GACTTAGAAG, G
 TCTAGTCTTC, H
 </FowardMultiTagText>
   <ReadLengthStr>150</ReadLengthStr>
-  <RevUmiTagLenStr>8</RevUmiTagLenStr>
-  <ForUmiTagLenStr>8</ForUmiTagLenStr>
+  <RevUmiTagLenStr>7-8</RevUmiTagLenStr>
+  <ForUmiTagLenStr>7-8</ForUmiTagLenStr>
   <MinQualityStr>30</MinQualityStr>
-  <IgnoreSingleConst>True</IgnoreSingleConst>
   <RegexDelRateStr>13</RegexDelRateStr>
   <RegexInsRateStr>25</RegexInsRateStr>
   <SpacerDelRateStr>5</SpacerDelRateStr>
   <SpacerInsRateStr>5</SpacerInsRateStr>
+  <IgnoreSingleConst>True</IgnoreSingleConst>
 </parameters>
