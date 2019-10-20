@@ -79,13 +79,15 @@ Change forward and reverse spacer lengths to range (array with min, nominal, max
 Change lin-tag lengths to range (array with min, nominal, max lengths), autoRegexButton_Click() method
 	Add AnalyzeSequences() at beginning of autoRegexButton_Click() method 
 
+Add number of parsing threads to log file output
+
+in Parser: use counter to display progress
+
 
 --------------------------------------------------------
 NISTBartender TODO List:
 
 add regex to output file label
-
-in Parser: use counter to display progress
 
 Add check that Read Sequence text contains only allowed characters (after ToUpper())
 	ATCGXZN

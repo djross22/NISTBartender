@@ -195,6 +195,7 @@ namespace BarcodeParser
             revLinTagRegex = new Regex(revLintagRegexStr, RegexOptions.Compiled);
             SendOutputText(logFileWriter, $"Forward lin-tag RegEx: {forLintagRegexStr}");
             SendOutputText(logFileWriter, $"Reverse lin-tag RegEx: {revLintagRegexStr}");
+            SendOutputText("");
 
             // Keep track of how many reads pass each check
             int totalReads = 0;
@@ -215,6 +216,8 @@ namespace BarcodeParser
                 string counter = stringArr[4]; //TODO: use this to display progress
                 int count = 0;
                 int.TryParse(counter, out count);
+                if (count % 1000000 == 0) SendOutputText(".", newLine: false);
+                if (count % 10000000 == 0 && count>0) SendOutputText($"{count}", newLine: false);
 
                 string forRead = stringArr[0];
                 string revRead = stringArr[1];
@@ -425,6 +428,7 @@ namespace BarcodeParser
 
 
             //Summary output messages
+            SendOutputText("");
             SendOutputText(logFileWriter);
 
             string percentStr = $"{(double)multiTagMatchingReads / totalReads * 100:0.##}";
