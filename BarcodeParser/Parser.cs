@@ -73,6 +73,11 @@ namespace BarcodeParser
             SendOutputText(logWriter, "");
         }
 
+        private void SendOutputText(string text, bool newLine = true)
+        {
+            outputReceiver.DisplayOutput(text, newLine);
+        }
+
         public void ParseDoubleBarcodes()
         {
             //Set up log file to keep record of output text from parsing
