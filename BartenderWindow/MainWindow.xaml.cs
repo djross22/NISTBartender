@@ -634,6 +634,8 @@ namespace BartenderWindow
 
             inputControlsList.Add(spacerDelRateTextBox);
             inputControlsList.Add(spacerInsRateTextBox);
+
+            inputControlsList.Add(outFileLabelTextBox);
         }
 
         private void CreateParamsList()
