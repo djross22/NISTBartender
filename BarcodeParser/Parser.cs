@@ -60,34 +60,40 @@ namespace BarcodeParser
             mutiTagIdDict = new Dictionary<string, string>();
         }
 
-        private void SendOutputText(string text, bool newLine = true)
+        private void SendOutputText(TextWriter logWriter, string text, bool newLine = true)
         {
             outputReceiver.DisplayOutput(text, newLine);
+
+            if (newLine) logWriter.WriteLine(text);
+            else logWriter.Write(text);
         }
 
-        private void SendOutputText()
+        private void SendOutputText(TextWriter logWriter)
         {
-            SendOutputText("");
+            SendOutputText(logWriter, "");
         }
 
         public void ParseDoubleBarcodes()
         {
+            //Set up log file to keep record of output text from parsing
+            TextWriter logFileWriter = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\{outputFileLabel}_NISTBartender_log.txt"));
+
             DateTime startTime = DateTime.Now;
-            SendOutputText();
-            SendOutputText("*********************************************");
-            SendOutputText("Running Parser for Double Barcodes.");
-            SendOutputText($"Parser started: {startTime}.");
-            SendOutputText("    Forward Multiplexing Tags:");
+            SendOutputText(logFileWriter);
+            SendOutputText(logFileWriter, "*********************************************");
+            SendOutputText(logFileWriter, "Running Parser for Double Barcodes.");
+            SendOutputText(logFileWriter, $"Parser started: {startTime}.");
+            SendOutputText(logFileWriter, "    Forward Multiplexing Tags:");
             foreach (string tag in forMultiTagList)
             {
-                SendOutputText($"        {tag}, ");
+                SendOutputText(logFileWriter, $"        {tag}, ");
             }
-            SendOutputText("    Reverse Multiplexing Tags:");
+            SendOutputText(logFileWriter, "    Reverse Multiplexing Tags:");
             foreach (string tag in revMultiTagList)
             {
-                SendOutputText($"        {tag}, ");
+                SendOutputText(logFileWriter, $"        {tag}, ");
             }
-            SendOutputText();
+            SendOutputText(logFileWriter);
 
             //Set multi-plexing tag arrays for faster loop itteration
             //TODO: test this assumption
@@ -104,9 +110,6 @@ namespace BarcodeParser
 
             //  reads that don't sort to a multiplexing tag or don't match the lineage tag RegEx, this file for debugging 
             TextWriter unmatchedWriter = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\{outputFileLabel}_unmatched_sequences.txt"));
-
-            //  reads that don't sort to a multiplexing tag or don't match the lineage tag RegEx, this file for debugging 
-            TextWriter logFileWriter = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\{outputFileLabel}_NISTBartender_log.txt"));
 
             //Maximum useful sequence read length based on input settings
             int maxForSeqLength = forUmiTagLen.Last() + forMultiTagLen.Last() + forSpacerLength.Last() + forLinTagLength.Last() + linTagFlankLength;
@@ -165,7 +168,7 @@ namespace BarcodeParser
                 regexStr += "}";
                 regexStr += RegExStrWithOneSnip(tag, includePerfectMatch:false);
                 regexStr += RegExStrWithOneSnip(forMultiFlankStr, includePerfectMatch: false);
-                SendOutputText($"Forward multi-tag RegEx: {regexStr}");
+                SendOutputText(logFileWriter, $"Forward multi-tag RegEx: {regexStr}");
                 forMultiTagRegexDict[tag] = new Regex(regexStr, RegexOptions.Compiled);
             }
             foreach (string tag in revMultiTagList)
@@ -176,16 +179,16 @@ namespace BarcodeParser
                 regexStr += "}";
                 regexStr += RegExStrWithOneSnip(tag, includePerfectMatch: false);
                 regexStr += RegExStrWithOneSnip(revMultiFlankStr, includePerfectMatch: false);
-                SendOutputText($"Reverse multi-tag RegEx: {regexStr}");
+                SendOutputText(logFileWriter, $"Reverse multi-tag RegEx: {regexStr}");
                 revMultiTagRegexDict[tag] = new Regex(regexStr, RegexOptions.Compiled);
             }
-            SendOutputText();
+            SendOutputText(logFileWriter);
 
             //RegEx's for lineage tages.
             forLinTagRegex = new Regex(forLintagRegexStr, RegexOptions.Compiled);
             revLinTagRegex = new Regex(revLintagRegexStr, RegexOptions.Compiled);
-            SendOutputText($"Forward lin-tag RegEx: {forLintagRegexStr}");
-            SendOutputText($"Reverse lin-tag RegEx: {revLintagRegexStr}");
+            SendOutputText(logFileWriter, $"Forward lin-tag RegEx: {forLintagRegexStr}");
+            SendOutputText(logFileWriter, $"Reverse lin-tag RegEx: {revLintagRegexStr}");
 
             // Keep track of how many reads pass each check
             int totalReads = 0;
@@ -408,19 +411,19 @@ namespace BarcodeParser
 
 
             //Summary output messages
-            SendOutputText();
+            SendOutputText(logFileWriter);
 
             string percentStr = $"{(double)multiTagMatchingReads / totalReads * 100:0.##}";
-            SendOutputText($"{multiTagMatchingReads} out of {totalReads} reads match to both forward and reverse multi-tags ({percentStr}%).");
+            SendOutputText(logFileWriter, $"{multiTagMatchingReads} out of {totalReads} reads match to both forward and reverse multi-tags ({percentStr}%).");
 
             percentStr = $"{(double)validSampleReads / multiTagMatchingReads * 100:0.##}";
-            SendOutputText($"{validSampleReads} of the multi-tag matching reads mapped to a valid/defined sample ID ({percentStr}%).");
+            SendOutputText(logFileWriter, $"{validSampleReads} of the multi-tag matching reads mapped to a valid/defined sample ID ({percentStr}%).");
 
             percentStr = $"{(double)qualityReads / multiTagMatchingReads * 100:0.##}";
-            SendOutputText($"{qualityReads} of the multi-tag matching reads passed the qualtity filter ({percentStr}%).");
+            SendOutputText(logFileWriter, $"{qualityReads} of the multi-tag matching reads passed the qualtity filter ({percentStr}%).");
 
             percentStr = $"{(double)lineageTagReads / totalReads * 100:0.##}";
-            SendOutputText($"{lineageTagReads} of the total reads passed all the quality and matching checks and counted as valid barcode reads ({percentStr}%).");
+            SendOutputText(logFileWriter, $"{lineageTagReads} of the total reads passed all the quality and matching checks and counted as valid barcode reads ({percentStr}%).");
 
             //Close output files
             forwardWriter.Close();
@@ -430,11 +433,11 @@ namespace BarcodeParser
 
 
             DateTime endTime = DateTime.Now;
-            SendOutputText();
-            SendOutputText($"Parser finished: {endTime}.");
-            SendOutputText($"Elapsed time: {endTime - startTime}.");
-            SendOutputText("*********************************************");
-            SendOutputText();
+            SendOutputText(logFileWriter);
+            SendOutputText(logFileWriter, $"Parser finished: {endTime}.");
+            SendOutputText(logFileWriter, $"Elapsed time: {endTime - startTime}.");
+            SendOutputText(logFileWriter, "*********************************************");
+            SendOutputText(logFileWriter);
 
 
             logFileWriter.Close();

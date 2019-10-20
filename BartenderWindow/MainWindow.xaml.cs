@@ -1380,7 +1380,7 @@ namespace BartenderWindow
         {
             DisableInputControls();
 
-            ParamsFilePath = System.IO.Path.Combine(outputDirectory, outputFileLabel);
+            ParamsFilePath = System.IO.Path.Combine(outputDirectory, $"{outputFileLabel}.xml");
             Save();
 
             parser.write_directory = OutputDirectory;
