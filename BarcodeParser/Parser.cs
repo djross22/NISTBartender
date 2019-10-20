@@ -243,6 +243,8 @@ namespace BarcodeParser
                 //For quality checks, only use the relevant portions of the sequence (bases later in the read tend to have lower quality, but are not relevant) 
                 forQual = forQual.Substring(0, maxForSeqLength);
                 revQual = revQual.Substring(0, maxRevSeqLength);
+                double meanForQuality = 0;
+                double meanRevQuality = 0;
 
                 forUmi = forSeq.Substring(0, forUmiTagLenUse);
                 revUmi = revSeq.Substring(0, revUmiTagLenUse);
@@ -322,12 +324,14 @@ namespace BarcodeParser
 
                         //Check mean quality score for potential forward lin-tag sequence
                         string linTagQualStr = forQual.Substring(minForPreLinFlankLength);
-                        meanQualOk = MeanQuality(linTagQualStr) > min_qs;
+                        meanForQuality = MeanQuality(linTagQualStr);
+                        meanQualOk = meanForQuality > min_qs;
                         if (meanQualOk)
                         {
                             //If quality good on forward read, check reverse read
                             linTagQualStr = revQual.Substring(minRevPreLinFlankLength);
-                            meanQualOk = MeanQuality(linTagQualStr) > min_qs;
+                            meanRevQuality = MeanQuality(linTagQualStr);
+                            meanQualOk = meanRevQuality > min_qs;
                             if (meanQualOk)
                             {
                                 //if quality good, find match to lin-tag pattern, forwardLinTagRegex/reverseLinTagRegex
@@ -391,7 +395,7 @@ namespace BarcodeParser
                 {
                     lock (unmatchedFileLock)
                     {
-                        unmatchedWriter.Write($"{forRead}\n{revRead}\n\n");
+                        unmatchedWriter.Write($"{forRead}, {meanForQuality}\n{revRead}, {meanRevQuality}\n\n");
                     }
                 }
 
