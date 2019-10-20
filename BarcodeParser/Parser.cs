@@ -86,7 +86,8 @@ namespace BarcodeParser
             DateTime startTime = DateTime.Now;
             SendOutputText(logFileWriter);
             SendOutputText(logFileWriter, "*********************************************");
-            SendOutputText(logFileWriter, "Running Parser for Double Barcodes.");
+            SendOutputText(logFileWriter, $"Running Parser for Double Barcodes.");
+            SendOutputText(logFileWriter, $"Number of threads used for parsing: {parsingThreads}.");
             SendOutputText(logFileWriter, $"Parser started: {startTime}.");
             SendOutputText(logFileWriter, "    Forward Multiplexing Tags:");
             foreach (string tag in forMultiTagList)
