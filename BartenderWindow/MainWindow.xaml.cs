@@ -47,6 +47,10 @@ namespace BartenderWindow
         private string readLengthStr;
         private int readLength;
 
+        //Max number of sequences to parse
+        private string maxParseStr;
+        private Int64 maxParse;
+
         //UMI tage lengths
         private string forUmiTagLenStr, revUmiTagLenStr;
         private int[] forUmiTagLen, revUmiTagLen;
@@ -459,6 +463,20 @@ namespace BartenderWindow
             }
         }
 
+        public string MaxParseStr
+        {
+            get { return this.maxParseStr; }
+            set
+            {
+                if (this.maxParseStr != value)
+                {
+                    this.maxParseStr = value;
+                    OnPropertyChanged("MaxParseStr");
+                    Int64.TryParse(maxParseStr, out maxParse);
+                }
+            }
+        }
+
         public string OutputText
         {
             get { return this.outputText; }
@@ -541,7 +559,7 @@ namespace BartenderWindow
             ParamsFilePath = "";
             CreateParamsList();
 
-            OutputFileLabel = "Barcoded_Samples";
+            OutputFileLabel = "barcode_analysis";
 
             //CopyReverseComplement();
 
@@ -573,6 +591,7 @@ namespace BartenderWindow
             AddOutputText($"Number of Logical Processors: {Environment.ProcessorCount}");
             threadsForParsing = Environment.ProcessorCount / 2;
             AddOutputText($"Number of threads to use for sequence file parsing: {threadsForParsing}");
+            AddOutputText($"");
 
             MinQualityStr = "30";
 
@@ -597,6 +616,7 @@ namespace BartenderWindow
             inputControlsList.Add(forwardRichTextBox);
             inputControlsList.Add(reverseRichTextBox);
             inputControlsList.Add(readLengthTextBox);
+            inputControlsList.Add(maxParseTextBox);
             inputControlsList.Add(fowardMultiTagTextBox);
             inputControlsList.Add(reverseMultiTagTextBox);
             inputControlsList.Add(extraMultiTagTextBox);
@@ -644,6 +664,8 @@ namespace BartenderWindow
 
             paramsList.Add("SpacerDelRateStr");
             paramsList.Add("SpacerInsRateStr");
+
+            paramsList.Add("MaxParseStr");
             //paramsList.Add("");
         }
 
@@ -783,7 +805,7 @@ namespace BartenderWindow
                     foreach (string revTag in reverseMultiTagList)
                     {
                         string keys = $"{forTag}_{revTag}";
-                        AddOutputText($"keys: {keys}");
+                        //AddOutputText($"keys: {keys}");
                         string value = $"{fowardIdDict[forTag]}{reverseIdDict[revTag]}";
                         value = value.Replace("__", "_");
                         mutiTagIdDict[keys] = value;
@@ -802,7 +824,7 @@ namespace BartenderWindow
                     string forTag = splitTag[0];
                     string revTag = splitTag[1];
                     string keys = $"{forTag}_{revTag}";
-                    AddOutputText($"keys: {keys}");
+                    //AddOutputText($"keys: {keys}");
                     if (!forwardMultiTagList.Contains(forTag)) forwardMultiTagList.Add(forTag);
                     if (!reverseMultiTagList.Contains(revTag)) reverseMultiTagList.Add(revTag);
 
@@ -1428,7 +1450,8 @@ namespace BartenderWindow
         {
             try
             {
-                parser.ParseDoubleBarcodes();
+                if (maxParse == 0) parser.ParseDoubleBarcodes();
+                else parser.ParseDoubleBarcodes(num_reads:maxParse);
             }
             catch (Exception ex)
             {
@@ -1841,12 +1864,12 @@ namespace BartenderWindow
                     if (Object.ReferenceEquals(rtb, forwardRichTextBox))
                     {
                         forwardMultiFlankStr = rtb.Selection.Text;
-                        AddOutputText($"forwardMultiFlankStr: {forwardMultiFlankStr}");
+                        //AddOutputText($"forwardMultiFlankStr: {forwardMultiFlankStr}");
                     }
                     if (Object.ReferenceEquals(rtb, reverseRichTextBox))
                     {
                         reverseMultiFlankStr = rtb.Selection.Text;
-                        AddOutputText($"reverseMultiFlankStr: {reverseMultiFlankStr}");
+                        //AddOutputText($"reverseMultiFlankStr: {reverseMultiFlankStr}");
                     }
                 }
             }
@@ -1898,6 +1921,7 @@ namespace BartenderWindow
                     reverseLinTag = rtb.Selection.Text;
                     ReverseLinTagLengthStr = $"{rtb.Selection.Text.Length}";
                     AddOutputText($"reverseLinTag: {reverseLinTag}");
+                    AddOutputText($"");
                 }
 
                 //Also highlight the flanking sequences used for matching

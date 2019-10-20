@@ -76,12 +76,22 @@
                     <RowDefinition Height="70"/>
                     <RowDefinition Height="115"/>
                 </Grid.RowDefinitions>
-                <TextBlock HorizontalAlignment="Right" Text="Read Length:" VerticalAlignment="Center" Foreground="White" Grid.Row="0" Margin="0,0,125,0" Grid.RowSpan="2"/>
-                <TextBox x:Name="readLengthTextBox" HorizontalAlignment="Right" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="60" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" KeyUp="readLengthTextBox_KeyUp" Margin="0,0,60,0" Grid.RowSpan="2">
+                <TextBlock HorizontalAlignment="Left" Text="Read Length:" VerticalAlignment="Center" Foreground="White" Grid.Row="0" Margin="250,0,0,0" Grid.RowSpan="2"/>
+                <TextBox x:Name="readLengthTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="60" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" KeyUp="readLengthTextBox_KeyUp" Margin="325,0,0,0" Grid.RowSpan="2">
                     <TextBox.Text>
                         <Binding Path="ReadLengthStr" UpdateSourceTrigger="PropertyChanged">
                             <Binding.ValidationRules>
                                 <local:RegexValidationRule x:Name="readLengthRegexRule" RegexText = "^[0-9]+$" ErrorMessage="Read length must be an integer." ValidationOptions="None"/>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
+                <TextBlock HorizontalAlignment="Left" Text="Max Sequences to Parse:" VerticalAlignment="Center" Foreground="White" Grid.Row="0" Margin="400,0,0,0" Grid.RowSpan="2" ToolTip="Maximum number of sequences to read from g-zipped fastq files. Set to zero to read the entire files."/>
+                <TextBox x:Name="maxParseTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="150" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" KeyUp="readLengthTextBox_KeyUp" Margin="535,0,0,0" Grid.RowSpan="2">
+                    <TextBox.Text>
+                        <Binding Path="MaxParseStr" UpdateSourceTrigger="PropertyChanged">
+                            <Binding.ValidationRules>
+                                <local:RegexValidationRule RegexText = "^[0-9]+$" ErrorMessage="Max sequences to parse must be an integer." ValidationOptions="None"/>
                             </Binding.ValidationRules>
                         </Binding>
                     </TextBox.Text>

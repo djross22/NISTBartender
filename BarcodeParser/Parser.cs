@@ -78,10 +78,10 @@ namespace BarcodeParser
             outputReceiver.DisplayOutput(text, newLine);
         }
 
-        public void ParseDoubleBarcodes()
+        public void ParseDoubleBarcodes(Int64 num_reads = Int64.MaxValue)
         {
             //Set up log file to keep record of output text from parsing
-            TextWriter logFileWriter = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\{outputFileLabel}_NISTBartender_log.txt"));
+            TextWriter logFileWriter = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\{outputFileLabel}.log"));
 
             DateTime startTime = DateTime.Now;
             SendOutputText(logFileWriter);
@@ -89,15 +89,16 @@ namespace BarcodeParser
             SendOutputText(logFileWriter, $"Running Parser for Double Barcodes.");
             SendOutputText(logFileWriter, $"Number of threads used for parsing: {parsingThreads}.");
             SendOutputText(logFileWriter, $"Parser started: {startTime}.");
-            SendOutputText(logFileWriter, "    Forward Multiplexing Tags:");
+            SendOutputText(logFileWriter, "");
+            SendOutputText(logFileWriter, "Forward Multiplexing Tags:");
             foreach (string tag in forMultiTagList)
             {
-                SendOutputText(logFileWriter, $"        {tag}, ");
+                SendOutputText(logFileWriter, $"    {tag}, ");
             }
-            SendOutputText(logFileWriter, "    Reverse Multiplexing Tags:");
+            SendOutputText(logFileWriter, "Reverse Multiplexing Tags:");
             foreach (string tag in revMultiTagList)
             {
-                SendOutputText(logFileWriter, $"        {tag}, ");
+                SendOutputText(logFileWriter, $"    {tag}, ");
             }
             SendOutputText(logFileWriter);
 
@@ -211,11 +212,11 @@ namespace BarcodeParser
             //Parallel.ForEach(GetNextSequences(f_fastqfile, r_fastqfile), stringArr =>
             //foreach (string[] stringArr in GetNextSequencesFromGZip($"{inDir}{f_gzipped_fastqfile}", $"{inDir}{r_gzipped_fastqfile}"))
             //Parallel.ForEach(GetNextSequencesFromGZip($"{inDir}{f_gzipped_fastqfile}", $"{inDir}{r_gzipped_fastqfile}"), stringArr =>
-            Parallel.ForEach(GetNextSequencesFromGZip($"{read_directory}\\{f_gzipped_fastqfile}", $"{read_directory}\\{r_gzipped_fastqfile}"), new ParallelOptions { MaxDegreeOfParallelism = 1 }, stringArr =>
+            Parallel.ForEach(GetNextSequencesFromGZip($"{read_directory}\\{f_gzipped_fastqfile}", $"{read_directory}\\{r_gzipped_fastqfile}", num_reads:num_reads), new ParallelOptions { MaxDegreeOfParallelism = 1 }, stringArr =>
             {
                 string counter = stringArr[4]; //TODO: use this to display progress
-                int count = 0;
-                int.TryParse(counter, out count);
+                Int64 count = 0;
+                Int64.TryParse(counter, out count);
                 if (count % 1000000 == 0) SendOutputText(".", newLine: false);
                 if (count % 10000000 == 0 && count>0) SendOutputText($"{count}", newLine: false);
 
@@ -719,11 +720,11 @@ namespace BarcodeParser
             return (bestMatch, leastMismatches);
         }
 
-        public static IEnumerable<string[]> GetNextSequencesFromGZip(string f_gzipped_fastqfile, string r_gzipped_fastqfile)
+        public static IEnumerable<string[]> GetNextSequencesFromGZip(string f_gzipped_fastqfile, string r_gzipped_fastqfile, Int64 num_reads = Int64.MaxValue)
         {
-            int count = 0;
+            Int64 count = 0;
 
-            //for testing, loop over the files ten times
+            //for testing, loop over the files multiple times
             for (int i = 0; i < 1; i++)
             {
                 FileInfo f_fileToDecompress = new FileInfo(f_gzipped_fastqfile);
@@ -739,9 +740,10 @@ namespace BarcodeParser
                     while ((f_file.ReadLine() != null) & (r_file.ReadLine() != null))
                     {
                         count += 1;
+                        if (count > num_reads) break;
 
                         //Returns an array of 4 strings: f_seq, r_seq, f_qual, r_qual, in that order
-                        string[] retString = new string[5];
+                            string[] retString = new string[5];
 
                         //parse fastq here, four lines per sequence
                         //First line is identifier, already read it, and don't need it
@@ -762,7 +764,7 @@ namespace BarcodeParser
                         retString[2] = f_file.ReadLine();
                         retString[3] = r_file.ReadLine();
 
-                        retString[4] = $"{count:000000}";
+                        retString[4] = $"{count}";
 
                         yield return retString;
                     }
