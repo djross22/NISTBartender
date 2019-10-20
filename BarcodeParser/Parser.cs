@@ -220,6 +220,8 @@ namespace BarcodeParser
                 if (count % 1000000 == 0) SendOutputText(".", newLine: false);
                 if (count % 10000000 == 0 && count>0) SendOutputText($"{count}", newLine: false);
 
+                //if (count < 15000000) return;
+
                 string forRead = stringArr[0];
                 string revRead = stringArr[1];
                 string forQual = stringArr[2];
@@ -277,6 +279,7 @@ namespace BarcodeParser
                     {
                         int misMatches;
                         (forMultiMatch, misMatches) = BestMatchMultiTag(match.Value, forMultiTagArr, max: 3, trimUmi: true, ignoreN: true);
+                        //(forMultiMatch, misMatches) = BestMatchMultiTag(match.Value, forMultiTagArr, max: 4, trimUmi: true, ignoreN: true);
                         forMatchFound = (forMultiMatch != "");
                         if (forMatchFound)
                         {
@@ -311,6 +314,7 @@ namespace BarcodeParser
                             int i;
                             //found match to flanking sequence, now test for match to multi-tag
                             (revMultiMatch, i) = BestMatchMultiTag(match.Value, revMultiTagArr, max: 3, trimUmi: true, ignoreN:true);
+                            //(revMultiMatch, i) = BestMatchMultiTag(match.Value, revMultiTagArr, max: 4, trimUmi: true, ignoreN:true);
                             revMatchFound = (revMultiMatch != "");
                             if (revMatchFound)
                             {
