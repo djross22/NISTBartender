@@ -130,33 +130,33 @@ namespace BarcodeParser
             int maxRevMultiTestLength = revUmiTagLen.Last() + revMultiTagLen.Last() + multiFlankLength;
             //Multi-tag flank sequence regex, used for finding matches to multi-tags if Regex search for single-mismatch fails
             //    Done as a look-ahead so that the multi-tag sequence will be at the end of the returned matching string 
-            string multiRegexStr = RegExStrWithOneSnip(forMultiFlankStr, includePerfectMatch: false);
+            string multiFlankRegexStr = RegExStrWithOneSnip(forMultiFlankStr, includePerfectMatch: false);
             if (maxForMultiTestLength == minForMultiTestLength)
             {
-                multiRegexStr = $"^.*(?=({multiRegexStr}$))";
+                multiFlankRegexStr = $"^.*(?=({multiFlankRegexStr}$))";
             }
             else
             {
-                multiRegexStr = $"^.*(?=({multiRegexStr}";
-                multiRegexStr += ".{";
-                multiRegexStr += $"0,{maxForMultiTestLength - minForMultiTestLength}";
-                multiRegexStr += "}$))";
+                multiFlankRegexStr = $"^.*(?=({multiFlankRegexStr}";
+                multiFlankRegexStr += ".{";
+                multiFlankRegexStr += $"0,{maxForMultiTestLength - minForMultiTestLength}";
+                multiFlankRegexStr += "}$))";
             }
-            Regex forMultiRegex = new Regex(multiRegexStr, RegexOptions.Compiled);
+            Regex forMultiFlankRegex = new Regex(multiFlankRegexStr, RegexOptions.Compiled);
 
-            multiRegexStr = RegExStrWithOneSnip(revMultiFlankStr, includePerfectMatch: false);
+            multiFlankRegexStr = RegExStrWithOneSnip(revMultiFlankStr, includePerfectMatch: false);
             if (maxRevMultiTestLength == minRevMultiTestLength)
             {
-                multiRegexStr = $"^.*(?=({multiRegexStr}$))";
+                multiFlankRegexStr = $"^.*(?=({multiFlankRegexStr}$))";
             }
             else
             {
-                multiRegexStr = $"^.*(?=({multiRegexStr}";
-                multiRegexStr += ".{";
-                multiRegexStr += $"0,{maxRevMultiTestLength - minRevMultiTestLength}";
-                multiRegexStr += "}$))";
+                multiFlankRegexStr = $"^.*(?=({multiFlankRegexStr}";
+                multiFlankRegexStr += ".{";
+                multiFlankRegexStr += $"0,{maxRevMultiTestLength - minRevMultiTestLength}";
+                multiFlankRegexStr += "}$))";
             }
-            Regex revMultiRegex = new Regex(multiRegexStr, RegexOptions.Compiled);
+            Regex revMultiFlankRegex = new Regex(multiFlankRegexStr, RegexOptions.Compiled);
 
             //Minimum length of sequence before Lineage tag flanking sequence
             int minForPreLinFlankLength = forUmiTagLen.First() + forMultiTagLen.First() + forSpacerLength.First() - linTagFlankLength;
@@ -274,7 +274,7 @@ namespace BarcodeParser
                 {
                     //Check for 2-base-pair mismatches (could be adjusted to allow for a greater number of mismatches by incresing max parameter)
                     string matchSeq = forSeq.Substring(0, maxForMultiTestLength);
-                    Match match = forMultiRegex.Match(matchSeq);
+                    Match match = forMultiFlankRegex.Match(matchSeq);
                     if (match.Success)
                     {
                         int misMatches;
@@ -308,7 +308,7 @@ namespace BarcodeParser
                     {
                         //Check for 2-base-pair mismatches (could be adjusted to allow for a greater number of mismatches by incresing max parameter)
                         string matchSeq = revSeq.Substring(0, maxRevMultiTestLength);
-                        Match match = revMultiRegex.Match(matchSeq);
+                        Match match = revMultiFlankRegex.Match(matchSeq);
                         if (match.Success)
                         {
                             int i;
