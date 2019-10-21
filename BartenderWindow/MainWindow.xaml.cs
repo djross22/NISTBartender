@@ -105,9 +105,28 @@ namespace BartenderWindow
         private double minQuality;
         private Parser parser;
 
+        private Parser.NWeights nWeight;
+        private string nWeightStr;
+
         private List<Control> inputControlsList;
 
         #region Properties Getters and Setters
+
+        public List<string> NWeightsList { get; set; }
+
+        public string NWeightStr
+        {
+            get { return this.nWeightStr; }
+            set
+            {
+                if (this.nWeightStr != value)
+                {
+                    this.nWeightStr = value;
+                    OnPropertyChanged("NWeightStr");
+                    Enum.TryParse(nWeightStr, out nWeight);
+                }
+            }
+        }
 
         public string SpacerDelRateStr
         {
@@ -530,14 +549,22 @@ namespace BartenderWindow
                     ParamsChanged = true;
                 }
                 if (name == "IgnoreSingleConst") ParamsChanged = true;
+                if (name == "NWeight") ParamsChanged = true;
             }
         }
-
+        
         public MainWindow()
         {
             InitializeComponent();
 
             InitInputControlsList();
+
+            NWeightsList = new List<string>();
+            foreach (Parser.NWeights nw in Enum.GetValues(typeof(Parser.NWeights)))
+            {
+                NWeightsList.Add($"{nw}");
+            }
+            NWeightStr = $"{Parser.NWeights.Ignore}";
 
             parser = new Parser(this);
 
@@ -636,6 +663,8 @@ namespace BartenderWindow
             inputControlsList.Add(spacerInsRateTextBox);
 
             inputControlsList.Add(outFileLabelTextBox);
+
+            inputControlsList.Add(nWeightsComboBox);
         }
 
         private void CreateParamsList()
@@ -661,6 +690,9 @@ namespace BartenderWindow
             paramsList.Add("MinQualityStr");
 
             //paramsList.Add("IgnoreSingleConst"); this is a bool Property so nas to be dealt with separately
+
+            paramsList.Add("NWeightStr");
+
             paramsList.Add("RegexDelRateStr");
             paramsList.Add("RegexInsRateStr");
 
@@ -1022,6 +1054,7 @@ namespace BartenderWindow
                 }
                 
             }
+
             //handle bool Property as special case
             string boolParam = "IgnoreSingleConst";
             propInfo = this.GetType().GetProperty(boolParam);
@@ -1032,6 +1065,7 @@ namespace BartenderWindow
                 paramNode.InnerText = value;
                 rootNode.AppendChild(paramNode);
             }
+
 
         }
 
@@ -1150,6 +1184,7 @@ namespace BartenderWindow
                 }
 
             }
+
             //handle bool Property as special case
             string boolParam = "IgnoreSingleConst";
             paramNode = rootNode.SelectSingleNode($"descendant::{boolParam}");
@@ -1160,6 +1195,7 @@ namespace BartenderWindow
                 string value = paramNode.InnerText;
                 propInfo.SetValue(this, (value=="True" || value=="true"));
             }
+
         }
 
         private void LoadParams()
@@ -1439,6 +1475,8 @@ namespace BartenderWindow
             parser.revLintagRegexStr = revLintagRegexStr;
 
             parser.parsingThreads = threadsForParsing;
+
+            parser.nWeight = nWeight;
 
             BackgroundWorker parserWorker = new BackgroundWorker();
             parserWorker.WorkerReportsProgress = false;

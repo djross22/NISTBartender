@@ -261,6 +261,7 @@
                     <RowDefinition Height="2.5*"/>
                     <RowDefinition Height="20"/>
                     <RowDefinition Height="1*"/>
+                    <RowDefinition Height="30"/>
                 </Grid.RowDefinitions>
                 <TextBlock HorizontalAlignment="Left" Text="Multiplexing Tags:" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="White" ToolTip="Enter forward and reverse multiplexing tags to be automatically combined." Margin="10,0,0,0"/>
                 <TextBlock HorizontalAlignment="Left" Text="Forward:" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="White" ToolTip="Enter forward multiplexing tags, one per line, and optionally include shorthand indentifier separated by a comma." Grid.Row="1" Margin="10,0,0,0"/>
@@ -293,6 +294,7 @@
                         </Binding>
                     </TextBox.Text>
                 </TextBox>
+                <ComboBox x:Name="nWeightsComboBox" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="144,0,0,0" Grid.Row="5" VerticalAlignment="Center" Width="120" ItemsSource="{Binding NWeightsList}" IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding NWeightStr, Mode=TwoWay}"/>
             </Grid>
         </Grid>
         <TextBox x:Name="outputTextBox" Margin="10,10,10,10" Grid.Row="3" TextWrapping="Wrap" Text="{Binding OutputText, Mode=TwoWay}" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" Background="#FF170D23" TextChanged="outputTextBox_TextChanged" Foreground="#FFCDCDCD" FontFamily="Courier New" FontSize="14"/>
