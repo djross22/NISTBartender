@@ -49,7 +49,9 @@ namespace BarcodeParser
 
         public int parsingThreads; //number of threads to use for parsing
 
-        static double min_qs = 30; //the minimum avareage quality score for both lineage tags
+        public double min_qs = 30; //the minimum avareage quality score for both lineage tags
+
+        public enum NWeights { Ignore, Half, Full };
 
         public Parser(IDisplaysOutputText receiver)
         {
@@ -125,9 +127,12 @@ namespace BarcodeParser
             //Minimum length of sequences uncluding UMI tags, multi-tags, and multi-tag flanking sequences
             int minForMultiTestLength = forUmiTagLen.First() + forMultiTagLen.First() + multiFlankLength;
             int minRevMultiTestLength = revUmiTagLen.First() + revMultiTagLen.First() + multiFlankLength;
+
             //Maximum length of sequences uncluding UMI tags, multi-tags, and multi-tag flanking sequences
             int maxForMultiTestLength = forUmiTagLen.Last() + forMultiTagLen.Last() + multiFlankLength;
             int maxRevMultiTestLength = revUmiTagLen.Last() + revMultiTagLen.Last() + multiFlankLength;
+
+
             //Multi-tag flank sequence regex, used for finding matches to multi-tags if Regex search for single-mismatch fails
             //    Done as a look-ahead so that the multi-tag sequence will be at the end of the returned matching string 
             string multiFlankRegexStr = RegExStrWithOneSnip(forMultiFlankStr, includePerfectMatch: false);
@@ -158,13 +163,34 @@ namespace BarcodeParser
             }
             Regex revMultiFlankRegex = new Regex(multiFlankRegexStr, RegexOptions.Compiled);
 
+            //If all UMI-tags and all multi-tags are the same length, potential multi-tage sequence can be identified strictly by position
+            //Multi-tag flank sequence regex, used for finding matches to multi-tags if Regex search for single-mismatch fails
+            //    Done without beginning/end anchors, since it will be compared agains strings with the exact flanking sequence length 
+            multiFlankRegexStr = RegExStrWithOneSnip(forMultiFlankStr, includePerfectMatch: false);
+            Regex forFixedMultiFlankRegex = new Regex(multiFlankRegexStr, RegexOptions.Compiled);
+            SendOutputText($"forMultiFlankRegex: {multiFlankRegexStr}");
+
+            multiFlankRegexStr = RegExStrWithOneSnip(revMultiFlankStr, includePerfectMatch: false);
+            Regex revFixedMultiFlankRegex = new Regex(multiFlankRegexStr, RegexOptions.Compiled);
+            SendOutputText($"revMultiFlankRegex: {multiFlankRegexStr}");
+
+
             //Minimum length of sequence before Lineage tag flanking sequence
             int minForPreLinFlankLength = forUmiTagLen.First() + forMultiTagLen.First() + forSpacerLength.First() - linTagFlankLength;
             int minRevPreLinFlankLength = revUmiTagLen.First() + revMultiTagLen.First() + revSpacerLength.First() - linTagFlankLength;
 
             //lengths to use for recording UMI tags (max of range)
             int forUmiTagLenUse = forUmiTagLen.Last();
-            int revUmiTagLenUse = revUmiTagLen.Last(); 
+            int revUmiTagLenUse = revUmiTagLen.Last();
+
+            //Multi-tag lengths
+            int forMultiLength = forMultiTagLen.Last();
+            int revMultiLength = revMultiTagLen.Last();
+
+            //Maximum length of UMI tags + multi-tags
+            int maxForUmiPlusMultiLength = forUmiTagLen.Last() + forMultiTagLen.Last();
+            int maxRevUmiPlusMultiLength = revUmiTagLen.Last() + revMultiTagLen.Last();
+
 
             //Regex lists for detecting multi-tags
             foreach (string tag in forMultiTagList)
@@ -212,7 +238,16 @@ namespace BarcodeParser
             //Parallel.ForEach(GetNextSequences(f_fastqfile, r_fastqfile), stringArr =>
             //foreach (string[] stringArr in GetNextSequencesFromGZip($"{inDir}{f_gzipped_fastqfile}", $"{inDir}{r_gzipped_fastqfile}"))
             //Parallel.ForEach(GetNextSequencesFromGZip($"{inDir}{f_gzipped_fastqfile}", $"{inDir}{r_gzipped_fastqfile}"), stringArr =>
-            Parallel.ForEach(GetNextSequencesFromGZip($"{read_directory}\\{f_gzipped_fastqfile}", $"{read_directory}\\{r_gzipped_fastqfile}", num_reads:num_reads), new ParallelOptions { MaxDegreeOfParallelism = 1 }, stringArr => LoopBodyRegexMultiTag(stringArr));
+            if (forUmiTagLen.Length == 1 && revUmiTagLen.Length == 1 && forMultiTagLen.Length == 1 && revMultiTagLen.Length == 1)
+            {
+                //If the UMI and multi-tags have constant length, run the faster pasring loop that looks for the multi-tag in a defined position
+                Parallel.ForEach(GetNextSequencesFromGZip($"{read_directory}\\{f_gzipped_fastqfile}", $"{read_directory}\\{r_gzipped_fastqfile}", num_reads: num_reads), new ParallelOptions { MaxDegreeOfParallelism = 1 }, stringArr => LoopBodyConstantMultiTag(stringArr));
+            }
+            else
+            {
+                //If the UMI tags or multi-ags have different lengths, use the more general parsing loop that uses a Regex search to find/match the multi-tags
+                Parallel.ForEach(GetNextSequencesFromGZip($"{read_directory}\\{f_gzipped_fastqfile}", $"{read_directory}\\{r_gzipped_fastqfile}", num_reads: num_reads), new ParallelOptions { MaxDegreeOfParallelism = 1 }, stringArr => LoopBodyRegexMultiTag(stringArr));
+            }
 
 
             //Summary output messages
@@ -471,6 +506,222 @@ namespace BarcodeParser
             }
 
             //If UMItags and multi-tags are constant length, then multi-tag position us constant, so loop can run faster with theis code:
+            void LoopBodyConstantMultiTag(string[] stringArr)
+            {
+                string counter = stringArr[4]; //TODO: use this to display progress
+                Int64 count = 0;
+                Int64.TryParse(counter, out count);
+                if (count % 1000000 == 0) SendOutputText(".", newLine: false);
+                if (count % 10000000 == 0 && count > 0) SendOutputText($"{count}", newLine: false);
+
+                string forRead = stringArr[0];
+                string revRead = stringArr[1];
+                string forQual = stringArr[2];
+                string revQual = stringArr[3];
+
+                bool forMatchFound = false;
+                bool revMatchFound = false;
+                bool validSampleFound = false;
+                bool meanQualOk = false;
+                bool forLinTagMatchFound = false;
+                bool revLinTagMatchFound = false;
+
+                string forMultiMatch = ""; //matching seqeunces from list of nominal multi-tags
+                string revMultiMatch = ""; //matching seqeunces from list of nominal multi-tags
+                string forMultiActual = ""; //actual sequence matched to multi-tag
+                string revMultiActual = ""; //actual sequence matched to multi-tag
+                string forUmi, revUmi; //UMI tag sequences
+                string sampleId; //Identifier for sample (forward x reverse multi-tag pairs)
+
+
+                //To make things run faster, work with just the substring of length maxForSeqLength/maxRevSeqLength
+                //    TODO: check this assumption with performance comparison
+                string forSeq = forRead.Substring(0, maxForSeqLength);
+                string revSeq = revRead.Substring(0, maxRevSeqLength);
+
+                //For quality checks, only use the relevant portions of the sequence (bases later in the read tend to have lower quality, but are not relevant) 
+                forQual = forQual.Substring(0, maxForSeqLength);
+                revQual = revQual.Substring(0, maxRevSeqLength);
+                double meanForQuality = 0;
+                double meanRevQuality = 0;
+
+                forUmi = forSeq.Substring(0, forUmiTagLenUse);
+                revUmi = revSeq.Substring(0, revUmiTagLenUse);
+
+
+                //First, look for match to multi-tag flanking sequence
+                string matchSeq = forSeq.Substring(maxForUmiPlusMultiLength, multiFlankLength);
+                Match match = forFixedMultiFlankRegex.Match(matchSeq);
+                ////***********************************
+                //if (forSeq.StartsWith("ATTCGTTTTCCTTCATAGCA"))
+                //{
+                //    SendOutputText($"*** F matchSeq: {matchSeq} ***");
+                //    SendOutputText($"*** F match.Success: {match.Success} ***");
+                //}
+                ////**************************************
+                //If match to flanking sequence is found on forward, check reverse flanking sequence
+                if (match.Success)
+                {
+                    matchSeq = revSeq.Substring(maxRevUmiPlusMultiLength, multiFlankLength);
+                    match = revFixedMultiFlankRegex.Match(matchSeq);
+                    ////***********************************
+                    //if (forSeq.StartsWith("ATTCGTTTTCCTTCATAGCA"))
+                    //{
+                    //    SendOutputText($"*** R matchSeq: {matchSeq} ***");
+                    //    SendOutputText($"*** R match.Success: {match.Success} ***");
+                    //}
+                    ////**************************************
+                }
+
+                //If match to both forward and reverse flanking sequences is found, go ahead and look for multi-tag matches 
+                if (match.Success)
+                {
+                    //Find Best match to forward multi-tag
+                    //   Allows for up to 2-base-pair mismatches (could be adjusted to allow for a greater number of mismatches by incresing max parameter)
+                    int misMatches;
+                    matchSeq = forSeq.Substring(forUmiTagLenUse, forMultiLength);
+                    (forMultiMatch, misMatches) = BestMatchMultiTag(matchSeq, forMultiTagArr, max: 3, trimUmi: false, ignoreN: true);
+                    forMatchFound = (forMultiMatch != "");
+                    if (forMatchFound)
+                    {
+                        forMultiActual = matchSeq;
+                    }
+                    ////***********************************
+                    //if (forSeq.StartsWith("ATTCGTTTTCCTTCATAGCA"))
+                    //{
+                    //    SendOutputText($"*** F revMatchFound: {forMatchFound} ***");
+                    //    SendOutputText($"*** F revMultiMatch: {forMultiMatch} ***");
+                    //}
+                    ////**************************************
+                }
+                //Procede if a forward multi-tag match was found;
+                if (forMatchFound)
+                {
+                    //Find Best match to reverse multi-tag
+                    //   Allows for up to 2-base-pair mismatches (could be adjusted to allow for a greater number of mismatches by incresing max parameter)
+                    int mismatches;
+                    matchSeq = revSeq.Substring(revUmiTagLenUse, revMultiLength);
+                    (revMultiMatch, mismatches) = BestMatchMultiTag(matchSeq, revMultiTagArr, max: 3, trimUmi: false, ignoreN: true);
+                    revMatchFound = (revMultiMatch != "");
+                    if (revMatchFound)
+                    {
+                        revMultiActual = matchSeq;
+                    }
+                    ////***********************************
+                    //if (forSeq.StartsWith("ATTCGTTTTCCTTCATAGCA"))
+                    //{
+                    //    SendOutputText($"*** R revMatchFound: {revMatchFound} ***");
+                    //    SendOutputText($"*** R revMultiMatch: {revMultiMatch} ***");
+                    //}
+                    ////**************************************
+
+                    //Procede if a multi-tag match was found;
+                    if (revMatchFound)
+                    {
+                        //Look up sample ID, and label accordingly
+                        string keys = $"{forMultiMatch}_{revMultiMatch}";
+                        validSampleFound = mutiTagIdDict.TryGetValue(keys, out sampleId);
+                        if (validSampleFound) sampleId += $"_{forUmi}_{revUmi}";
+                        else sampleId = $"unexpected_F{forMultiMatch}_R{revMultiMatch}_{forUmi}_{revUmi}";
+
+                        //Check mean quality score for potential forward lin-tag sequence
+                        string linTagQualStr = forQual.Substring(minForPreLinFlankLength);
+                        meanForQuality = MeanQuality(linTagQualStr);
+                        meanQualOk = meanForQuality > min_qs;
+                        if (meanQualOk)
+                        {
+                            //If quality good on forward read, check reverse read
+                            linTagQualStr = revQual.Substring(minRevPreLinFlankLength);
+                            meanRevQuality = MeanQuality(linTagQualStr);
+                            meanQualOk = meanRevQuality > min_qs;
+                            if (meanQualOk)
+                            {
+                                //if quality good, find match to lin-tag pattern, forwardLinTagRegex/reverseLinTagRegex
+                                Match forLinTagMatch = forLinTagRegex.Match(forSeq.Substring(minForPreLinFlankLength));
+                                forLinTagMatchFound = forLinTagMatch.Success;
+                                if (forLinTagMatchFound)
+                                {
+                                    Match revLinTagMatch = revLinTagRegex.Match(revSeq.Substring(minRevPreLinFlankLength));
+                                    revLinTagMatchFound = revLinTagMatch.Success;
+                                    if (revLinTagMatchFound)
+                                    {
+                                        //If a match is found to both lin-tag patterns, then call it a lineage tag and write it to the output files
+                                        string forLinTag = forLinTagMatch.Value;
+                                        forLinTag = forLinTag.Substring(linTagFlankLength, forLinTag.Length - 2 * linTagFlankLength);
+                                        string revLinTag = revLinTagMatch.Value;
+                                        revLinTag = revLinTag.Substring(linTagFlankLength, revLinTag.Length - 2 * linTagFlankLength);
+
+                                        lock (fileLock)
+                                        {
+                                            //TODO: checked if clustering tool cares whether or not there is a space after the comma:
+                                            forwardWriter.Write($"{forLinTag},{sampleId}\n");
+                                            reverseWriter.Write($"{revLinTag},{sampleId}\n");
+
+                                            multiTagWriter.Write($"{forMultiMatch}, {forMultiActual}\n{revMultiMatch}, {revMultiActual}\n\n");
+                                        }
+                                    }
+                                    else
+                                    {
+                                        //TODO: failed to find a lin-tag match
+                                    }
+                                }
+                                else
+                                {
+                                    //TODO: failed to find a lin-tag match
+                                }
+
+                            }
+                            else
+                            {
+                                //TODO: fail quality check
+                            }
+                        }
+                        else
+                        {
+                            //TODO: fail quality check
+                        }
+
+                    }
+                    else
+                    {
+                        //TODO: failed to find a multi-tag match
+                    }
+                }
+                else
+                {
+                    //TODO: failed to find a multi-tag match
+                }
+
+
+                if (!revLinTagMatchFound)
+                {
+                    lock (unmatchedFileLock)
+                    {
+                        unmatchedWriter.Write($"{forRead}, {meanForQuality}\n{revRead}, {meanRevQuality}\n\n");
+                    }
+                }
+
+                lock (counterLock)
+                {
+                    totalReads += 1;
+                    if (revMatchFound)
+                    {
+                        multiTagMatchingReads += 1;
+                        if (validSampleFound)
+                        {
+                            validSampleReads += 1;
+                            if (meanQualOk)
+                            {
+                                qualityReads += 1;
+                                if (revLinTagMatchFound)
+                                {
+                                    lineageTagReads += 1;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
         }
 
@@ -566,7 +817,8 @@ namespace BarcodeParser
             return new string(charArray);
         }
 
-        public static int HammingDistance(string seq1, string seq2, int max = int.MaxValue, bool ignoreN = false)
+        //public static int HammingDistance(string seq1, string seq2, int max = int.MaxValue, bool ignoreN = false)
+        public static int HammingDistance(string seq1, string seq2, int max = int.MaxValue, NWeights nWeight = NWeights.Full)
         {
             //This Hamming distance, from Levy lab (mostly), included max and ignoreN parameters
             //     It assumes that seq1.Length <= seq2.Length, otherwise it returns max
@@ -583,39 +835,63 @@ namespace BarcodeParser
                 else
                 {
                     int mismatches = 0;
-                    if (ignoreN)
+                    switch (nWeight)
                     {
-                        for (int i = 0; i < seq1.Length; i++)
-                        {
-                            if ((seq1[i] != 'N') && (seq2[i] != 'N'))
+                        case NWeights.Ignore:
+                            for (int i = 0; i < seq1.Length; i++)
+                            {
+                                if ((seq1[i] != 'N') && (seq2[i] != 'N'))
+                                {
+                                    if (seq1[i] != seq2[i])
+                                    {
+                                        mismatches += 1;
+                                    }
+                                }
+                                if (mismatches >= max)
+                                {
+                                    break;
+                                }
+                            }
+                            return mismatches;
+                        case NWeights.Half:
+                            double misMatchesDbl = 0;
+                            for (int i = 0; i < seq1.Length; i++)
+                            {
+                                if ((seq1[i] != 'N') && (seq2[i] != 'N'))
+                                {
+                                    if (seq1[i] != seq2[i])
+                                    {
+                                        misMatchesDbl += 1;
+                                    }
+                                }
+                                else
+                                {
+                                    misMatchesDbl += 0.5;
+                                }
+                                if (misMatchesDbl >= max)
+                                {
+                                    break;
+                                }
+                            }
+                            mismatches = (int)(Math.Round(misMatchesDbl));
+                            return mismatches;
+                        case NWeights.Full:
+                            for (int i = 0; i < seq1.Length; i++)
                             {
                                 if (seq1[i] != seq2[i])
                                 {
                                     mismatches += 1;
                                 }
+                                if (mismatches >= max)
+                                {
+                                    break;
+                                }
                             }
-                            if (mismatches >= max)
-                            {
-                                break;
-                            }
-                        }
-                        return mismatches;
+                            return mismatches;
+                        default:
+                            return max;
                     }
-                    else
-                    {
-                        for (int i = 0; i < seq1.Length; i++)
-                        {
-                            if (seq1[i] != seq2[i])
-                            {
-                                mismatches += 1;
-                            }
-                            if (mismatches >= max)
-                            {
-                                break;
-                            }
-                        }
-                        return mismatches;
-                    }
+
                 }
             }
         }
@@ -682,7 +958,7 @@ namespace BarcodeParser
             return d[n, m];
         }
 
-        public static (string, int) BestMatchMultiTag(string m, string[] tags, int max = int.MaxValue, bool ignoreN = false, bool useHamming = true, bool trimUmi = false)
+        public static (string, int) BestMatchMultiTag(string m, string[] tags, int max = int.MaxValue, NWeights nWeight = NWeights.Full, bool useHamming = true, bool trimUmi = false)
         {
             //Combines the best_match and mismatches functions
             //returns the best matching multitag and the number of mismathces
@@ -713,7 +989,7 @@ namespace BarcodeParser
                 {
                     if (useHamming)
                     {
-                        mismatches = HammingDistance(mTest, t, max, ignoreN);
+                        mismatches = HammingDistance(mTest, t, max, nWeight);
                     }
                     else
                     {
