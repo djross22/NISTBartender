@@ -105,8 +105,11 @@ namespace BartenderWindow
         private double minQuality;
         private Parser parser;
 
+        //Parameters for matching to multi-plexing tags
         private Parser.NWeights nWeight;
         private string nWeightStr;
+        private string multiTagErrorRateStr;
+        private double multiTagErrorRate;
 
         private List<Control> inputControlsList;
 
@@ -124,6 +127,20 @@ namespace BartenderWindow
                     this.nWeightStr = value;
                     OnPropertyChanged("NWeightStr");
                     Enum.TryParse(nWeightStr, out nWeight);
+                }
+            }
+        }
+
+        public string MultiTagErrorRateStr
+        {
+            get { return this.multiTagErrorRateStr; }
+            set
+            {
+                if (this.multiTagErrorRateStr != value)
+                {
+                    this.multiTagErrorRateStr = value;
+                    OnPropertyChanged("MultiTagErrorRateStr");
+                    double.TryParse(multiTagErrorRateStr, out multiTagErrorRate);
                 }
             }
         }
@@ -665,6 +682,7 @@ namespace BartenderWindow
             inputControlsList.Add(outFileLabelTextBox);
 
             inputControlsList.Add(nWeightsComboBox);
+            inputControlsList.Add(multiTagErrorRateTextBox);
         }
 
         private void CreateParamsList()
@@ -692,6 +710,7 @@ namespace BartenderWindow
             //paramsList.Add("IgnoreSingleConst"); this is a bool Property so nas to be dealt with separately
 
             paramsList.Add("NWeightStr");
+            paramsList.Add("MultiTagErrorRateStr");
 
             paramsList.Add("RegexDelRateStr");
             paramsList.Add("RegexInsRateStr");
@@ -1477,6 +1496,9 @@ namespace BartenderWindow
             parser.parsingThreads = threadsForParsing;
 
             parser.nWeight = nWeight;
+            parser.multiTagErrorRate = multiTagErrorRate;
+
+            parser.min_qs = minQuality;
 
             BackgroundWorker parserWorker = new BackgroundWorker();
             parserWorker.WorkerReportsProgress = false;

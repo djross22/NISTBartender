@@ -83,13 +83,15 @@ Add number of parsing threads to log file output
 
 in Parser: use counter to display progress
 
+Change ignoreN to Nweight enumeration: Ignore:ingoreN, Full:N=mismatch, Half:N=0.5*mismatch
+
 
 --------------------------------------------------------
 NISTBartender TODO List:
 
 Add multi-tag error rate and ignoreN controls/properties
 
-Change ingoreN to Nweighting enumeration: Ignore:ingoreN, Full:N=mismatch, Half:N=0.5*mismatch
+Add warning during AnalyzeMultiTags() if Hamming distance is <= allowed mismatch number from multiTagErrorRate
 
 add regex to output text
 

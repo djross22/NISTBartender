@@ -194,7 +194,7 @@
                         <TextBox.Text>
                             <Binding Path="RegexDelRateStr" UpdateSourceTrigger="PropertyChanged">
                                 <Binding.ValidationRules>
-                                    <local:RegexValidationRule RegexText = "^[0-9]{1,2}$" ErrorMessage="Deletion rate must be an integer etween 0 and 99." ValidationOptions="None"/>
+                                    <local:RegexValidationRule RegexText = "^[0-9]{1,2}$" ErrorMessage="Deletion rate must be an integer between 0 and 99." ValidationOptions="None"/>
                                 </Binding.ValidationRules>
                             </Binding>
                         </TextBox.Text>
@@ -204,7 +204,7 @@
                         <TextBox.Text>
                             <Binding Path="RegexInsRateStr" UpdateSourceTrigger="PropertyChanged">
                                 <Binding.ValidationRules>
-                                    <local:RegexValidationRule RegexText = "^[0-9]{1,2}$" ErrorMessage="Insertion rate must be an integer etween 0 and 99." ValidationOptions="None"/>
+                                    <local:RegexValidationRule RegexText = "^[0-9]{1,2}$" ErrorMessage="Insertion rate must be an integer between 0 and 99." ValidationOptions="None"/>
                                 </Binding.ValidationRules>
                             </Binding>
                         </TextBox.Text>
@@ -294,7 +294,18 @@
                         </Binding>
                     </TextBox.Text>
                 </TextBox>
-                <ComboBox x:Name="nWeightsComboBox" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="144,0,0,0" Grid.Row="5" VerticalAlignment="Center" Width="120" ItemsSource="{Binding NWeightsList}" IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding NWeightStr, Mode=TwoWay}"/>
+                <TextBlock HorizontalAlignment="Left" Text="Multi-tag Error Rate (%):" VerticalAlignment="Center" Foreground="White"  Grid.Row="5" Height="15" ToolTip="Allowance for errors in matching sequences to multiplexing tags" Margin="10,0,0,0"/>
+                <TextBox x:Name="multiTagErrorRateTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="30" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="142,0,0,0" Grid.Row="5">
+                    <TextBox.Text>
+                        <Binding Path="MultiTagErrorRateStr" UpdateSourceTrigger="PropertyChanged">
+                            <Binding.ValidationRules>
+                                <local:RegexValidationRule RegexText = "^[0-9]{1,2}$" ErrorMessage="Error rate must be an integer between 0 and 99." ValidationOptions="None"/>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
+                <ComboBox x:Name="nWeightsComboBox" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="277,0,0,0" Grid.Row="5" VerticalAlignment="Center" Width="70" ItemsSource="{Binding NWeightsList}" IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding NWeightStr, Mode=TwoWay}"/>
+                <TextBlock HorizontalAlignment="Left" Text="'N' weighting:" VerticalAlignment="Center" Foreground="White"  Grid.Row="5" Height="15" ToolTip="Weighting to use for error calculation with 'N's in multi-tag sequences" Margin="200,0,0,0" Grid.ColumnSpan="2"/>
             </Grid>
         </Grid>
         <TextBox x:Name="outputTextBox" Margin="10,10,10,10" Grid.Row="3" TextWrapping="Wrap" Text="{Binding OutputText, Mode=TwoWay}" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" Background="#FF170D23" TextChanged="outputTextBox_TextChanged" Foreground="#FFCDCDCD" FontFamily="Courier New" FontSize="14"/>
