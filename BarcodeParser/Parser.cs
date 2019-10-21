@@ -250,6 +250,8 @@ namespace BarcodeParser
 
 
             //define loop body functions here:
+
+            //If UMI tags and/or multi-tags have variable length, then must use a Regex to find multi-tag positions
             void LoopBodyRegexMultiTag(string[] stringArr)
             {
                 string counter = stringArr[4]; //TODO: use this to display progress
@@ -467,6 +469,8 @@ namespace BarcodeParser
                     }
                 }
             }
+
+            //If UMItags and multi-tags are constant length, then multi-tag position us constant, so loop can run faster with theis code:
 
         }
 
