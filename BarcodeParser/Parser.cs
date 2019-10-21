@@ -51,7 +51,9 @@ namespace BarcodeParser
 
         public double min_qs = 30; //the minimum avareage quality score for both lineage tags
 
+        //enum for setting how to dwal with N's in multi-tag sequence; Ignore: N counts as zero mismathces, Full:N counts as one, Half:N  counts as 1/2 mismatch
         public enum NWeights { Ignore, Half, Full };
+        public NWeights nWeight;
 
         public Parser(IDisplaysOutputText receiver)
         {
@@ -353,8 +355,8 @@ namespace BarcodeParser
                     if (match.Success)
                     {
                         int misMatches;
-                        (forMultiMatch, misMatches) = BestMatchMultiTag(match.Value, forMultiTagArr, max: 3, trimUmi: true, ignoreN: true);
-                        //(forMultiMatch, misMatches) = BestMatchMultiTag(match.Value, forMultiTagArr, max: 4, trimUmi: true, ignoreN: true);
+                        (forMultiMatch, misMatches) = BestMatchMultiTag(match.Value, forMultiTagArr, max: 3, trimUmi: true, nWeight: NWeights.Ignore);
+                        //(forMultiMatch, misMatches) = BestMatchMultiTag(match.Value, forMultiTagArr, max: 4, trimUmi: true, nWeight: NWeights.Ignore);
                         forMatchFound = (forMultiMatch != "");
                         if (forMatchFound)
                         {
@@ -388,8 +390,8 @@ namespace BarcodeParser
                         {
                             int i;
                             //found match to flanking sequence, now test for match to multi-tag
-                            (revMultiMatch, i) = BestMatchMultiTag(match.Value, revMultiTagArr, max: 3, trimUmi: true, ignoreN: true);
-                            //(revMultiMatch, i) = BestMatchMultiTag(match.Value, revMultiTagArr, max: 4, trimUmi: true, ignoreN:true);
+                            (revMultiMatch, i) = BestMatchMultiTag(match.Value, revMultiTagArr, max: 3, trimUmi: true, nWeight: NWeights.Ignore);
+                            //(revMultiMatch, i) = BestMatchMultiTag(match.Value, revMultiTagArr, max: 4, trimUmi: true, nWeight: NWeights.Ignore);
                             revMatchFound = (revMultiMatch != "");
                             if (revMatchFound)
                             {
@@ -580,7 +582,7 @@ namespace BarcodeParser
                     //   Allows for up to 2-base-pair mismatches (could be adjusted to allow for a greater number of mismatches by incresing max parameter)
                     int misMatches;
                     matchSeq = forSeq.Substring(forUmiTagLenUse, forMultiLength);
-                    (forMultiMatch, misMatches) = BestMatchMultiTag(matchSeq, forMultiTagArr, max: 3, trimUmi: false, ignoreN: true);
+                    (forMultiMatch, misMatches) = BestMatchMultiTag(matchSeq, forMultiTagArr, max: 3, trimUmi: false, nWeight: NWeights.Ignore);
                     forMatchFound = (forMultiMatch != "");
                     if (forMatchFound)
                     {
@@ -601,7 +603,7 @@ namespace BarcodeParser
                     //   Allows for up to 2-base-pair mismatches (could be adjusted to allow for a greater number of mismatches by incresing max parameter)
                     int mismatches;
                     matchSeq = revSeq.Substring(revUmiTagLenUse, revMultiLength);
-                    (revMultiMatch, mismatches) = BestMatchMultiTag(matchSeq, revMultiTagArr, max: 3, trimUmi: false, ignoreN: true);
+                    (revMultiMatch, mismatches) = BestMatchMultiTag(matchSeq, revMultiTagArr, max: 3, trimUmi: false, nWeight: NWeights.Ignore);
                     revMatchFound = (revMultiMatch != "");
                     if (revMatchFound)
                     {
