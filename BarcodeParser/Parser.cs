@@ -212,13 +212,51 @@ namespace BarcodeParser
             //Parallel.ForEach(GetNextSequences(f_fastqfile, r_fastqfile), stringArr =>
             //foreach (string[] stringArr in GetNextSequencesFromGZip($"{inDir}{f_gzipped_fastqfile}", $"{inDir}{r_gzipped_fastqfile}"))
             //Parallel.ForEach(GetNextSequencesFromGZip($"{inDir}{f_gzipped_fastqfile}", $"{inDir}{r_gzipped_fastqfile}"), stringArr =>
-            Parallel.ForEach(GetNextSequencesFromGZip($"{read_directory}\\{f_gzipped_fastqfile}", $"{read_directory}\\{r_gzipped_fastqfile}", num_reads:num_reads), new ParallelOptions { MaxDegreeOfParallelism = 1 }, stringArr =>
+            Parallel.ForEach(GetNextSequencesFromGZip($"{read_directory}\\{f_gzipped_fastqfile}", $"{read_directory}\\{r_gzipped_fastqfile}", num_reads:num_reads), new ParallelOptions { MaxDegreeOfParallelism = 1 }, stringArr => loopBodyRegexForMultiTag(stringArr));
+
+
+            //Summary output messages
+            SendOutputText("");
+            SendOutputText(logFileWriter);
+
+            string percentStr = $"{(double)multiTagMatchingReads / totalReads * 100:0.##}";
+            SendOutputText(logFileWriter, $"{multiTagMatchingReads} out of {totalReads} reads match to both forward and reverse multi-tags ({percentStr}%).");
+
+            percentStr = $"{(double)validSampleReads / multiTagMatchingReads * 100:0.##}";
+            SendOutputText(logFileWriter, $"{validSampleReads} of the multi-tag matching reads mapped to a valid/defined sample ID ({percentStr}%).");
+
+            percentStr = $"{(double)qualityReads / multiTagMatchingReads * 100:0.##}";
+            SendOutputText(logFileWriter, $"{qualityReads} of the multi-tag matching reads passed the qualtity filter ({percentStr}%).");
+
+            percentStr = $"{(double)lineageTagReads / totalReads * 100:0.##}";
+            SendOutputText(logFileWriter, $"{lineageTagReads} of the total reads passed all the quality and matching checks and counted as valid barcode reads ({percentStr}%).");
+
+            //Close output files
+            forwardWriter.Close();
+            reverseWriter.Close();
+            multiTagWriter.Close();
+            unmatchedWriter.Close();
+
+
+            DateTime endTime = DateTime.Now;
+            SendOutputText(logFileWriter);
+            SendOutputText(logFileWriter, $"Parser finished: {endTime}.");
+            SendOutputText(logFileWriter, $"Elapsed time: {endTime - startTime}.");
+            SendOutputText(logFileWriter, "*********************************************");
+            SendOutputText(logFileWriter);
+
+
+            logFileWriter.Close();
+
+
+            //define loop body functions here:
+            void loopBodyRegexForMultiTag(string[] stringArr)
             {
                 string counter = stringArr[4]; //TODO: use this to display progress
                 Int64 count = 0;
                 Int64.TryParse(counter, out count);
                 if (count % 1000000 == 0) SendOutputText(".", newLine: false);
-                if (count % 10000000 == 0 && count>0) SendOutputText($"{count}", newLine: false);
+                if (count % 10000000 == 0 && count > 0) SendOutputText($"{count}", newLine: false);
 
                 //if (count < 15000000) return;
 
@@ -266,7 +304,7 @@ namespace BarcodeParser
                         forMultiMatch = tag;
                         string matchStr = match.Value;
                         forMultiActual = matchStr.Substring(matchStr.Length - multiFlankLength - tag.Length, tag.Length);
-                        
+
                         break;
                     }
                 }
@@ -300,7 +338,7 @@ namespace BarcodeParser
                             revMultiMatch = tag;
                             string matchStr = match.Value;
                             revMultiActual = matchStr.Substring(matchStr.Length - multiFlankLength - tag.Length, tag.Length);
-                            
+
                             break;
                         }
                     }
@@ -313,7 +351,7 @@ namespace BarcodeParser
                         {
                             int i;
                             //found match to flanking sequence, now test for match to multi-tag
-                            (revMultiMatch, i) = BestMatchMultiTag(match.Value, revMultiTagArr, max: 3, trimUmi: true, ignoreN:true);
+                            (revMultiMatch, i) = BestMatchMultiTag(match.Value, revMultiTagArr, max: 3, trimUmi: true, ignoreN: true);
                             //(revMultiMatch, i) = BestMatchMultiTag(match.Value, revMultiTagArr, max: 4, trimUmi: true, ignoreN:true);
                             revMatchFound = (revMultiMatch != "");
                             if (revMatchFound)
@@ -399,7 +437,7 @@ namespace BarcodeParser
                     //TODO: failed to find a multi-tag match
                 }
 
-                
+
                 if (!revLinTagMatchFound)
                 {
                     lock (unmatchedFileLock)
@@ -428,42 +466,7 @@ namespace BarcodeParser
                         }
                     }
                 }
-
-            });
-
-
-            //Summary output messages
-            SendOutputText("");
-            SendOutputText(logFileWriter);
-
-            string percentStr = $"{(double)multiTagMatchingReads / totalReads * 100:0.##}";
-            SendOutputText(logFileWriter, $"{multiTagMatchingReads} out of {totalReads} reads match to both forward and reverse multi-tags ({percentStr}%).");
-
-            percentStr = $"{(double)validSampleReads / multiTagMatchingReads * 100:0.##}";
-            SendOutputText(logFileWriter, $"{validSampleReads} of the multi-tag matching reads mapped to a valid/defined sample ID ({percentStr}%).");
-
-            percentStr = $"{(double)qualityReads / multiTagMatchingReads * 100:0.##}";
-            SendOutputText(logFileWriter, $"{qualityReads} of the multi-tag matching reads passed the qualtity filter ({percentStr}%).");
-
-            percentStr = $"{(double)lineageTagReads / totalReads * 100:0.##}";
-            SendOutputText(logFileWriter, $"{lineageTagReads} of the total reads passed all the quality and matching checks and counted as valid barcode reads ({percentStr}%).");
-
-            //Close output files
-            forwardWriter.Close();
-            reverseWriter.Close();
-            multiTagWriter.Close();
-            unmatchedWriter.Close();
-
-
-            DateTime endTime = DateTime.Now;
-            SendOutputText(logFileWriter);
-            SendOutputText(logFileWriter, $"Parser finished: {endTime}.");
-            SendOutputText(logFileWriter, $"Elapsed time: {endTime - startTime}.");
-            SendOutputText(logFileWriter, "*********************************************");
-            SendOutputText(logFileWriter);
-
-
-            logFileWriter.Close();
+            }
 
         }
 
