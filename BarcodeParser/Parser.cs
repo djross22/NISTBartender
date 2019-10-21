@@ -212,7 +212,7 @@ namespace BarcodeParser
             //Parallel.ForEach(GetNextSequences(f_fastqfile, r_fastqfile), stringArr =>
             //foreach (string[] stringArr in GetNextSequencesFromGZip($"{inDir}{f_gzipped_fastqfile}", $"{inDir}{r_gzipped_fastqfile}"))
             //Parallel.ForEach(GetNextSequencesFromGZip($"{inDir}{f_gzipped_fastqfile}", $"{inDir}{r_gzipped_fastqfile}"), stringArr =>
-            Parallel.ForEach(GetNextSequencesFromGZip($"{read_directory}\\{f_gzipped_fastqfile}", $"{read_directory}\\{r_gzipped_fastqfile}", num_reads:num_reads), new ParallelOptions { MaxDegreeOfParallelism = 1 }, stringArr => loopBodyRegexForMultiTag(stringArr));
+            Parallel.ForEach(GetNextSequencesFromGZip($"{read_directory}\\{f_gzipped_fastqfile}", $"{read_directory}\\{r_gzipped_fastqfile}", num_reads:num_reads), new ParallelOptions { MaxDegreeOfParallelism = 1 }, stringArr => LoopBodyRegexMultiTag(stringArr));
 
 
             //Summary output messages
@@ -250,7 +250,7 @@ namespace BarcodeParser
 
 
             //define loop body functions here:
-            void loopBodyRegexForMultiTag(string[] stringArr)
+            void LoopBodyRegexMultiTag(string[] stringArr)
             {
                 string counter = stringArr[4]; //TODO: use this to display progress
                 Int64 count = 0;
