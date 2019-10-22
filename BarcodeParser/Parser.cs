@@ -19,6 +19,8 @@ namespace BarcodeParser
         public string f_gzipped_fastqfile; //The forward reads, gzipped fastq file
         public string r_gzipped_fastqfile; //The reverse reads, gzipped fastq file
 
+        public string forLintagOutFile, revLintagOutFile;
+
         public List<string> forMultiTagList; //List of forward multiplexing tags
         public string[] forMultiTagArr; //Array of forward multiplexing tags, set from forMultiTagList before parsing to increase spped
         private Dictionary<string, Regex> forMultiTagRegexDict; //Dictionary of Regex's for detecting forward multi-tags, keys are multi-tag sequences
@@ -118,8 +120,10 @@ namespace BarcodeParser
 
             //open files for writing
             //  lineage tags for reads that sort to a multiplexing tag, these files are for input into clustering method
-            TextWriter forwardWriter = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\{outputFileLabel}_forward_lintags.txt"));
-            TextWriter reverseWriter = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\{outputFileLabel}_reverse_lintags.txt"));
+            forLintagOutFile = $"{write_directory}\\{outputFileLabel}_forward_lintags.txt";
+            TextWriter forwardWriter = TextWriter.Synchronized(new StreamWriter(forLintagOutFile));
+            revLintagOutFile = $"{write_directory}\\{outputFileLabel}_reverse_lintags.txt";
+            TextWriter reverseWriter = TextWriter.Synchronized(new StreamWriter(revLintagOutFile));
 
             //  actual multi-plexing tag sequences for reads that sort to a multiplexing tag, this files is for debugging
             TextWriter multiTagWriter = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\{outputFileLabel}_multiplexing_tags.txt"));
