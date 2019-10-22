@@ -59,8 +59,11 @@ namespace BarcodeClusterer
 
             //TODO: if seed_len < step: print("The default or specified step is larger than the seed length, reset the step be the seed length!") step = seed_len
             string bartenderArgStr = "bartender_single_com";
-            bartenderArgStr += $" -f {inputFile}";
-            bartenderArgStr += $" -o {outputPrefix}";
+
+            // path string have to use .Replace("\\", "/")..Replace("C:/", "/mnt/c/") because the call to wsl uses Unix syntax
+            bartenderArgStr += $" -f {inputFile.Replace("\\", "/").Replace("C:/", "/mnt/c/")}"; //.Replace("\\", "/").Replace("C:/", "/mnt/c/")
+            bartenderArgStr += $" -o {outputPrefix.Replace("\\", "/").Replace("C:/", "/mnt/c/")}"; //.Replace("\\", "/").Replace("C:/", "/mnt/c/")
+
             bartenderArgStr += $" -c {clusterCutoffFrequency}";
             bartenderArgStr += $" -z {clusterMergeThreshold}";
             bartenderArgStr += $" -l {clusterSeedLength}";
@@ -72,31 +75,32 @@ namespace BarcodeClusterer
             SendOutputText(logFileWriter, $"Running bartender with command string: {bartenderArgStr}.");
             SendOutputText(logFileWriter, "");
 
-            ////This part starts the wsl Bartender process (Bartender running on the Unix shell in Windows)
-            //using (Process clusterProcess = new Process())
-            //{
-            //    clusterProcess.StartInfo.FileName = "wsl";
+            //This part starts the wsl Bartender process (Bartender running on the Unix shell in Windows)
+            using (Process clusterProcess = new Process())
+            {
+                clusterProcess.StartInfo.FileName = "wsl";
 
-            //    clusterProcess.StartInfo.Arguments = bartenderArgStr;
+                clusterProcess.StartInfo.Arguments = bartenderArgStr;
 
-            //    //clusterProcess.StartInfo.ArgumentList.Add("bartender_single");// -c";
-            //    //clusterProcess.StartInfo.ArgumentList.Add("/mnt/c/Users/djross/Documents/temp/csharp_test/barcode_analysis_forward_lintags.txt");// -c";
-            //    //clusterProcess.StartInfo.ArgumentList.Add(@"-f C:\Users\djross\Documents\temp\csharp_test\barcode_analysis_forward_lintags.txt");// -c";
+                //clusterProcess.StartInfo.ArgumentList.Add("bartender_single");// -c";
+                //clusterProcess.StartInfo.ArgumentList.Add("/mnt/c/Users/djross/Documents/temp/csharp_test/barcode_analysis_forward_lintags.txt");// -c";
+                //clusterProcess.StartInfo.ArgumentList.Add(@"-f C:\Users\djross\Documents\temp\csharp_test\barcode_analysis_forward_lintags.txt");// -c";
 
-            //    clusterProcess.StartInfo.UseShellExecute = false;
-            //    clusterProcess.StartInfo.RedirectStandardOutput = true;
-            //    clusterProcess.StartInfo.RedirectStandardError = true;
+                clusterProcess.StartInfo.CreateNoWindow = true;
+                clusterProcess.StartInfo.UseShellExecute = false;
+                clusterProcess.StartInfo.RedirectStandardOutput = true;
+                clusterProcess.StartInfo.RedirectStandardError = true;
 
-            //    clusterProcess.Start();
+                clusterProcess.Start();
 
-            //    while (!clusterProcess.HasExited)
-            //    {
-            //        SendOutputText(clusterProcess.StandardOutput.ReadToEnd());
-            //        Thread.Sleep(100);
-            //    }
+                while (!clusterProcess.HasExited)
+                {
+                    SendOutputText(logFileWriter, clusterProcess.StandardOutput.ReadToEnd());
+                    Thread.Sleep(100);
+                }
 
-            //    clusterProcess.WaitForExit();
-            //}
+                clusterProcess.WaitForExit();
+            }
 
 
             //ProcessStartInfo startInfo = new ProcessStartInfo();

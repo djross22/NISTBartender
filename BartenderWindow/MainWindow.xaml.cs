@@ -1642,11 +1642,10 @@ namespace BartenderWindow
 
 
                 //Set clusterer parameters
-                // path string have to use .Replace("\\", "/") because the call to wsl uses Unix syntax
-                forwardClusterer.inputFile = ForClusterInputPath.Replace("\\", "/");
-                forwardClusterer.outputPrefix = $"{ClusterOutputDir.Replace("\\", "/")}/forward";
-                reverseClusterer.inputFile = RevClusterInputPath.Replace("\\", "/");
-                reverseClusterer.outputPrefix = $"{ClusterOutputDir.Replace("\\", "/")}/reverse";
+                forwardClusterer.inputFile = ForClusterInputPath;
+                forwardClusterer.outputPrefix = $"{ClusterOutputDir}\\{OutputFileLabel}_forward";
+                reverseClusterer.inputFile = RevClusterInputPath;
+                reverseClusterer.outputPrefix = $"{ClusterOutputDir}\\{OutputFileLabel}_reverse";
                 foreach (Clusterer clust in new Clusterer[] { forwardClusterer, reverseClusterer} ) 
                 {
                     clust.clusterSeedStep = clusterSeedStep;
