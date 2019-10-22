@@ -36,6 +36,7 @@ namespace BartenderWindow
         private string displayTitle = appName + " - ";
         private string paramsFilePath;
         private bool paramsChanged = false;
+        private bool useSaveAs = true;
         private List<string> paramsList;
         //Fields for XML parameters file output
         private XmlDocument xmlDoc;
@@ -687,6 +688,8 @@ namespace BartenderWindow
                 }
                 if (name == "IgnoreSingleConst") ParamsChanged = true;
                 if (name == "NWeight") ParamsChanged = true;
+
+                if (name == "OutputFileLabel") useSaveAs = true;
             }
         }
         
@@ -1111,7 +1114,15 @@ namespace BartenderWindow
 
         private void SaveMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            Save();
+            if (useSaveAs)
+            {
+                SaveAs();
+            }
+            else
+            {
+                Save();
+            }
+
             outputTextBox.Focus();
         }
 
@@ -1175,6 +1186,8 @@ namespace BartenderWindow
             {
                 didSave = false;
             }
+
+            useSaveAs = false;
 
             return didSave;
         }
@@ -1304,6 +1317,8 @@ namespace BartenderWindow
                     ReadParamsXml(ParamsFilePath);
 
                     ParamsChanged = false;
+
+                    useSaveAs = false;
                 }
                 catch
                 {
