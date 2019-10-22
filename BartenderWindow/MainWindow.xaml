@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BartenderWindow"
         mc:Ignorable="d"
-        Title="{Binding DisplayTitle}" Height="800" Width="1090" Background="{DynamicResource PurpleBackgroundBrush}" MinWidth="1090" MinHeight="800" Closing="Window_Closing">
+        Title="{Binding DisplayTitle}" Height="800" Width="1090" Background="{DynamicResource PurpleBackgroundBrush}" MinWidth="1090" MinHeight="1000" Closing="Window_Closing">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
