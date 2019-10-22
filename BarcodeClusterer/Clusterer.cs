@@ -16,7 +16,7 @@ namespace BarcodeClusterer
 
         public double clusterMergeThreshold;
 
-        public int clusteringThreads;
+        public int threadsForClustering;
 
         //private Process clusterProcess;
 
@@ -53,7 +53,7 @@ namespace BarcodeClusterer
             SendOutputText(logFileWriter);
             SendOutputText(logFileWriter, "*********************************************");
             SendOutputText(logFileWriter, $"Running Barcode Clustering.");
-            SendOutputText(logFileWriter, $"Number of threads used for clustering: {clusteringThreads}.");
+            SendOutputText(logFileWriter, $"Number of threads used for clustering: {threadsForClustering}.");
             SendOutputText(logFileWriter, $"Clustering started: {startTime}.");
             SendOutputText(logFileWriter, "");
 
