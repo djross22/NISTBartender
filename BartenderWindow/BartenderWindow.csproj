@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BarcodeClusterer\BarcodeClusterer.csproj" />
     <ProjectReference Include="..\BarcodeParser\BarcodeParser.csproj" />
   </ItemGroup>
 

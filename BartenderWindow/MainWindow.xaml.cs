@@ -19,6 +19,7 @@ using System.ComponentModel;
 using Microsoft.Win32;
 using System.Xml;
 using BarcodeParser;
+using BarcodeClusterer;
 
 namespace BartenderWindow
 {
@@ -111,6 +112,10 @@ namespace BartenderWindow
         private string multiTagErrorRateStr;
         private double multiTagErrorRate;
 
+        //Parameters for barcode clustering
+        private Clusterer forwardClusterer, reverseClusterer;
+
+        //List of controls to disable/enable when parser or clusterer is running
         private List<Control> inputControlsList;
 
         #region Properties Getters and Setters

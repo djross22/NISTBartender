@@ -87,7 +87,7 @@ namespace BarcodeParser
         public void ParseDoubleBarcodes(Int64 num_reads = Int64.MaxValue)
         {
             //Set up log file to keep record of output text from parsing
-            TextWriter logFileWriter = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\{outputFileLabel}.log"));
+            TextWriter logFileWriter = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\{outputFileLabel}.parsing.log"));
 
             DateTime startTime = DateTime.Now;
             SendOutputText(logFileWriter);
