@@ -1651,6 +1651,9 @@ namespace BartenderWindow
             {
                 DisableInputControls();
 
+                ParamsFilePath = System.IO.Path.Combine(outputDirectory, $"{outputFileLabel}.xml");
+                Save();
+
                 // initialize cluserers
                 forwardClusterer = new Clusterer(this);
                 reverseClusterer = new Clusterer(this);
