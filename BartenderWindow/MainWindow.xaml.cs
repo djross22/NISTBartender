@@ -827,21 +827,32 @@ namespace BartenderWindow
             paramsList = new List<string>();
             paramsList.Add("ReverseGzFastQ");
             paramsList.Add("ForwardGzFastQ");
+
             paramsList.Add("OutputDirectory");
             paramsList.Add("OutputFileLabel");
             paramsList.Add("InputDirectory");
+
             paramsList.Add("ForwardReadSequence");
             paramsList.Add("ReverseReadSequence");
+
             paramsList.Add("RevLintagRegexStr");
             paramsList.Add("ForLintagRegexStr");
+
             paramsList.Add("LinTagFlankLengthStr");
             paramsList.Add("MultiFlankLengthStr");
+
+            paramsList.Add("ForwardLinTagLengthStr");
+            paramsList.Add("ReverseLinTagLengthStr");
+
             paramsList.Add("ExtraMultiTagText");
             paramsList.Add("ReverseMultiTagText");
             paramsList.Add("FowardMultiTagText");
+
             paramsList.Add("ReadLengthStr");
+
             paramsList.Add("RevUmiTagLenStr");
             paramsList.Add("ForUmiTagLenStr");
+
             paramsList.Add("MinQualityStr");
 
             //paramsList.Add("IgnoreSingleConst"); this is a bool Property so nas to be dealt with separately
@@ -1617,6 +1628,8 @@ namespace BartenderWindow
 
             InitClusterers();
 
+            ClusterOutputDir = OutputDirectory;
+
             BackgroundWorker worker = new BackgroundWorker();
             worker.WorkerReportsProgress = false;
             worker.DoWork += parserAndClusterWorker_DoWork;
@@ -1644,7 +1657,6 @@ namespace BartenderWindow
 
             ForClusterInputPath = parser.forLintagOutFile;
             RevClusterInputPath = parser.revLintagOutFile;
-            ClusterOutputDir = OutputDirectory;
 
             try
             {
@@ -2329,13 +2341,19 @@ namespace BartenderWindow
                 if (Object.ReferenceEquals(rtb, forwardRichTextBox))
                 {
                     forwardLinTag = rtb.Selection.Text;
-                    ForwardLinTagLengthStr = $"{rtb.Selection.Text.Length}";
+                    if ( (ForwardLinTagLengthStr is null) || !ForwardLinTagLengthStr.Contains("-"))
+                    {
+                        ForwardLinTagLengthStr = $"{forwardLinTag.Length}";
+                    }
                     AddOutputText($"forwardLinTag: {forwardLinTag}");
                 }
                 if (Object.ReferenceEquals(rtb, reverseRichTextBox))
                 {
                     reverseLinTag = rtb.Selection.Text;
-                    ReverseLinTagLengthStr = $"{rtb.Selection.Text.Length}";
+                    if ( (ReverseLinTagLengthStr is null) || !ReverseLinTagLengthStr.Contains("-"))
+                    {
+                        ReverseLinTagLengthStr = $"{reverseLinTag.Length}";
+                    }
                     AddOutputText($"reverseLinTag: {reverseLinTag}");
                     AddOutputText($"");
                 }

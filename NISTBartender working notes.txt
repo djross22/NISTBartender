@@ -97,7 +97,7 @@ If output file label or directory is changed, switch to SaveAs
 --------------------------------------------------------
 NISTBartender TODO List:
 
-Figure out what's going 
+Figure out what's going on with N's
 
 Automatically run AnalyzeMultiTags before parsing
 
