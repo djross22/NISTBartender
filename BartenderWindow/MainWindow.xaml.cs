@@ -1635,7 +1635,7 @@ namespace BartenderWindow
             {
                 //this has to be delegated becasue it interacts with the GUI by sending text to the outputTextBox
                 this.Dispatcher.Invoke(() => {
-                    AddOutputText($"Excpetion in Clusterer.ClusterBarcodes(): {ex})");
+                    AddOutputText($"Exception in Clusterer.ClusterBarcodes(): {ex})");
                 });
             }
         }
@@ -1709,7 +1709,7 @@ namespace BartenderWindow
             {
                 //this has to be delegated becasue it interacts with the GUI by sending text to the outputTextBox
                 this.Dispatcher.Invoke(() => {
-                    AddOutputText($"Excpetion in Parser.ParseDoubleBarcodes(): {ex})");
+                    AddOutputText($"Exception in Parser.ParseDoubleBarcodes(): {ex})");
                 });
             }
         }
