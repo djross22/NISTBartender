@@ -694,7 +694,8 @@ namespace BartenderWindow
         {
             InitializeComponent();
 
-            InitInputControlsList();
+            MakeInputControlsList();
+
             SetClusteringDefaults();
 
             NWeightsList = new List<string>();
@@ -775,7 +776,7 @@ namespace BartenderWindow
             mutiTagIdDict = new Dictionary<string, string>();
         }
 
-        private void InitInputControlsList()
+        private void MakeInputControlsList()
         {
             inputControlsList = new List<Control>();
             inputControlsList.Add(mainMenu);
