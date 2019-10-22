@@ -695,6 +695,7 @@ namespace BartenderWindow
             InitializeComponent();
 
             InitInputControlsList();
+            SetClusteringDefaults();
 
             NWeightsList = new List<string>();
             foreach (Parser.NWeights nw in Enum.GetValues(typeof(Parser.NWeights)))
@@ -1581,7 +1582,24 @@ namespace BartenderWindow
 
         private void clusterDefaultButton_Click(object sender, RoutedEventArgs e)
         {
+            SetClusteringDefaults();
+        }
 
+        private void SetClusteringDefaults()
+        {
+            if (parser != null)
+            {
+                if (!string.IsNullOrEmpty(parser.forLintagOutFile)) ForClusterInputPath = parser.forLintagOutFile;
+                if (!string.IsNullOrEmpty(parser.revLintagOutFile)) RevClusterInputPath = parser.revLintagOutFile;
+            }
+
+            if (!string.IsNullOrEmpty(OutputDirectory)) ClusterOutputDir = OutputDirectory;
+
+            ClusterCutoffFrequencyStr = "1";
+            MaxClusterDistanceStr = "2";
+            ClusterMergeThresholdStr = "5.0";
+            ClusterSeedLengthStr = "5";
+            ClusterSeedStepStr = "1";
         }
 
         private void parseButton_Click(object sender, RoutedEventArgs e)
@@ -1608,21 +1626,46 @@ namespace BartenderWindow
 
         private void RunClusterer()
         {
-            DisableInputControls();
 
-            forwardClusterer = new Clusterer(this);
+            if ( (string.IsNullOrEmpty(ForClusterInputPath)) || (string.IsNullOrEmpty(RevClusterInputPath)) || (string.IsNullOrEmpty(ClusterOutputDir)) )
+            {
+                MessageBox.Show("Clusterin input and output files not properly set.");
+            }
+            else
+            {
+                DisableInputControls();
 
-            //Set clusterer parameters
+                // initialize cluserers
+                forwardClusterer = new Clusterer(this);
+                reverseClusterer = new Clusterer(this);
 
-            //Run clusterer as background worker
 
+                //Set clusterer parameters
+                // path string have to use .Replace("\\", "/") because the call to wsl uses Unix syntax
+                forwardClusterer.inputFile = ForClusterInputPath.Replace("\\", "/");
+                forwardClusterer.outputPrefix = $"{ClusterOutputDir.Replace("\\", "/")}/forward";
+                reverseClusterer.inputFile = RevClusterInputPath.Replace("\\", "/");
+                reverseClusterer.outputPrefix = $"{ClusterOutputDir.Replace("\\", "/")}/reverse";
+                foreach (Clusterer clust in new Clusterer[] { forwardClusterer, reverseClusterer} ) 
+                {
+                    clust.clusterSeedStep = clusterSeedStep;
+                    clust.clusterSeedLength = clusterSeedLength;
+                    clust.clusterCutoffFrequency = clusterCutoffFrequency;
+                    clust.clusterMergeThreshold = clusterMergeThreshold;
+                    clust.maxClusterDistance = maxClusterDistance;
+                    clust.threadsForClustering = threadsForClustering;
 
-            BackgroundWorker clusterWorker = new BackgroundWorker();
-            clusterWorker.WorkerReportsProgress = false;
-            clusterWorker.DoWork += clusterWorker_DoWork;
-            clusterWorker.RunWorkerCompleted += clusterWorker_RunWorkerCompleted;
+                }
 
-            clusterWorker.RunWorkerAsync();
+                //Run clusterers as background worker
+                BackgroundWorker clusterWorker = new BackgroundWorker();
+                clusterWorker.WorkerReportsProgress = false;
+                clusterWorker.DoWork += clusterWorker_DoWork;
+                clusterWorker.RunWorkerCompleted += clusterWorker_RunWorkerCompleted;
+
+                clusterWorker.RunWorkerAsync();
+
+            }
         }
 
         void clusterWorker_DoWork(object sender, DoWorkEventArgs e)
@@ -1635,7 +1678,19 @@ namespace BartenderWindow
             {
                 //this has to be delegated becasue it interacts with the GUI by sending text to the outputTextBox
                 this.Dispatcher.Invoke(() => {
-                    AddOutputText($"Exception in Clusterer.ClusterBarcodes(): {ex})");
+                    AddOutputText($"Exception in Clusterer.ClusterBarcodes() while attempting to cluster forward barcodes: {ex})");
+                });
+            }
+
+            try
+            {
+                reverseClusterer.ClusterBarcodes();
+            }
+            catch (Exception ex)
+            {
+                //this has to be delegated becasue it interacts with the GUI by sending text to the outputTextBox
+                this.Dispatcher.Invoke(() => {
+                    AddOutputText($"Exception in Clusterer.ClusterBarcodes() while attempting to cluster reverse barcodes: {ex})");
                 });
             }
         }
