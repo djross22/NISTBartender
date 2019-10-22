@@ -1601,6 +1601,85 @@ namespace BartenderWindow
             SetClusteringDefaults();
         }
 
+        private void parseAndClusterButton_Click(object sender, RoutedEventArgs e)
+        {
+            RunParserThenClusterer();
+        }
+
+        private void RunParserThenClusterer()
+        {
+            DisableInputControls();
+
+            ParamsFilePath = System.IO.Path.Combine(outputDirectory, $"{outputFileLabel}.xml");
+            Save();
+
+            SetParserParams();
+
+            InitClusterers();
+
+            BackgroundWorker worker = new BackgroundWorker();
+            worker.WorkerReportsProgress = false;
+            worker.DoWork += parserAndClusterWorker_DoWork;
+            worker.RunWorkerCompleted += parserAndClusterWorker_RunWorkerCompleted;
+
+            worker.RunWorkerAsync();
+        }
+
+        void parserAndClusterWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            try
+            {
+                if (maxParse == 0) parser.ParseDoubleBarcodes();
+                else parser.ParseDoubleBarcodes(num_reads: maxParse);
+            }
+            catch (Exception ex)
+            {
+                //this has to be delegated becasue it interacts with the GUI by sending text to the outputTextBox
+                this.Dispatcher.Invoke(() => {
+                    AddOutputText($"Exception in Parser.ParseDoubleBarcodes(): {ex})");
+                });
+
+                return;
+            }
+
+            ForClusterInputPath = parser.forLintagOutFile;
+            RevClusterInputPath = parser.revLintagOutFile;
+            ClusterOutputDir = OutputDirectory;
+
+            try
+            {
+                forwardClusterer.ClusterBarcodes();
+            }
+            catch (Exception ex)
+            {
+                //this has to be delegated becasue it interacts with the GUI by sending text to the outputTextBox
+                this.Dispatcher.Invoke(() => {
+                    AddOutputText($"Exception in Clusterer.ClusterBarcodes() while attempting to cluster forward barcodes: {ex})");
+                });
+            }
+
+            try
+            {
+                reverseClusterer.ClusterBarcodes();
+            }
+            catch (Exception ex)
+            {
+                //this has to be delegated becasue it interacts with the GUI by sending text to the outputTextBox
+                this.Dispatcher.Invoke(() => {
+                    AddOutputText($"Exception in Clusterer.ClusterBarcodes() while attempting to cluster reverse barcodes: {ex})");
+                });
+            }
+
+
+        }
+
+        void parserAndClusterWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            ForClusterInputPath = parser.forLintagOutFile;
+            RevClusterInputPath = parser.revLintagOutFile;
+            EnableInputControls();
+        }
+
         private void SetClusteringDefaults()
         {
             if (parser != null)
@@ -1654,26 +1733,7 @@ namespace BartenderWindow
                 ParamsFilePath = System.IO.Path.Combine(outputDirectory, $"{outputFileLabel}.xml");
                 Save();
 
-                // initialize cluserers
-                forwardClusterer = new Clusterer(this);
-                reverseClusterer = new Clusterer(this);
-
-
-                //Set clusterer parameters
-                forwardClusterer.inputFile = ForClusterInputPath;
-                forwardClusterer.outputPrefix = $"{ClusterOutputDir}\\{OutputFileLabel}_forward";
-                reverseClusterer.inputFile = RevClusterInputPath;
-                reverseClusterer.outputPrefix = $"{ClusterOutputDir}\\{OutputFileLabel}_reverse";
-                foreach (Clusterer clust in new Clusterer[] { forwardClusterer, reverseClusterer} ) 
-                {
-                    clust.clusterSeedStep = clusterSeedStep;
-                    clust.clusterSeedLength = clusterSeedLength;
-                    clust.clusterCutoffFrequency = clusterCutoffFrequency;
-                    clust.clusterMergeThreshold = clusterMergeThreshold;
-                    clust.maxClusterDistance = maxClusterDistance;
-                    clust.threadsForClustering = threadsForClustering;
-
-                }
+                InitClusterers();
 
                 //Run clusterers as background worker
                 BackgroundWorker clusterWorker = new BackgroundWorker();
@@ -1682,6 +1742,30 @@ namespace BartenderWindow
                 clusterWorker.RunWorkerCompleted += clusterWorker_RunWorkerCompleted;
 
                 clusterWorker.RunWorkerAsync();
+
+            }
+        }
+
+        void InitClusterers()
+        {
+            // initialize clusterers
+            forwardClusterer = new Clusterer(this);
+            reverseClusterer = new Clusterer(this);
+
+
+            //Set clusterer parameters
+            forwardClusterer.inputFile = ForClusterInputPath;
+            forwardClusterer.outputPrefix = $"{ClusterOutputDir}\\{OutputFileLabel}_forward";
+            reverseClusterer.inputFile = RevClusterInputPath;
+            reverseClusterer.outputPrefix = $"{ClusterOutputDir}\\{OutputFileLabel}_reverse";
+            foreach (Clusterer clust in new Clusterer[] { forwardClusterer, reverseClusterer })
+            {
+                clust.clusterSeedStep = clusterSeedStep;
+                clust.clusterSeedLength = clusterSeedLength;
+                clust.clusterCutoffFrequency = clusterCutoffFrequency;
+                clust.clusterMergeThreshold = clusterMergeThreshold;
+                clust.maxClusterDistance = maxClusterDistance;
+                clust.threadsForClustering = threadsForClustering;
 
             }
         }
@@ -1725,6 +1809,18 @@ namespace BartenderWindow
             ParamsFilePath = System.IO.Path.Combine(outputDirectory, $"{outputFileLabel}.xml");
             Save();
 
+            SetParserParams();
+
+            BackgroundWorker parserWorker = new BackgroundWorker();
+            parserWorker.WorkerReportsProgress = false;
+            parserWorker.DoWork += parserWorker_DoWork;
+            parserWorker.RunWorkerCompleted += parserWorker_RunWorkerCompleted;
+
+            parserWorker.RunWorkerAsync();
+        }
+
+        private void SetParserParams()
+        {
             parser.write_directory = OutputDirectory;
             parser.outputFileLabel = outputFileLabel;
             parser.read_directory = InputDirectory;
@@ -1762,13 +1858,6 @@ namespace BartenderWindow
             parser.multiTagErrorRate = multiTagErrorRate;
 
             parser.min_qs = minQuality;
-
-            BackgroundWorker parserWorker = new BackgroundWorker();
-            parserWorker.WorkerReportsProgress = false;
-            parserWorker.DoWork += parserWorker_DoWork;
-            parserWorker.RunWorkerCompleted += parserWorker_RunWorkerCompleted;
-
-            parserWorker.RunWorkerAsync();
         }
 
         void parserWorker_DoWork(object sender, DoWorkEventArgs e)
