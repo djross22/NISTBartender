@@ -5,13 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BartenderWindow"
         mc:Ignorable="d"
-        Title="{Binding DisplayTitle}" Height="600" Width="1090" Background="{DynamicResource PurpleBackgroundBrush}" MinWidth="1090" MinHeight="600" Closing="Window_Closing">
+        Title="{Binding DisplayTitle}" Height="800" Width="1090" Background="{DynamicResource PurpleBackgroundBrush}" MinWidth="1090" MinHeight="800" Closing="Window_Closing">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
             <RowDefinition Height="75"/>
             <RowDefinition Height="400"/>
-            <RowDefinition MinHeight="50"/>
+            <RowDefinition Height="110
+                           "/>
+            <RowDefinition MinHeight="100"/>
         </Grid.RowDefinitions>
         <DockPanel LastChildFill="False" Grid.RowSpan="2">
             <Menu x:Name="mainMenu" DockPanel.Dock="Top" VerticalAlignment="Top" HorizontalAlignment="Stretch">
@@ -36,6 +38,7 @@
                     <Button x:Name="analyzeMultiButton" Content="Analyze Multi-Tags" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ToolTip="Analyze Forward Read and Reverse Mulltiplexing Tags" Margin="5,0,5,0" Click="analyzeMultiButton_Click"/>
                     <Button x:Name="autoRegexButton" Content="Auto Regex" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ToolTip="Automatically generate Lineage Tag RegEx's" Margin="5,0,5,0" Click="autoRegexButton_Click"/>
                     <Button x:Name="parseButton" Content="Parse" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ToolTip="Run Barcode Parser" Margin="5,0,5,0" Click="parseButton_Click"/>
+                    <Button x:Name="clusterButton" Content="Cluster" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ToolTip="Run Barcode Clustering" Margin="5,0,5,0" Click="clusterButton_Click"/>
                 </ToolBar>
             </ToolBarTray>
             <Grid/>
@@ -52,7 +55,7 @@
             </Grid.ColumnDefinitions>
             <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Input Directory:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="Directory containing input (gzipped fastq) files." Height="16"/>
             <TextBox Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="115,0,10,0" FontFamily="Courier New" MaxLines="1" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Text="{Binding InputDirectory, Mode=TwoWay}" IsReadOnly="True" Background="{DynamicResource ReadOnlyBackground}" Foreground="{DynamicResource ReadOnlyForeground}"/>
-            <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Output Directory:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="Directory to save output files." Height="16" Grid.Row="1"/>
+            <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Output Directory:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="Directory to save output files from barcode parsing." Height="16" Grid.Row="1"/>
             <TextBox Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="115,0,10,0" FontFamily="Courier New" MaxLines="1" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Text="{Binding OutputDirectory, Mode=TwoWay}" Grid.Row="1" IsReadOnly="True" Background="{DynamicResource ReadOnlyBackground}" Foreground="{DynamicResource ReadOnlyForeground}"/>
             <TextBlock HorizontalAlignment="Left" Margin="82,0,0,0" Text="Output File Label:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="Text to include at beginning of all output filenames" Height="16" Grid.Row="2"/>
             <TextBox x:Name="outFileLabelTextBox" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="180,0,10,0" FontFamily="Courier New" MaxLines="1" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Text="{Binding OutputFileLabel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" IsReadOnly="False"/>
@@ -218,7 +221,7 @@
                         <TextBox.Text>
                             <Binding Path="MinQualityStr" UpdateSourceTrigger="PropertyChanged">
                                 <Binding.ValidationRules>
-                                    <local:RegexValidationRule RegexText = "^[0-9.]+$" ErrorMessage="Minimum Quality Score must be a number." ValidationOptions="None"/>
+                                    <local:RegexValidationRule RegexText = "^[0-9]+$|^[0-9]+.[0-9]{0,2}$" ErrorMessage="Minimum Quality Score must be a number." ValidationOptions="None"/>
                                 </Binding.ValidationRules>
                             </Binding>
                         </TextBox.Text>
@@ -308,7 +311,81 @@
                 <TextBlock HorizontalAlignment="Left" Text="'N' weighting:" VerticalAlignment="Center" Foreground="White"  Grid.Row="5" Height="15" ToolTip="Weighting to use for error calculation with 'N's in multi-tag sequences" Margin="200,0,0,0" Grid.ColumnSpan="2"/>
             </Grid>
         </Grid>
-        <TextBox x:Name="outputTextBox" Margin="10,10,10,10" Grid.Row="3" TextWrapping="Wrap" Text="{Binding OutputText, Mode=TwoWay}" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" Background="#FF170D23" TextChanged="outputTextBox_TextChanged" Foreground="#FFCDCDCD" FontFamily="Courier New" FontSize="14"/>
+        <TextBox x:Name="outputTextBox" Margin="10,10,10,10" Grid.Row="5" TextWrapping="Wrap" Text="{Binding OutputText, Mode=TwoWay}" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" Background="#FF170D23" TextChanged="outputTextBox_TextChanged" Foreground="#FFCDCDCD" FontFamily="Courier New" FontSize="14"/>
+        <Border BorderThickness="1" BorderBrush="White" Grid.Row="3" Margin="10,5,10,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="5"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="200"/>
+                    <ColumnDefinition Width="200"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Barcode Clustering Parameters:" VerticalAlignment="Top" Foreground="White" ToolTip="Parameters/Controls for Barcode Clustering" Height="16" Grid.RowSpan="2"/>
+                <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Forward Input File:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="Path to forward input file for clustering." Height="16" Grid.Column="2" Grid.Row="1"/>
+                <TextBox x:Name="forClusterInputTextBox" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="115,0,10,0" FontFamily="Courier New" MaxLines="1" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Text="{Binding ForClusterInputPath, Mode=TwoWay}" Grid.Column="2" Grid.Row="1"/>
+                <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Reverse Input File:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="Path to reverse input file for clustering." Height="16" Grid.Column="2" Grid.Row="2"/>
+                <TextBox x:Name="revClusterInputTextBox" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="115,0,10,0" FontFamily="Courier New" MaxLines="1" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Text="{Binding RevClusterInputPath, Mode=TwoWay}" Grid.Column="2" Grid.Row="2"/>
+                <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Output Directory:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="Directory to save output files from barcode clustering." Height="16" Grid.Column="2" Grid.Row="3"/>
+                <TextBox x:Name="clusterOutputDirTextBox" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="115,0,10,0" FontFamily="Courier New" MaxLines="1" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Text="{Binding ClusterOutputDir, Mode=TwoWay}" Grid.Column="2" Grid.Row="3"/>
+                <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Cutoff Frequency:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="All clusters with size less then this threshold will not be reported in the results." Height="16" Grid.Row="1" Grid.Column="1"/>
+                <TextBox x:Name="clusterCutoffFreqTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="30" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="144,0,0,0" Grid.Row="1" Grid.Column="1">
+                    <TextBox.Text>
+                        <Binding Path="ClusterCutoffFrequencyStr" UpdateSourceTrigger="PropertyChanged">
+                            <Binding.ValidationRules>
+                                <local:RegexValidationRule RegexText = "^[0-9]{1,2}$" ErrorMessage="Clustering Cutoff Frequency must be an integer between 0 and 99." ValidationOptions="None"/>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
+                <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Max Cluster Distance:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="If the distance between two cluster sequences is within this threshold, these two sequences will be merged if they pass the statistical test set by the cluster merging threshold." Height="16" Grid.Row="2"/>
+                <TextBox x:Name="maxClusterDistTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="30" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="144,0,0,0" Grid.Row="2">
+                    <TextBox.Text>
+                        <Binding Path="MaxClusterDistanceStr" UpdateSourceTrigger="PropertyChanged">
+                            <Binding.ValidationRules>
+                                <local:RegexValidationRule RegexText = "^[0-9]{1,2}$" ErrorMessage="Max Cluster Distance must be an integer between 0 and 99." ValidationOptions="None"/>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
+                <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Cluster Merge Threshold:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="Higher threshold values result in more cluster merging (see the publication for a full description). This should be set according to the expected coverage per barcode and the barcode library complexity. For low to medium coverage (less than 500 reads/barcode), we recommend starting with the default setting (= 5). However, in some cases, it may be necessary to adjust the threshold higher to prevent over-merging (see publication). In cases where all barcodes are expected to be distant (an average of 5-6 mismatches from a nearest neighbor), we recommend disabling the merging threshold (set value to -1) to make merging decisions based on cluster distance only." Height="16" Grid.Row="2" Grid.Column="1"/>
+                <TextBox x:Name="clusterMergeTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="30" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="144,0,0,0" Grid.Row="2" Grid.Column="1">
+                    <TextBox.Text>
+                        <Binding Path="ClusterMergeThresholdStr" UpdateSourceTrigger="PropertyChanged">
+                            <Binding.ValidationRules>
+                                <local:RegexValidationRule RegexText = "^-?[0-9]+$|^-?[0-9]+.[0-9]{0,2}$" ErrorMessage="Cluster Merge Threshold must be a number." ValidationOptions="None"/>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
+                <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Cluster Seed Length:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="The possible values range from 3 to 8, with a default of 5 (recommended). The larger this value, the faster the program will run. In some cases with high sequence error rates, a higher setting will result in under-merging." Height="16" Grid.Row="3"/>
+                <TextBox x:Name="clusterSeedLenTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="30" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="144,0,0,0" Grid.Row="3">
+                    <TextBox.Text>
+                        <Binding Path="ClusterSeedLengthStr" UpdateSourceTrigger="PropertyChanged">
+                            <Binding.ValidationRules>
+                                <local:RegexValidationRule RegexText = "^[3-8]$" ErrorMessage="Cluster Seed Length must be an integer between 3 and 8." ValidationOptions="None"/>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
+                <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Cluster Seed Step:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="The number of non-overlapping positions between two adjacent seeds. The default value is 1 (recommended). For example, using seed length = 5 and seed step = 2, will result in adjacent seeds that have 2 unique positions and 3 positions in common. If the step value is equal to or larger than the seed length, then there will be no overlap between seeds." Height="16" Grid.Row="3" Grid.Column="1"/>
+                <TextBox x:Name="clusterSeedStepTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="30" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="144,0,0,0" Grid.Row="3" Grid.Column="1">
+                    <TextBox.Text>
+                        <Binding Path="ClusterSeedStepStr" UpdateSourceTrigger="PropertyChanged">
+                            <Binding.ValidationRules>
+                                <local:RegexValidationRule RegexText = "^[1-8]$" ErrorMessage="Cluster Seed Step must be an integer between 1 and 8." ValidationOptions="None"/>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
+                <Button x:Name="clusterDefaultButton" Content="Use Default Settings" HorizontalAlignment="Left" Margin="20,0,0,0" Grid.Row="4" VerticalAlignment="Center" Width="120" Height="20" Click="clusterDefaultButton_Click"/>
+            </Grid>
+        </Border>
 
 
     </Grid>

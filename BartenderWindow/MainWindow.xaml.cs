@@ -683,6 +683,16 @@ namespace BartenderWindow
 
             inputControlsList.Add(nWeightsComboBox);
             inputControlsList.Add(multiTagErrorRateTextBox);
+
+            inputControlsList.Add(forClusterInputTextBox);
+            inputControlsList.Add(revClusterInputTextBox);
+            inputControlsList.Add(clusterOutputDirTextBox);
+            inputControlsList.Add(clusterCutoffFreqTextBox);
+            inputControlsList.Add(maxClusterDistTextBox);
+            inputControlsList.Add(clusterMergeTextBox);
+            inputControlsList.Add(clusterSeedLenTextBox);
+            inputControlsList.Add(clusterSeedStepTextBox);
+            inputControlsList.Add(clusterDefaultButton);
         }
 
         private void CreateParamsList()
@@ -719,6 +729,15 @@ namespace BartenderWindow
             paramsList.Add("SpacerInsRateStr");
 
             paramsList.Add("MaxParseStr");
+
+            paramsList.Add("ForClusterInputPath");
+            paramsList.Add("RevClusterInputPath");
+            paramsList.Add("ClusterOutputDir");
+            paramsList.Add("ClusterCutoffFrequencyStr");
+            paramsList.Add("MaxClusterDistanceStr");
+            paramsList.Add("ClusterMergeThresholdStr");
+            paramsList.Add("ClusterSeedLengthStr");
+            paramsList.Add("ClusterSeedStepStr");
             //paramsList.Add("");
         }
 
@@ -1433,6 +1452,11 @@ namespace BartenderWindow
             AddOutputText("");
         }
 
+        private void clusterButton_Click(object sender, RoutedEventArgs e)
+        {
+            RunClustering();
+        }
+
         private void parseButton_Click(object sender, RoutedEventArgs e)
         {
             RunParser();
@@ -1453,6 +1477,11 @@ namespace BartenderWindow
             {
                 cont.IsEnabled = true;
             }
+        }
+
+        private void RunClustering()
+        {
+
         }
 
         private void RunParser()
@@ -1522,6 +1551,11 @@ namespace BartenderWindow
                     AddOutputText($"Excpetion in Parser.ParseDoubleBarcodes(): {ex})");
                 });
             }
+        }
+
+        private void clusterDefaultButton_Click(object sender, RoutedEventArgs e)
+        {
+
         }
 
         void parserWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)

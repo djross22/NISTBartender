@@ -89,9 +89,56 @@ Change ignoreN to Nweight enumeration: Ignore:ingoreN, Full:N=mismatch, Half:N=0
 --------------------------------------------------------
 NISTBartender TODO List:
 
+
+
+ForClusterInputPath
+RevClusterInputPath
+ClusterOutputDir
+
+
+forClusterInputTextBox
+revClusterInputTextBox
+clusterOutputDirTextBox
+
+
+
+
+ClusterCutoffFrequencyStr  int 1
+MaxClusterDistanceStr      int 2
+ClusterMergeThresholdStr   double 5.0
+ClusterSeedLengthStr       int 5
+ClusterSeedStepStr         int 1 or 5
+
+clusterCutoffFreqTextBox
+maxClusterDistTextBox
+clusterMergeTextBox
+clusterSeedLenTextBox
+clusterSeedStepTextBox
+clusterDefaultButton
+
+
+
+clusteringThreads
+
+
+
+
+
+
+
+
+
+
+
+If output file label or directory is changed, switch to SaveAs
+
+Automatically run AnalyzeMultiTags before parsing
+
 Add multi-tag error rate and ignoreN controls/properties
 
 Add warning during AnalyzeMultiTags() if Hamming distance is <= allowed mismatch number from multiTagErrorRate
+
+Add extra multi-tags to parser
 
 add regex to output text
 
