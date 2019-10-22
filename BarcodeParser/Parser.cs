@@ -252,11 +252,15 @@ namespace BarcodeParser
             if (forUmiTagLen.Length == 1 && revUmiTagLen.Length == 1 && forMultiTagLen.Length == 1 && revMultiTagLen.Length == 1)
             {
                 //If the UMI and multi-tags have constant length, run the faster pasring loop that looks for the multi-tag in a defined position
+                SendOutputText(logFileWriter, $"Parsing with LoopBodyConstantMultiTag().");
+                SendOutputText(logFileWriter, "");
                 Parallel.ForEach(GetNextSequencesFromGZip($"{read_directory}\\{f_gzipped_fastqfile}", $"{read_directory}\\{r_gzipped_fastqfile}", num_reads: num_reads), new ParallelOptions { MaxDegreeOfParallelism = 1 }, stringArr => LoopBodyConstantMultiTag(stringArr));
             }
             else
             {
                 //If the UMI tags or multi-ags have different lengths, use the more general parsing loop that uses a Regex search to find/match the multi-tags
+                SendOutputText(logFileWriter, $"Parsing with LoopBodyRegexMultiTag().");
+                SendOutputText(logFileWriter, "");
                 Parallel.ForEach(GetNextSequencesFromGZip($"{read_directory}\\{f_gzipped_fastqfile}", $"{read_directory}\\{r_gzipped_fastqfile}", num_reads: num_reads), new ParallelOptions { MaxDegreeOfParallelism = 1 }, stringArr => LoopBodyRegexMultiTag(stringArr));
             }
 
@@ -272,7 +276,7 @@ namespace BarcodeParser
             SendOutputText(logFileWriter, $"{validSampleReads} of the multi-tag matching reads mapped to a valid/defined sample ID ({percentStr}%).");
 
             percentStr = $"{(double)qualityReads / multiTagMatchingReads * 100:0.##}";
-            SendOutputText(logFileWriter, $"{qualityReads} of the multi-tag matching reads passed the qualtity filter ({percentStr}%).");
+            SendOutputText(logFileWriter, $"{qualityReads} of the multi-tag matching reads passed the quality filter ({percentStr}%).");
 
             percentStr = $"{(double)lineageTagReads / totalReads * 100:0.##}";
             SendOutputText(logFileWriter, $"{lineageTagReads} of the total reads passed all the quality and matching checks and counted as valid barcode reads ({percentStr}%).");
