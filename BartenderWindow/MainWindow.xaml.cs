@@ -1459,7 +1459,12 @@ namespace BartenderWindow
 
         private void clusterButton_Click(object sender, RoutedEventArgs e)
         {
-            RunClustering();
+            RunClusterer();
+        }
+
+        private void clusterDefaultButton_Click(object sender, RoutedEventArgs e)
+        {
+
         }
 
         private void parseButton_Click(object sender, RoutedEventArgs e)
@@ -1484,9 +1489,43 @@ namespace BartenderWindow
             }
         }
 
-        private void RunClustering()
+        private void RunClusterer()
         {
+            DisableInputControls();
 
+            forwardClusterer = new Clusterer(this);
+
+            //Set clusterer parameters
+
+            //Run clusterer as background worker
+
+
+            BackgroundWorker clusterWorker = new BackgroundWorker();
+            clusterWorker.WorkerReportsProgress = false;
+            clusterWorker.DoWork += clusterWorker_DoWork;
+            clusterWorker.RunWorkerCompleted += clusterWorker_RunWorkerCompleted;
+
+            clusterWorker.RunWorkerAsync();
+        }
+
+        void clusterWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            try
+            {
+                forwardClusterer.ClusterBarcodes();
+            }
+            catch (Exception ex)
+            {
+                //this has to be delegated becasue it interacts with the GUI by sending text to the outputTextBox
+                this.Dispatcher.Invoke(() => {
+                    AddOutputText($"Excpetion in Clusterer.ClusterBarcodes(): {ex})");
+                });
+            }
+        }
+
+        void clusterWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            EnableInputControls();
         }
 
         private void RunParser()
@@ -1556,11 +1595,6 @@ namespace BartenderWindow
                     AddOutputText($"Excpetion in Parser.ParseDoubleBarcodes(): {ex})");
                 });
             }
-        }
-
-        private void clusterDefaultButton_Click(object sender, RoutedEventArgs e)
-        {
-
         }
 
         void parserWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
