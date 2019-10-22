@@ -322,7 +322,7 @@
                     <RowDefinition Height="1*"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="200"/>
+                    <ColumnDefinition Width="180"/>
                     <ColumnDefinition Width="200"/>
                     <ColumnDefinition Width="1*"/>
                 </Grid.ColumnDefinitions>
@@ -334,7 +334,7 @@
                 <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Output Directory:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="Directory to save output files from barcode clustering." Height="16" Grid.Column="2" Grid.Row="3"/>
                 <TextBox x:Name="clusterOutputDirTextBox" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="115,0,10,0" FontFamily="Courier New" MaxLines="1" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Text="{Binding ClusterOutputDir, Mode=TwoWay}" Grid.Column="2" Grid.Row="3"/>
                 <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Cutoff Frequency:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="All clusters with size less then this threshold will not be reported in the results." Height="16" Grid.Row="1" Grid.Column="1"/>
-                <TextBox x:Name="clusterCutoffFreqTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="30" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="144,0,0,0" Grid.Row="1" Grid.Column="1">
+                <TextBox x:Name="clusterCutoffFreqTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="40" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="115,0,0,0" Grid.Row="1" Grid.Column="1">
                     <TextBox.Text>
                         <Binding Path="ClusterCutoffFrequencyStr" UpdateSourceTrigger="PropertyChanged">
                             <Binding.ValidationRules>
@@ -344,7 +344,7 @@
                     </TextBox.Text>
                 </TextBox>
                 <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Max Cluster Distance:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="If the distance between two cluster sequences is within this threshold, these two sequences will be merged if they pass the statistical test set by the cluster merging threshold." Height="16" Grid.Row="2"/>
-                <TextBox x:Name="maxClusterDistTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="30" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="144,0,0,0" Grid.Row="2">
+                <TextBox x:Name="maxClusterDistTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="40" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="130,0,0,0" Grid.Row="2">
                     <TextBox.Text>
                         <Binding Path="MaxClusterDistanceStr" UpdateSourceTrigger="PropertyChanged">
                             <Binding.ValidationRules>
@@ -354,7 +354,7 @@
                     </TextBox.Text>
                 </TextBox>
                 <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Cluster Merge Threshold:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="Higher threshold values result in more cluster merging (see the publication for a full description). This should be set according to the expected coverage per barcode and the barcode library complexity. For low to medium coverage (less than 500 reads/barcode), we recommend starting with the default setting (= 5). However, in some cases, it may be necessary to adjust the threshold higher to prevent over-merging (see publication). In cases where all barcodes are expected to be distant (an average of 5-6 mismatches from a nearest neighbor), we recommend disabling the merging threshold (set value to -1) to make merging decisions based on cluster distance only." Height="16" Grid.Row="2" Grid.Column="1"/>
-                <TextBox x:Name="clusterMergeTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="30" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="144,0,0,0" Grid.Row="2" Grid.Column="1">
+                <TextBox x:Name="clusterMergeTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="40" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="150,0,0,0" Grid.Row="2" Grid.Column="1">
                     <TextBox.Text>
                         <Binding Path="ClusterMergeThresholdStr" UpdateSourceTrigger="PropertyChanged">
                             <Binding.ValidationRules>
@@ -364,7 +364,7 @@
                     </TextBox.Text>
                 </TextBox>
                 <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Cluster Seed Length:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="The possible values range from 3 to 8, with a default of 5 (recommended). The larger this value, the faster the program will run. In some cases with high sequence error rates, a higher setting will result in under-merging." Height="16" Grid.Row="3"/>
-                <TextBox x:Name="clusterSeedLenTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="30" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="144,0,0,0" Grid.Row="3">
+                <TextBox x:Name="clusterSeedLenTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="40" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="130,0,0,0" Grid.Row="3">
                     <TextBox.Text>
                         <Binding Path="ClusterSeedLengthStr" UpdateSourceTrigger="PropertyChanged">
                             <Binding.ValidationRules>
@@ -374,7 +374,7 @@
                     </TextBox.Text>
                 </TextBox>
                 <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Cluster Seed Step:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="The number of non-overlapping positions between two adjacent seeds. The default value is 1 (recommended). For example, using seed length = 5 and seed step = 2, will result in adjacent seeds that have 2 unique positions and 3 positions in common. If the step value is equal to or larger than the seed length, then there will be no overlap between seeds." Height="16" Grid.Row="3" Grid.Column="1"/>
-                <TextBox x:Name="clusterSeedStepTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="30" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="144,0,0,0" Grid.Row="3" Grid.Column="1">
+                <TextBox x:Name="clusterSeedStepTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="40" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="115,0,0,0" Grid.Row="3" Grid.Column="1">
                     <TextBox.Text>
                         <Binding Path="ClusterSeedStepStr" UpdateSourceTrigger="PropertyChanged">
                             <Binding.ValidationRules>
