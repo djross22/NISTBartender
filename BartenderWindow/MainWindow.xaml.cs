@@ -114,11 +114,126 @@ namespace BartenderWindow
 
         //Parameters for barcode clustering
         private Clusterer forwardClusterer, reverseClusterer;
+        private string forClusterInputPath, revClusterInputPath, clusterOutputDir;
+        private string clusterCutoffFrequencyStr, maxClusterDistanceStr, clusterSeedLengthStr, clusterSeedStepStr;
+        private int clusterCutoffFrequency, maxClusterDistance, clusterSeedLength, clusterSeedStep;
+        private string clusterMergeThresholdStr;
+        private double clusterMergeThreshold;
+        private int threadsForClustering;
 
         //List of controls to disable/enable when parser or clusterer is running
         private List<Control> inputControlsList;
 
         #region Properties Getters and Setters
+
+        public string ClusterSeedStepStr
+        {
+            get { return this.clusterSeedStepStr; }
+            set
+            {
+                if (this.clusterSeedStepStr != value)
+                {
+                    this.clusterSeedStepStr = value;
+                    OnPropertyChanged("ClusterSeedStepStr");
+                    int.TryParse(clusterSeedStepStr, out clusterSeedStep);
+                }
+            }
+        }
+
+        public string ClusterSeedLengthStr
+        {
+            get { return this.clusterSeedLengthStr; }
+            set
+            {
+                if (this.clusterSeedLengthStr != value)
+                {
+                    this.clusterSeedLengthStr = value;
+                    OnPropertyChanged("ClusterSeedLengthStr");
+                    int.TryParse(clusterSeedLengthStr, out clusterSeedLength);
+                }
+            }
+        }
+
+        public string ClusterMergeThresholdStr
+        {
+            get { return this.clusterMergeThresholdStr; }
+            set
+            {
+                if (this.clusterMergeThresholdStr != value)
+                {
+                    this.clusterMergeThresholdStr = value;
+                    OnPropertyChanged("ClusterMergeThresholdStr");
+                    double.TryParse(clusterMergeThresholdStr, out clusterMergeThreshold);
+                }
+            }
+        }
+
+        public string MaxClusterDistanceStr
+        {
+            get { return this.maxClusterDistanceStr; }
+            set
+            {
+                if (this.maxClusterDistanceStr != value)
+                {
+                    this.maxClusterDistanceStr = value;
+                    OnPropertyChanged("MaxClusterDistanceStr");
+                    int.TryParse(maxClusterDistanceStr, out maxClusterDistance);
+                }
+            }
+        }
+
+        public string ClusterCutoffFrequencyStr
+        {
+            get { return this.clusterCutoffFrequencyStr; }
+            set
+            {
+                if (this.clusterCutoffFrequencyStr != value)
+                {
+                    this.clusterCutoffFrequencyStr = value;
+                    OnPropertyChanged("ClusterCutoffFrequencyStr");
+                    int.TryParse(clusterCutoffFrequencyStr, out clusterCutoffFrequency);
+                }
+            }
+        }
+
+        public string ClusterOutputDir
+        {
+            get { return this.clusterOutputDir; }
+            set
+            {
+                if (this.clusterOutputDir != value)
+                {
+                    this.clusterOutputDir = value;
+                    OnPropertyChanged("ClusterOutputDir");
+                }
+            }
+        }
+
+        public string RevClusterInputPath
+        {
+            get { return this.revClusterInputPath; }
+            set
+            {
+                if (this.revClusterInputPath != value)
+                {
+                    this.revClusterInputPath = value;
+                    OnPropertyChanged("RevClusterInputPath");
+                }
+            }
+        }
+
+        public string ForClusterInputPath
+        {
+            get { return this.forClusterInputPath; }
+            set
+            {
+                if (this.forClusterInputPath != value)
+                {
+                    this.forClusterInputPath = value;
+                    OnPropertyChanged("ForClusterInputPath");
+                }
+            }
+        }
 
         public List<string> NWeightsList { get; set; }
 
@@ -640,6 +755,8 @@ namespace BartenderWindow
             AddOutputText($"Number of Logical Processors: {Environment.ProcessorCount}");
             threadsForParsing = Environment.ProcessorCount / 2;
             AddOutputText($"Number of threads to use for sequence file parsing: {threadsForParsing}");
+            threadsForClustering = Environment.ProcessorCount;
+            AddOutputText($"Number of threads to use for barcode clustering: {threadsForClustering}");
             AddOutputText($"");
 
             MinQualityStr = "30";
@@ -1599,6 +1716,8 @@ namespace BartenderWindow
 
         void parserWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            ForClusterInputPath = parser.forLintagOutFile;
+            RevClusterInputPath = parser.revLintagOutFile;
             EnableInputControls();
         }
 
