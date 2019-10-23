@@ -89,6 +89,8 @@ namespace BartenderWindow
         private string regexDelRateStr, regexInsRateStr;
         private double regexDelRate, regexInsRate;
         private bool ignoreSingleConst;
+        private string linTagFlankErrStr, multiTagFlankErrStr;
+        private int linTagFlankErr, multiTagFlankErr;
 
 
         private string outputText;
@@ -126,6 +128,34 @@ namespace BartenderWindow
         private List<Control> inputControlsList;
 
         #region Properties Getters and Setters
+
+        public string MultiTagFlankErrStr
+        {
+            get { return this.multiTagFlankErrStr; }
+            set
+            {
+                if (this.multiTagFlankErrStr != value)
+                {
+                    this.multiTagFlankErrStr = value;
+                    OnPropertyChanged("MultiTagFlankErrStr");
+                    int.TryParse(multiTagFlankErrStr, out multiTagFlankErr);
+                }
+            }
+        }
+
+        public string LinTagFlankErrStr
+        {
+            get { return this.linTagFlankErrStr; }
+            set
+            {
+                if (this.linTagFlankErrStr != value)
+                {
+                    this.linTagFlankErrStr = value;
+                    OnPropertyChanged("LinTagFlankErrStr");
+                    int.TryParse(linTagFlankErrStr, out linTagFlankErr);
+                }
+            }
+        }
 
         public string ClusterSeedStepStr
         {
@@ -701,6 +731,8 @@ namespace BartenderWindow
 
             SetClusteringDefaults();
 
+            SetParsingDefaults();
+
             NWeightsList = new List<string>();
             foreach (Parser.NWeights nw in Enum.GetValues(typeof(Parser.NWeights)))
             {
@@ -730,31 +762,6 @@ namespace BartenderWindow
 
             OutputFileLabel = "barcode_analysis";
 
-            //CopyReverseComplement();
-
-            //TextRange textRange = new TextRange(forwardRichTextBox.Document.ContentStart, forwardRichTextBox.Document.ContentEnd);
-            //textRange.Text = "ZZZZZZZZXXXXXXXXXXCATCGGTGAGCCCGGGCTGTCGGCGTNNTNNNANNTNNNANNTNNNANNTNNNANNTNNNANNATATGCCAGCAGGCCGGCCACGCTNNTNNNANNTNNNANNANNNANNTNNNANNTNNNANNCGGTGGCCCGGGCGGCCGCACGATGCGTCCGGCGTAGAGGXXXXXXXXXXZZZZZZZZ";
-
-            ReadLengthStr = "150";
-            //ForUmiTagLenStr = "";
-            //RevUmiTagLenStr = "";
-
-            LinTagFlankLengthStr = "4";
-            MultiFlankLengthStr = "4";
-
-            RegexDelRateStr = "20";
-            RegexInsRateStr = "40";
-
-            SpacerDelRateStr = "5";
-            SpacerInsRateStr = "5";
-
-            //FowardMultiTagText = "AGCTAGCTAG, A\n";
-            //FowardMultiTagText += "CAATGCCTAG, B\n";
-            //ReverseMultiTagText = "TAATGCCGTG, 1\n";
-            //ReverseMultiTagText += "GGGCAATGCG, 2\n";
-            //ExtraMultiTagText = "AGAAGGTAG, TAGTGTCGTG, S5\n";
-            //ExtraMultiTagText = "AGAAGGTAG, GGGCAATGCG, S6\n";
-
             InitMultiTagLists();
 
             AddOutputText($"Number of Logical Processors: {Environment.ProcessorCount}");
@@ -768,6 +775,29 @@ namespace BartenderWindow
 
             //"ParamsChanged = false" should be the last thing in the Constructor
             ParamsChanged = false;
+        }
+
+        private void SetParsingDefaults()
+        {
+            ReadLengthStr = "150";
+
+            LinTagFlankLengthStr = "4";
+            MultiFlankLengthStr = "4";
+
+            RegexDelRateStr = "6";
+            RegexInsRateStr = "12";
+
+            MultiTagErrorRateStr = "20";
+
+            SpacerDelRateStr = "5";
+            SpacerInsRateStr = "5";
+
+            LinTagFlankErrStr = "1";
+            MultiTagFlankErrStr = "1";
+
+            MaxParseStr = "0";
+
+            IgnoreSingleConst = true;
         }
 
         private void InitMultiTagLists()
@@ -820,6 +850,9 @@ namespace BartenderWindow
             inputControlsList.Add(clusterSeedLenTextBox);
             inputControlsList.Add(clusterSeedStepTextBox);
             inputControlsList.Add(clusterDefaultButton);
+
+            inputControlsList.Add(linTagFlankErrTextBox);
+            inputControlsList.Add(multiTagFlankErrTextBox);
         }
 
         private void CreateParamsList()
@@ -839,7 +872,10 @@ namespace BartenderWindow
             paramsList.Add("ForLintagRegexStr");
 
             paramsList.Add("LinTagFlankLengthStr");
+            paramsList.Add("LinTagFlankErrStr");
+
             paramsList.Add("MultiFlankLengthStr");
+            paramsList.Add("MultiTagFlankErrStr");
 
             paramsList.Add("ForwardLinTagLengthStr");
             paramsList.Add("ReverseLinTagLengthStr");
