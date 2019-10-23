@@ -1619,6 +1619,12 @@ namespace BartenderWindow
 
         private void RunParserThenClusterer()
         {
+            if (string.IsNullOrEmpty(ClusterOutputDir))
+            {
+                MessageBox.Show("Clustering output directory not properly set.");
+                return;
+            }
+
             DisableInputControls();
 
             ParamsFilePath = System.IO.Path.Combine(outputDirectory, $"{outputFileLabel}.xml");
@@ -1626,9 +1632,6 @@ namespace BartenderWindow
 
             SetParserParams();
 
-            InitClusterers();
-
-            ClusterOutputDir = OutputDirectory;
 
             BackgroundWorker worker = new BackgroundWorker();
             worker.WorkerReportsProgress = false;
@@ -1657,6 +1660,10 @@ namespace BartenderWindow
 
             ForClusterInputPath = parser.forLintagOutFile;
             RevClusterInputPath = parser.revLintagOutFile;
+
+            InitClusterers();
+
+            ClusterOutputDir = OutputDirectory;
 
             try
             {
@@ -1736,7 +1743,7 @@ namespace BartenderWindow
 
             if ( (string.IsNullOrEmpty(ForClusterInputPath)) || (string.IsNullOrEmpty(RevClusterInputPath)) || (string.IsNullOrEmpty(ClusterOutputDir)) )
             {
-                MessageBox.Show("Clusterin input and output files not properly set.");
+                MessageBox.Show("Clustering input and output files not properly set.");
             }
             else
             {
