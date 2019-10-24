@@ -99,12 +99,12 @@ Automatically run AnalyzeMultiTags before parsing
 
 Add option to accept zero or one mismatches in each flanking sequence region
 
+Figure out what's going on with N's
+	Make short test dataset that I can edit by hand
+
 
 --------------------------------------------------------
 NISTBartender TODO List:
-
-Figure out what's going on with N's
-	Make short test dataset that I can edit by hand
 
 
 

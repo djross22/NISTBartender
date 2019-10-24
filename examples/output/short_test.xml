@@ -1,0 +1,63 @@
+<parameters source="NIST Bartender">
+  <ForwardReadSequence>ZZZZZZZZXXXXXXXXXXCATCGGTGAGCCCGGGCTGTCGGCGTNNTNNNANNTNNNANNTNNNANNTNNNANNTNNNANNATATGCCAGCAGGCCGGCCACGCTNNTNNNANNTNNNANNANNNANNTNNNANNTNNNANNCGGTGGCCCGGGCGGCCGCACGATGCGTCCGGCGTAGAGGXXXXXXXXXXZZZZZZZZ
+</ForwardReadSequence>
+  <ReverseReadSequence>ZZZZZZZZXXXXXXXXXXCCTCTACGCCGGACGCATCGTGCGGCCGCCCGGGCCACCGNNTNNNANNTNNNANNTNNNTNNTNNNANNTNNNANNAGCGTGGCCGGCCTGCTGGCATATNNTNNNANNTNNNANNTNNNANNTNNNANNTNNNANNACGCCGACAGCCCGGGCTCACCGATGXXXXXXXXXXZZZZZZZZ
+</ReverseReadSequence>
+  <ReverseGzFastQ>reverse_test.fastq.gz</ReverseGzFastQ>
+  <ForwardGzFastQ>forward_test.fastq.gz</ForwardGzFastQ>
+  <OutputDirectory>C:\Users\djross\source\repos\NISTBartender\examples\output</OutputDirectory>
+  <OutputFileLabel>short_test</OutputFileLabel>
+  <InputDirectory>C:\Users\djross\source\repos\NISTBartender\examples\input</InputDirectory>
+  <RevLintagRegexStr>(CACCG|.ACCG|C.CCG|CA.CG|CAC.G|CACC.).{35,41}?(AGCGT|.GCGT|A.CGT|AG.GT|AGC.T|AGCG.)</RevLintagRegexStr>
+  <ForLintagRegexStr>(GGCGT|.GCGT|G.CGT|GG.GT|GGC.T|GGCG.).{35,41}?(ATATG|.TATG|A.ATG|AT.TG|ATA.G|ATAT.)</ForLintagRegexStr>
+  <LinTagFlankLengthStr>5</LinTagFlankLengthStr>
+  <LinTagFlankErrStr>1</LinTagFlankErrStr>
+  <MultiFlankLengthStr>4</MultiFlankLengthStr>
+  <MultiTagFlankErrStr>1</MultiTagFlankErrStr>
+  <ForwardLinTagLengthStr>35-37-41</ForwardLinTagLengthStr>
+  <ReverseLinTagLengthStr>35-37-41</ReverseLinTagLengthStr>
+  <ExtraMultiTagText>
+  </ExtraMultiTagText>
+  <ReverseMultiTagText>TAGAGTTGGA, 1
+AGAGCACTAG, 2
+ACTCTACAGG, 3
+CGGTGACACC, 4
+GCGTTGGTAT, 5
+TGTGCTAACA, 6
+CCAGAAGTAA, 7
+CTTATACCTG, 8
+ACTAGAACTT, 9
+TTAGGCTTAC, 10
+TATCATGAGA, 11
+CTCACACAAG, 12
+</ReverseMultiTagText>
+  <FowardMultiTagText>CGTGTATCTT, A
+ATTCATTGCA, B
+TCCTTCATAG, C
+GAATGCACGA, D
+GGAATTGTTC, E
+CCGGACCACA, F
+GACTTAGAAG, G
+TCTAGTCTTC, H
+</FowardMultiTagText>
+  <ReadLengthStr>150</ReadLengthStr>
+  <RevUmiTagLenStr>8</RevUmiTagLenStr>
+  <ForUmiTagLenStr>8</ForUmiTagLenStr>
+  <MinQualityStr>30</MinQualityStr>
+  <NWeightStr>Full</NWeightStr>
+  <MultiTagErrorRateStr>10</MultiTagErrorRateStr>
+  <RegexDelRateStr>6</RegexDelRateStr>
+  <RegexInsRateStr>12</RegexInsRateStr>
+  <SpacerDelRateStr>5</SpacerDelRateStr>
+  <SpacerInsRateStr>5</SpacerInsRateStr>
+  <MaxParseStr>0</MaxParseStr>
+  <ForClusterInputPath>C:\Users\djross\source\repos\NISTBartender\examples\output\short_test_forward_lintags.txt</ForClusterInputPath>
+  <RevClusterInputPath>C:\Users\djross\source\repos\NISTBartender\examples\output\short_test_reverse_lintags.txt</RevClusterInputPath>
+  <ClusterOutputDir>C:\Users\djross\source\repos\NISTBartender\examples\output</ClusterOutputDir>
+  <ClusterCutoffFrequencyStr>1</ClusterCutoffFrequencyStr>
+  <MaxClusterDistanceStr>2</MaxClusterDistanceStr>
+  <ClusterMergeThresholdStr>5.0</ClusterMergeThresholdStr>
+  <ClusterSeedLengthStr>5</ClusterSeedLengthStr>
+  <ClusterSeedStepStr>1</ClusterSeedStepStr>
+  <IgnoreSingleConst>True</IgnoreSingleConst>
+</parameters>
