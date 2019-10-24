@@ -106,11 +106,15 @@ Figure out what's going on with N's
 --------------------------------------------------------
 NISTBartender TODO List:
 
+Add SampleSorter to sort barcode cluster counts into samples
+
 
 
 Add warning during AnalyzeMultiTags() if Hamming distance is <= allowed mismatch number from multiTagErrorRate
 
 display histogram of lin-tag lengths after parsing
+
+calculate/show bit rate for UMI tags and lin-tags
 
 
 add regex to output text

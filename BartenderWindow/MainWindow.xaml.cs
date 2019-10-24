@@ -1993,7 +1993,7 @@ namespace BartenderWindow
 
         private string CondenseRepeatedNs(Match match)
         {
-            //The code in this method assumes that the match.Value is a repeated string of N's
+            //The code in this method assumes that the match.Value is a repeated string of *'s
             string matchStr = match.Value;
             int matchLen = matchStr.Length;
             if (matchLen == 1)
@@ -2060,13 +2060,15 @@ namespace BartenderWindow
             }
             string linTag = forwardLinTag;
             int linTagLen = forwardLinTag.Length;
-            //look for single constants and replace with Ns if IgnoreSingleConst
+            //DisplayOutput($"1 *** {linTag} ***");
+            //look for single constants and replace with *s if IgnoreSingleConst
             if (IgnoreSingleConst) {
-                linTag = Regex.Replace(linTag, "(?<=N).(?=N)", "N");
+                linTag = Regex.Replace(linTag, @"(?<=\*).(?=\*)", @"*");
             }
-            //find runs of N's and use them, along with spacerInsRate and spacerDelRate to calculate the min and max length
+            //DisplayOutput($"2 *** {linTag} ***");
+            //find runs of *'s and use them, along with spacerInsRate and spacerDelRate to calculate the min and max length
             int midLen = 0;
-            MatchCollection matches = Regex.Matches(linTag, "N+");
+            MatchCollection matches = Regex.Matches(linTag, @"\*+");
             foreach (Match match in matches)
             {
                 midLen += match.Value.Length;
@@ -2083,11 +2085,13 @@ namespace BartenderWindow
             lengthStr += $"{linTagLen}";
             if (max != linTagLen) lengthStr += $"-{max}";
             ForwardLinTagLengthStr = lengthStr;
-            //Find runs of one or more N's (again) and replace them accordingly using CondenseRepeatedNs()
+            //Find runs of one or more *'s (again) and replace them accordingly using CondenseRepeatedNs()
             MatchEvaluator evaluator = new MatchEvaluator(CondenseRepeatedNs);
-            linTag = Regex.Replace(linTag, "N+", evaluator);
+            linTag = Regex.Replace(linTag, @"\*+", evaluator);
+            //DisplayOutput($"3 *** {linTag} ***");
             //regExStr += linTag;
-            regExStr += linTag.Replace('N', '.'); //include the Replace() here just in case
+            regExStr += linTag.Replace('*', '.'); //include the Replace() here just in case
+            //DisplayOutput($"4 *** {regExStr} ***");
             if (linTagFlankErr == 0)
             {
                 regExStr += forwardLinTagFlankStrs[1];
@@ -2109,15 +2113,15 @@ namespace BartenderWindow
             }
             linTag = reverseLinTag;
             linTagLen = reverseLinTag.Length;
-            //look for single constants and replace with Ns if IgnoreSingleConst
+            //look for single constants and replace with *s if IgnoreSingleConst
             if (IgnoreSingleConst)
             {
-                linTag = Regex.Replace(linTag, "(?<=N).(?=N)", "N");
+                linTag = Regex.Replace(linTag, @"(?<=\*).(?=\*)", @"*");
             }
 
-            //find runs of N's and use them, along with spacerInsRate and spacerDelRate to calculate the min and max length
+            //find runs of *'s and use them, along with spacerInsRate and spacerDelRate to calculate the min and max length
             midLen = 0;
-            matches = Regex.Matches(linTag, "N+");
+            matches = Regex.Matches(linTag, @"\*+");
             foreach (Match match in matches)
             {
                 midLen += match.Value.Length;
@@ -2134,10 +2138,10 @@ namespace BartenderWindow
             lengthStr += $"{linTagLen}";
             if (max != linTagLen) lengthStr += $"-{max}";
             ReverseLinTagLengthStr = lengthStr;
-            //find runs of one or more N's (again) and replace them accordingly using CondenseRepeatedNs()
-            linTag = Regex.Replace(linTag, "N+", evaluator);
+            //find runs of one or more *'s (again) and replace them accordingly using CondenseRepeatedNs()
+            linTag = Regex.Replace(linTag, @"\*+", evaluator);
             //regExStr += linTag;
-            regExStr += linTag.Replace('N', '.'); //include the Replace() here just in case
+            regExStr += linTag.Replace('*', '.'); //include the Replace() here just in case
             if (linTagFlankErr == 0)
             {
                 regExStr += reverseLinTagFlankStrs[1];
@@ -2400,15 +2404,15 @@ namespace BartenderWindow
                 TextRange textRange = new TextRange(rtb.Document.ContentStart, rtb.Document.ContentEnd);
                 string read = textRange.Text;
 
-                //The Lineage tag is indicated by N's but can have constant (non-N) bases in it.
-                //    So, start by finding the first 'N' character
-                //        and the first run of 5 non-N characters after that
-                Regex tagStartRegEx = new Regex("^.+?N");
+                //The Lineage tag is indicated by *'s but can have constant (non-*) bases in it.
+                //    So, start by finding the first '*' character
+                //        and the first run of 5 non-* characters after that
+                Regex tagStartRegEx = new Regex(@"^.+?\*");
                 string tagStartMatch = tagStartRegEx.Match(read).Value;
                 //AddOutputText($"tagStartMatch: {tagStartMatch}");
                 int tagStart = tagStartMatch.Length - 1;
 
-                Regex tagEndRegEx = new Regex("^.+?N.+?N[^N]{5}");
+                Regex tagEndRegEx = new Regex(@"^.+?\*.+?\*[^\*]{5}");
                 string tagEndMatch = tagEndRegEx.Match(read).Value;
                 //AddOutputText($"tagEndMatch: {tagEndMatch}");
                 int tagEnd = tagEndMatch.Length - 5;
