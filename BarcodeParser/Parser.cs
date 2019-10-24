@@ -37,6 +37,7 @@ namespace BarcodeParser
         public int[] forLinTagLength, revLinTagLength; //range of possible lineage tag lengths
         public int multiFlankLength; //length of flanking regions around multi-tags
         public int linTagFlankLength; //length of flanking regions around lineage tags
+        public int multiTagFlankErr; // number of allowed errors in multi-tag flanking sequence (zero or one)
 
         //Regex's for matching to lineage tag patterns (with flanking sequences)
         public string forLintagRegexStr, revLintagRegexStr;
@@ -146,7 +147,15 @@ namespace BarcodeParser
 
             //Multi-tag flank sequence regex, used for finding matches to multi-tags if Regex search for single-mismatch fails
             //    Done as a look-ahead so that the multi-tag sequence will be at the end of the returned matching string 
-            string multiFlankRegexStr = RegExStrWithOneSnip(forMultiFlankStr, includePerfectMatch: false);
+            string multiFlankRegexStr;
+            if (multiTagFlankErr == 0)
+            {
+                multiFlankRegexStr = forMultiFlankStr;
+            }
+            else
+            {
+                multiFlankRegexStr = RegExStrWithOneSnip(forMultiFlankStr, includePerfectMatch: false);
+            }
             if (maxForMultiTestLength == minForMultiTestLength)
             {
                 multiFlankRegexStr = $"^.*(?=({multiFlankRegexStr}$))";
@@ -160,7 +169,14 @@ namespace BarcodeParser
             }
             Regex forMultiFlankRegex = new Regex(multiFlankRegexStr, RegexOptions.Compiled);
 
-            multiFlankRegexStr = RegExStrWithOneSnip(revMultiFlankStr, includePerfectMatch: false);
+            if (multiTagFlankErr == 0)
+            {
+                multiFlankRegexStr = revMultiFlankStr;
+            }
+            else
+            {
+                multiFlankRegexStr = RegExStrWithOneSnip(revMultiFlankStr, includePerfectMatch: false);
+            }
             if (maxRevMultiTestLength == minRevMultiTestLength)
             {
                 multiFlankRegexStr = $"^.*(?=({multiFlankRegexStr}$))";
@@ -177,11 +193,25 @@ namespace BarcodeParser
             //If all UMI-tags and all multi-tags are the same length, potential multi-tage sequence can be identified strictly by position
             //Multi-tag flank sequence regex, used for finding matches to multi-tags if Regex search for single-mismatch fails
             //    Done without beginning/end anchors, since it will be compared agains strings with the exact flanking sequence length 
-            multiFlankRegexStr = RegExStrWithOneSnip(forMultiFlankStr, includePerfectMatch: false);
+            if (multiTagFlankErr == 0)
+            {
+                multiFlankRegexStr = forMultiFlankStr;
+            }
+            else
+            {
+                multiFlankRegexStr = RegExStrWithOneSnip(forMultiFlankStr, includePerfectMatch: false);
+            }
             Regex forFixedMultiFlankRegex = new Regex(multiFlankRegexStr, RegexOptions.Compiled);
             SendOutputText($"forMultiFlankRegex: {multiFlankRegexStr}");
 
-            multiFlankRegexStr = RegExStrWithOneSnip(revMultiFlankStr, includePerfectMatch: false);
+            if (multiTagFlankErr == 0)
+            {
+                multiFlankRegexStr = revMultiFlankStr;
+            }
+            else
+            {
+                multiFlankRegexStr = RegExStrWithOneSnip(revMultiFlankStr, includePerfectMatch: false);
+            }
             Regex revFixedMultiFlankRegex = new Regex(multiFlankRegexStr, RegexOptions.Compiled);
             SendOutputText($"revMultiFlankRegex: {multiFlankRegexStr}");
 
@@ -207,7 +237,7 @@ namespace BarcodeParser
             int maxRevUmiPlusMultiLength = revUmiTagLen.Last() + revMultiTagLen.Last();
 
 
-            //Regex lists for detecting multi-tags
+            //Regex lists for detecting multi-tags, when all multi-tags are not the same length
             foreach (string tag in forMultiTagList)
             {
                 string regexStr = "^.{";
@@ -215,7 +245,14 @@ namespace BarcodeParser
                 else regexStr += $"{forUmiTagLen[0]},{forUmiTagLen[1]}";
                 regexStr += "}";
                 regexStr += RegExStrWithOneSnip(tag, includePerfectMatch:false);
-                regexStr += RegExStrWithOneSnip(forMultiFlankStr, includePerfectMatch: false);
+                if (multiTagFlankErr == 0)
+                {
+                    regexStr += forMultiFlankStr;
+                }
+                else
+                {
+                    regexStr += RegExStrWithOneSnip(forMultiFlankStr, includePerfectMatch: false);
+                }
                 SendOutputText(logFileWriter, $"Forward multi-tag RegEx: {regexStr}");
                 forMultiTagRegexDict[tag] = new Regex(regexStr, RegexOptions.Compiled);
             }
@@ -226,7 +263,14 @@ namespace BarcodeParser
                 else regexStr += $"{revUmiTagLen[0]},{revUmiTagLen[1]}";
                 regexStr += "}";
                 regexStr += RegExStrWithOneSnip(tag, includePerfectMatch: false);
-                regexStr += RegExStrWithOneSnip(revMultiFlankStr, includePerfectMatch: false);
+                if (multiTagFlankErr == 0)
+                {
+                    regexStr += revMultiFlankStr;
+                }
+                else
+                {
+                    regexStr += RegExStrWithOneSnip(revMultiFlankStr, includePerfectMatch: false);
+                }
                 SendOutputText(logFileWriter, $"Reverse multi-tag RegEx: {regexStr}");
                 revMultiTagRegexDict[tag] = new Regex(regexStr, RegexOptions.Compiled);
             }

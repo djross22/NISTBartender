@@ -941,7 +941,7 @@ namespace BartenderWindow
             DisplayTitle = title;
         }
 
-        private void MakeMultiTagLists()
+        private void MakeMultiTagLists(bool printOutput = true)
         {
             InitMultiTagLists();
 
@@ -1085,12 +1085,15 @@ namespace BartenderWindow
                 }
             }
 
-            AddOutputText($"Multi-tag sample IDs: ", false);
-            foreach (string keys in mutiTagIdDict.Keys)
+            if (printOutput)
             {
-                AddOutputText($"{mutiTagIdDict[keys]}, ", false);
+                AddOutputText($"Multi-tag sample IDs: ", false);
+                foreach (string keys in mutiTagIdDict.Keys)
+                {
+                    AddOutputText($"{mutiTagIdDict[keys]}, ", false);
+                }
+                AddOutputText($"");
             }
-            AddOutputText($"");
         }
 
         private void SetReadLength()
@@ -1590,19 +1593,24 @@ namespace BartenderWindow
 
         private void analyzeMultiButton_Click(object sender, RoutedEventArgs e)
         {
-            MakeMultiTagLists();
+            AnalyzeMultiTags();
+        }
 
-            AddOutputText("");
-            AddOutputText("Nearest neighbor and minimum distances for Forward Multiplex Tags:");
+        private void AnalyzeMultiTags(bool printOutput = true)
+        {
+            MakeMultiTagLists(printOutput);
+
+            if (printOutput) AddOutputText("");
+            if (printOutput) AddOutputText("Nearest neighbor and minimum distances for Forward Multiplex Tags:");
             int minLength = int.MaxValue;
             int maxLength = 0;
             foreach (string tag in forwardMultiTagList)
             {
                 List<string> compList = new List<string>(forwardMultiTagList);
                 compList.Remove(tag);
-                AddOutputText($"{tag}: Hamming", false);
-                AddOutputText($"{Parser.BestMatchMultiTag(tag, compList.ToArray())}, Levenshtein: ", false);
-                AddOutputText($"{Parser.BestMatchMultiTag(tag, compList.ToArray(), useHamming:false)}.");
+                if (printOutput) AddOutputText($"{tag}: Hamming", false);
+                if (printOutput) AddOutputText($"{Parser.BestMatchMultiTag(tag, compList.ToArray())}, Levenshtein: ", false);
+                if (printOutput) AddOutputText($"{Parser.BestMatchMultiTag(tag, compList.ToArray(), useHamming: false)}.");
                 foreach (string s in compList)
                 {
                     if (s.Contains(tag)) AddOutputText($"!!Warning: {tag} is a substring of {s}.");
@@ -1614,17 +1622,17 @@ namespace BartenderWindow
             if (minLength == maxLength) forMultiTagLen = new int[1] { minLength };
             else forMultiTagLen = new int[2] { minLength, maxLength };
 
-            AddOutputText("");
-            AddOutputText("Nearest neighbor and minimum distances for Reverse Multiplex Tags:");
+            if (printOutput) AddOutputText("");
+            if (printOutput) AddOutputText("Nearest neighbor and minimum distances for Reverse Multiplex Tags:");
             minLength = int.MaxValue;
             maxLength = 0;
             foreach (string tag in reverseMultiTagList)
             {
                 List<string> compList = new List<string>(reverseMultiTagList);
                 compList.Remove(tag);
-                AddOutputText($"{tag}: Hamming", false);
-                AddOutputText($"{Parser.BestMatchMultiTag(tag, compList.ToArray())}, Levenshtein: ", false);
-                AddOutputText($"{Parser.BestMatchMultiTag(tag, compList.ToArray(), useHamming:false)}.");
+                if (printOutput) AddOutputText($"{tag}: Hamming", false);
+                if (printOutput) AddOutputText($"{Parser.BestMatchMultiTag(tag, compList.ToArray())}, Levenshtein: ", false);
+                if (printOutput) AddOutputText($"{Parser.BestMatchMultiTag(tag, compList.ToArray(), useHamming: false)}.");
                 foreach (string s in compList)
                 {
                     if (s.Contains(tag)) AddOutputText($"!!Warning: {tag} is a substring of {s}.");
@@ -1635,7 +1643,7 @@ namespace BartenderWindow
             //Set forMultiTagLen[]
             if (minLength == maxLength) revMultiTagLen = new int[1] { minLength };
             else revMultiTagLen = new int[2] { minLength, maxLength };
-            AddOutputText("");
+            if (printOutput) AddOutputText("");
         }
 
         private void clusterButton_Click(object sender, RoutedEventArgs e)
@@ -1876,6 +1884,10 @@ namespace BartenderWindow
 
         private void SetParserParams()
         {
+            AnalyzeSequences(printOutput:false);
+
+            AnalyzeMultiTags(printOutput:false);
+
             parser.write_directory = OutputDirectory;
             parser.outputFileLabel = outputFileLabel;
             parser.read_directory = InputDirectory;
@@ -1903,6 +1915,7 @@ namespace BartenderWindow
 
             parser.linTagFlankLength = linTagFlankLength;
             parser.multiFlankLength = multiFlankLength;
+            parser.multiTagFlankErr = multiTagFlankErr;
 
             parser.forLintagRegexStr = forLintagRegexStr;
             parser.revLintagRegexStr = revLintagRegexStr;
@@ -2036,7 +2049,15 @@ namespace BartenderWindow
             //Automatically generate RegEx's, and also calculate/update length range for Lin-tags 
 
             //Forward Lin-tag RegEx
-            string regExStr = Parser.RegExStrWithOneSnip(forwardLinTagFlankStrs[0]);
+            string regExStr;
+            if (linTagFlankErr == 0)
+            {
+                regExStr = forwardLinTagFlankStrs[0];
+            }
+            else
+            {
+                regExStr = Parser.RegExStrWithOneSnip(forwardLinTagFlankStrs[0]);
+            }
             string linTag = forwardLinTag;
             int linTagLen = forwardLinTag.Length;
             //look for single constants and replace with Ns if IgnoreSingleConst
@@ -2067,11 +2088,25 @@ namespace BartenderWindow
             linTag = Regex.Replace(linTag, "N+", evaluator);
             //regExStr += linTag;
             regExStr += linTag.Replace('N', '.'); //include the Replace() here just in case
-            regExStr += Parser.RegExStrWithOneSnip(forwardLinTagFlankStrs[1]);
+            if (linTagFlankErr == 0)
+            {
+                regExStr += forwardLinTagFlankStrs[1];
+            }
+            else
+            {
+                regExStr += Parser.RegExStrWithOneSnip(forwardLinTagFlankStrs[1]);
+            }
             ForLintagRegexStr = regExStr;
 
             //Reverse Lin-tag RegEx
-            regExStr = Parser.RegExStrWithOneSnip(reverseLinTagFlankStrs[0]);
+            if (linTagFlankErr == 0)
+            {
+                regExStr = reverseLinTagFlankStrs[0];
+            }
+            else
+            {
+                regExStr = Parser.RegExStrWithOneSnip(reverseLinTagFlankStrs[0]);
+            }
             linTag = reverseLinTag;
             linTagLen = reverseLinTag.Length;
             //look for single constants and replace with Ns if IgnoreSingleConst
@@ -2103,7 +2138,14 @@ namespace BartenderWindow
             linTag = Regex.Replace(linTag, "N+", evaluator);
             //regExStr += linTag;
             regExStr += linTag.Replace('N', '.'); //include the Replace() here just in case
-            regExStr += Parser.RegExStrWithOneSnip(reverseLinTagFlankStrs[1]);
+            if (linTagFlankErr == 0)
+            {
+                regExStr += reverseLinTagFlankStrs[1];
+            }
+            else
+            {
+                regExStr += Parser.RegExStrWithOneSnip(reverseLinTagFlankStrs[1]);
+            }
             RevLintagRegexStr = regExStr;
         }
 
@@ -2131,7 +2173,7 @@ namespace BartenderWindow
             AnalyzeSequences();
         }
 
-        private void AnalyzeSequences()
+        private void AnalyzeSequences(bool printOutput = true)
         {
             clearWhiteSpaces();
 
@@ -2351,7 +2393,7 @@ namespace BartenderWindow
 
         }
 
-        private void HighlightLineageTag()
+        private void HighlightLineageTag(bool printOutput = true)
         {
             foreach (RichTextBox rtb in new RichTextBox[2] { forwardRichTextBox, reverseRichTextBox })
             {
@@ -2388,7 +2430,7 @@ namespace BartenderWindow
                     {
                         ForwardLinTagLengthStr = $"{forwardLinTag.Length}";
                     }
-                    AddOutputText($"forwardLinTag: {forwardLinTag}");
+                    if (printOutput) AddOutputText($"forwardLinTag: {forwardLinTag}");
                 }
                 if (Object.ReferenceEquals(rtb, reverseRichTextBox))
                 {
@@ -2397,8 +2439,8 @@ namespace BartenderWindow
                     {
                         ReverseLinTagLengthStr = $"{reverseLinTag.Length}";
                     }
-                    AddOutputText($"reverseLinTag: {reverseLinTag}");
-                    AddOutputText($"");
+                    if (printOutput) AddOutputText($"reverseLinTag: {reverseLinTag}");
+                    if (printOutput) AddOutputText($"");
                 }
 
                 //Also highlight the flanking sequences used for matching

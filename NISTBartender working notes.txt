@@ -93,20 +93,24 @@ set up log file; in AddOutputText()
 
 If output file label or directory is changed, switch to SaveAs
 
+Fix bug in Parse Then Cluster: doesn't assign input files for clustering properly.
+
+Automatically run AnalyzeMultiTags before parsing
+
+Add option to accept zero or one mismatches in each flanking sequence region
+
 
 --------------------------------------------------------
 NISTBartender TODO List:
 
-Fix bug in Parse Then Cluster: doesn't assign input files for clustering properly.
-
 Figure out what's going on with N's
 	Make short test dataset that I can edit by hand
 
-Add option to accept zero or one mismatches in each flanking sequence region
 
-Automatically run AnalyzeMultiTags before parsing
 
 Add warning during AnalyzeMultiTags() if Hamming distance is <= allowed mismatch number from multiTagErrorRate
+
+display histogram of lin-tag lengths after parsing
 
 
 add regex to output text

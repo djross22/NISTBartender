@@ -11,7 +11,11 @@
   <RevLintagRegexStr>(TACC|.ACC|T.CC|TA.C|TAC.).{4,7}?AA.{4,7}?AA.{4,7}?TT.{4,7}?(TTAC|.TAC|T.AC|TT.C|TTA.)</RevLintagRegexStr>
   <ForLintagRegexStr>(TACC|.ACC|T.CC|TA.C|TAC.).{4,7}?AA.{4,7}?TT.{4,7}?TT.{4,7}?(ATAA|.TAA|A.AA|AT.A|ATA.)</ForLintagRegexStr>
   <LinTagFlankLengthStr>4</LinTagFlankLengthStr>
+  <LinTagFlankErrStr>1</LinTagFlankErrStr>
   <MultiFlankLengthStr>4</MultiFlankLengthStr>
+  <MultiTagFlankErrStr>1</MultiTagFlankErrStr>
+  <ForwardLinTagLengthStr>22-26-34</ForwardLinTagLengthStr>
+  <ReverseLinTagLengthStr>22-26-34</ReverseLinTagLengthStr>
   <ExtraMultiTagText>TTCGGT, GCTTAA, S1
 CGCATA, CACCGA, S2
 </ExtraMultiTagText>
@@ -23,9 +27,20 @@ CGCATA, CACCGA, S2
   <RevUmiTagLenStr>8</RevUmiTagLenStr>
   <ForUmiTagLenStr>8</ForUmiTagLenStr>
   <MinQualityStr>30</MinQualityStr>
+  <NWeightStr>Ignore</NWeightStr>
+  <MultiTagErrorRateStr>20</MultiTagErrorRateStr>
   <RegexDelRateStr>20</RegexDelRateStr>
   <RegexInsRateStr>40</RegexInsRateStr>
   <SpacerDelRateStr>5</SpacerDelRateStr>
   <SpacerInsRateStr>5</SpacerInsRateStr>
+  <MaxParseStr>0</MaxParseStr>
+  <ForClusterInputPath>C:\Users\djross\Documents\temp\csharp_test\barcode_analysis_forward_lintags.txt</ForClusterInputPath>
+  <RevClusterInputPath>C:\Users\djross\Documents\temp\csharp_test\barcode_analysis_reverse_lintags.txt</RevClusterInputPath>
+  <ClusterOutputDir>C:\Users\djross\Documents\temp\csharp_test</ClusterOutputDir>
+  <ClusterCutoffFrequencyStr>1</ClusterCutoffFrequencyStr>
+  <MaxClusterDistanceStr>2</MaxClusterDistanceStr>
+  <ClusterMergeThresholdStr>5.0</ClusterMergeThresholdStr>
+  <ClusterSeedLengthStr>5</ClusterSeedLengthStr>
+  <ClusterSeedStepStr>1</ClusterSeedStepStr>
   <IgnoreSingleConst>False</IgnoreSingleConst>
 </parameters>
