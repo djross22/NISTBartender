@@ -11,7 +11,8 @@ namespace BarcodeParser
 {
     public class Parser
     {
-        IDisplaysOutputText outputReceiver;
+        //***********************************************************************************************
+        //All public fields need to be set by controlling app before ParseDoubleBarcodes() is called
         public string write_directory; //directory where files are read and saved
         public string read_directory; //directory where files are read and saved
         public string outputFileLabel; //text used at the start of output filenames
@@ -22,12 +23,8 @@ namespace BarcodeParser
         public string forLintagOutFile, revLintagOutFile;
 
         public List<string> forMultiTagList; //List of forward multiplexing tags
-        public string[] forMultiTagArr; //Array of forward multiplexing tags, set from forMultiTagList before parsing to increase spped
-        private Dictionary<string, Regex> forMultiTagRegexDict; //Dictionary of Regex's for detecting forward multi-tags, keys are multi-tag sequences
 
         public List<string> revMultiTagList; //List of reverse multiplexing tags
-        public string[] revMultiTagArr; //Array of reverse multiplexing tags, set from revMultiTagList before parsing to increase spped
-        private Dictionary<string, Regex> revMultiTagRegexDict; //Dictionary of Regex's for detecting reverse multi-tags, keys are multi-tag sequences
 
         public string forMultiFlankStr, revMultiFlankStr; //string for flanking sequence after multi-tags
 
@@ -39,16 +36,9 @@ namespace BarcodeParser
         public int linTagFlankLength; //length of flanking regions around lineage tags
         public int multiTagFlankErr; // number of allowed errors in multi-tag flanking sequence (zero or one)
 
-        //Regex's for matching to lineage tag patterns (with flanking sequences)
-        public string forLintagRegexStr, revLintagRegexStr;
-        private Regex forLinTagRegex, revLinTagRegex;
+        public string forLintagRegexStr, revLintagRegexStr; //Regex's for matching to lineage tag patterns (with flanking sequences)
 
         public Dictionary<string, string> mutiTagIdDict;  //Dictionary for sample IDs, keys are: $"{forwardMultiTag}_{reverseMultiTag}"
-
-        private static readonly Object fileLock = new Object(); //lock for multi-thread file writing
-        private static readonly Object unmatchedFileLock = new Object(); //lock for multi-thread file writing
-        private static readonly Object counterLock = new Object(); //lock for multi-thread counter updates
-
 
         public int parsingThreads; //number of threads to use for parsing
 
@@ -56,9 +46,29 @@ namespace BarcodeParser
 
         public double multiTagErrorRate; //allowed error rate for matching sequences to multiplexing tags
 
+        public NWeights nWeight;
+        //***********************************************************************************************
+
+
         //enum for setting how to dwal with N's in multi-tag sequence; Ignore: N counts as zero mismathces, Full:N counts as one, Half:N  counts as 1/2 mismatch
         public enum NWeights { Ignore, Half, Full };
-        public NWeights nWeight;
+
+        private string[] forMultiTagArr; //Array of forward multiplexing tags, set from forMultiTagList before parsing to increase spped
+        private Dictionary<string, Regex> forMultiTagRegexDict; //Dictionary of Regex's for detecting forward multi-tags, keys are multi-tag sequences
+
+        private string[] revMultiTagArr; //Array of reverse multiplexing tags, set from revMultiTagList before parsing to increase spped
+        private Dictionary<string, Regex> revMultiTagRegexDict; //Dictionary of Regex's for detecting reverse multi-tags, keys are multi-tag sequences
+
+        //Regex's for matching to lineage tag patterns (with flanking sequences)
+        private Regex forLinTagRegex, revLinTagRegex;
+
+        IDisplaysOutputText outputReceiver; //the controlling app to send text output to (e.g. the Main Window object)
+
+
+        //Locks used for synchronization of writing output to files from multiple parsing threads
+        private static readonly Object fileLock = new Object(); //lock for multi-thread file writing
+        private static readonly Object unmatchedFileLock = new Object(); //lock for multi-thread file writing
+        private static readonly Object counterLock = new Object(); //lock for multi-thread counter updates
 
         public Parser(IDisplaysOutputText receiver)
         {
