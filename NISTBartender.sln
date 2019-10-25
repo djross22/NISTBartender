@@ -5,6 +5,7 @@ VisualStudioVersion = 16.0.29326.143
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BartenderWindow", "BartenderWindow\BartenderWindow.csproj", "{9D16C880-255D-45F0-B22D-0167BE5FE804}"
 	ProjectSection(ProjectDependencies) = postProject
+		{2BCD724C-CD27-4E5B-BCCF-167E989899C0} = {2BCD724C-CD27-4E5B-BCCF-167E989899C0}
 		{78E70A73-550E-4E08-B335-A84F85F82F65} = {78E70A73-550E-4E08-B335-A84F85F82F65}
 	EndProjectSection
 EndProject
@@ -15,7 +16,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BarcodeClusterer", "Barcode
 		{87D64CBE-79CA-4360-9922-AC6C40B05528} = {87D64CBE-79CA-4360-9922-AC6C40B05528}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleSorter", "SampleSorter\SampleSorter.csproj", "{2BCD724C-CD27-4E5B-BCCF-167E989899C0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleSorter", "SampleSorter\SampleSorter.csproj", "{2BCD724C-CD27-4E5B-BCCF-167E989899C0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

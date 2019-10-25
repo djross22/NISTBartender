@@ -8,7 +8,15 @@ namespace SampleSorter
 {
     public class Sorter
     {
-        IDisplaysOutputText outputReceiver;
+        //***********************************************************************************************
+        //All public fields need to be set by controlling app before SortBarcodes() is called
+
+        public string forLinTagFile, revLinTagFile, outputPrefix;
+
+
+        //***********************************************************************************************
+
+        private IDisplaysOutputText outputReceiver;
 
 
         public Sorter(BarcodeParser.IDisplaysOutputText receiver)
@@ -35,12 +43,12 @@ namespace SampleSorter
             outputReceiver.DisplayOutput(text, newLine);
         }
 
-        public static IEnumerable<string[]> GetNextLinTags(string forLinTagFile, string revLinTagFile)
+        private static IEnumerable<string[]> GetNextLinTags(string forwardFile, string reverseFile)
         {
             Int64 count = 0;
 
             //Create StreamReaders from both forward and reverse lineage tag files
-            using (StreamReader forwardReader = new StreamReader(forLinTagFile), reverseReader = new StreamReader(revLinTagFile))
+            using (StreamReader forwardReader = new StreamReader(forwardFile), reverseReader = new StreamReader(reverseFile))
             {
                 //check to be sure there are more lines first
                 while ((forwardReader.ReadLine() != null) & (reverseReader.ReadLine() != null))
@@ -83,6 +91,36 @@ namespace SampleSorter
                     yield return retString;
                 }
             }
+        }
+
+        public void SortBarcodes()
+        {
+            //Set up log file to keep record of output text from clustering
+            TextWriter logFileWriter = TextWriter.Synchronized(new StreamWriter($"{outputPrefix}.sorting.log"));
+
+            DateTime startTime = DateTime.Now;
+            SendOutputText(logFileWriter);
+            SendOutputText(logFileWriter, "*********************************************");
+            SendOutputText(logFileWriter, $"Running Barcode Sorting.");
+            SendOutputText(logFileWriter, $"Sorting started: {startTime}.");
+            SendOutputText(logFileWriter, "");
+
+
+            foreach (string[] stringArr in GetNextLinTags(forLinTagFile, revLinTagFile))
+            {
+
+            }
+
+
+            DateTime endTime = DateTime.Now;
+            SendOutputText(logFileWriter);
+            SendOutputText(logFileWriter, $"Sorting finished: {endTime}.");
+            SendOutputText(logFileWriter, $"Elapsed time: {endTime - startTime}.");
+            SendOutputText(logFileWriter, "*********************************************");
+            SendOutputText(logFileWriter);
+
+
+            logFileWriter.Close();
         }
 
 
