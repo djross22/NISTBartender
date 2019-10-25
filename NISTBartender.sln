@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BarcodeClusterer", "Barcode
 		{87D64CBE-79CA-4360-9922-AC6C40B05528} = {87D64CBE-79CA-4360-9922-AC6C40B05528}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BarcodeSorter", "BarcodeSorter\BarcodeSorter.csproj", "{8E33F0A7-3D8F-4CD2-9C70-51AC6BF22EFB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{78E70A73-550E-4E08-B335-A84F85F82F65}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{78E70A73-550E-4E08-B335-A84F85F82F65}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{78E70A73-550E-4E08-B335-A84F85F82F65}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E33F0A7-3D8F-4CD2-9C70-51AC6BF22EFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E33F0A7-3D8F-4CD2-9C70-51AC6BF22EFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E33F0A7-3D8F-4CD2-9C70-51AC6BF22EFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E33F0A7-3D8F-4CD2-9C70-51AC6BF22EFB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
