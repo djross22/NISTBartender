@@ -20,6 +20,7 @@ using Microsoft.Win32;
 using System.Xml;
 using BarcodeParser;
 using BarcodeClusterer;
+using SampleSorter;
 
 namespace BartenderWindow
 {
@@ -124,7 +125,10 @@ namespace BartenderWindow
         private double clusterMergeThreshold;
         private int threadsForClustering;
 
-        //List of controls to disable/enable when parser or clusterer is running
+        //paramters/fields for sorting
+        private Sorter barcodeSorter;
+
+        //List of controls to disable/enable when parser, clusterer, or sorter is running
         private List<Control> inputControlsList;
 
         #region Properties Getters and Setters
@@ -1741,6 +1745,17 @@ namespace BartenderWindow
             ForClusterInputPath = parser.forLintagOutFile;
             RevClusterInputPath = parser.revLintagOutFile;
             EnableInputControls();
+        }
+
+        private void sortButton_Click(object sender, RoutedEventArgs e)
+        {
+            RunSorter();
+        }
+
+        private void RunSorter()
+        {
+            barcodeSorter = new Sorter(this);
+
         }
 
         private void SetClusteringDefaults()

@@ -40,6 +40,7 @@
                     <Button x:Name="parseButton" Content="Parse" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ToolTip="Run Barcode Parser" Margin="5,0,5,0" Click="parseButton_Click"/>
                     <Button x:Name="clusterButton" Content="Cluster" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ToolTip="Run Barcode Clustering" Margin="5,0,5,0" Click="clusterButton_Click"/>
                     <Button x:Name="parseAndClusterButton" Content="Parse and Cluster" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ToolTip="Parse Barcodes then run Barcode Clustering" Margin="5,0,5,0" Click="parseAndClusterButton_Click"/>
+                    <Button x:Name="sortButton" Content="Sort" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ToolTip="Sort Barcodes by Sample ID" Margin="5,0,5,0" Click="sortButton_Click"/>
                 </ToolBar>
             </ToolBarTray>
             <Grid/>
