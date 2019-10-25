@@ -105,19 +105,15 @@ namespace BarcodeSorter
         private void MakeBarcodeDictionary(bool forward)
         {
             string inFile;
-            Dictionary<string, int> dict;
+            Dictionary<string, int> dict = new Dictionary<string, int>(); ;
             if (forward)
             {
                 inFile = forBarcodeFile;
-                dict = forBarcodeDict;
             }
             else
             {
                 inFile = revBarcodeFile;
-                dict = revBarcodeDict;
             }
-
-            dict = new Dictionary<string, int>();
 
             string line;
             string[] splitLine;
@@ -135,6 +131,15 @@ namespace BarcodeSorter
                 }
             }
 
+            if (forward)
+            {
+                forBarcodeDict = dict;
+            }
+            else
+            {
+                revBarcodeDict = dict;
+            }
+
         }
 
         public void SortBarcodes()
@@ -149,10 +154,14 @@ namespace BarcodeSorter
             SendOutputText(logFileWriter, $"Sorting started: {startTime}.");
             SendOutputText(logFileWriter, "");
 
+
             MakeBarcodeDictionary(forward: true);
+            int count = 0;
             foreach (string key in forBarcodeDict.Keys)
             {
+                if (count > 100) break;
                 SendOutputText(key);
+                count++;
             }
 
 

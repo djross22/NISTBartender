@@ -1754,7 +1754,12 @@ namespace BartenderWindow
 
         private void RunSorter()
         {
+            sorter = new Sorter(this);
 
+            sorter.forBarcodeFile = ClusterOutputDir + $"\\{OutputFileLabel}_forward_barcode.csv";
+            sorter.revBarcodeFile = ClusterOutputDir + $"\\{OutputFileLabel}_reverse_barcode.csv";
+
+            sorter.SortBarcodes();
         }
 
         private void SetClusteringDefaults()
