@@ -1743,6 +1743,16 @@ namespace BartenderWindow
             EnableInputControls();
         }
 
+        private void sortButton_Click(object sender, RoutedEventArgs e)
+        {
+            RunSorter();
+        }
+
+        private void RunSorter()
+        {
+
+        }
+
         private void SetClusteringDefaults()
         {
             if (parser != null)
