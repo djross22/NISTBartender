@@ -485,7 +485,7 @@ namespace BarcodeParser
                         string keys = $"{forMultiMatch}_{revMultiMatch}";
                         validSampleFound = mutiTagIdDict.TryGetValue(keys, out sampleId);
                         if (validSampleFound) sampleId += $"_{forUmi}_{revUmi}";
-                        else sampleId = $"unexpected_F{forMultiMatch}_R{revMultiMatch}_{forUmi}_{revUmi}";
+                        else sampleId = $"unexpected-F{forMultiMatch}-R{revMultiMatch}_{forUmi}_{revUmi}";
 
                         //Check mean quality score for potential forward lin-tag sequence
                         string linTagQualStr = forQual.Substring(minForPreLinFlankLength);
@@ -703,7 +703,7 @@ namespace BarcodeParser
                         string keys = $"{forMultiMatch}_{revMultiMatch}";
                         validSampleFound = mutiTagIdDict.TryGetValue(keys, out sampleId);
                         if (validSampleFound) sampleId += $"_{forUmi}_{revUmi}";
-                        else sampleId = $"unexpected_F{forMultiMatch}_R{revMultiMatch}_{forUmi}_{revUmi}";
+                        else sampleId = $"unexpected-F{forMultiMatch}-R{revMultiMatch}_{forUmi}_{revUmi}";
 
                         //Check mean quality score for potential forward lin-tag sequence
                         string linTagQualStr = forQual.Substring(minForPreLinFlankLength);
