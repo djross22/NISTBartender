@@ -10,13 +10,22 @@ namespace SampleSorter
     {
         //***********************************************************************************************
         //All public fields need to be set by controlling app before SortBarcodes() is called
+        //    input file strings should be set to the full path for the file
 
-        public string forLinTagFile, revLinTagFile, outputPrefix;
+        public string forLinTagFile, revLinTagFile; //lineage tag files ourput from Parser
+
+        public string outputPrefix; //output prefix used to automatically create output files; directory plus partial filename
+
+        public string forBarcodeFile, revBarcodeFile; // "..._barcode.csv" files output from Clusterer; 1st column is lin-tag sequence, third column is cluster ID
+
+
 
 
         //***********************************************************************************************
 
         private IDisplaysOutputText outputReceiver;
+
+        private Dictionary<string, int> forBarcodeDict, revBarcodeDict; //Dictionaries for looking up barcode cluster IDs: key = lin-tag sequence, value = barcode ID.
 
 
         public Sorter(BarcodeParser.IDisplaysOutputText receiver)
@@ -93,6 +102,41 @@ namespace SampleSorter
             }
         }
 
+        private void MakeBarcodeDictionary(bool forward)
+        {
+            string inFile;
+            Dictionary<string, int> dict;
+            if (forward)
+            {
+                inFile = forBarcodeFile;
+                dict = forBarcodeDict;
+            }
+            else
+            {
+                inFile = revBarcodeFile;
+                dict = revBarcodeDict;
+            }
+
+            dict = new Dictionary<string, int>();
+
+            string line;
+            string[] splitLine;
+            //each line of input should be in the form: "{lin-tag sequence},{frequence},{cluster ID}"
+            using (StreamReader reader = new StreamReader(inFile))
+            {
+                reader.ReadLine(); //first line of file is header, so read it but don't do anything with it.
+
+                while ((line = reader.ReadLine()) != null)
+                {
+                    splitLine = line.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    splitLine = splitLine.Select(s => s.Trim()).ToArray();
+
+                    dict[splitLine[0]] = int.Parse(splitLine[2]);
+                }
+            }
+
+        }
+
         public void SortBarcodes()
         {
             //Set up log file to keep record of output text from clustering
@@ -105,11 +149,17 @@ namespace SampleSorter
             SendOutputText(logFileWriter, $"Sorting started: {startTime}.");
             SendOutputText(logFileWriter, "");
 
-
-            foreach (string[] stringArr in GetNextLinTags(forLinTagFile, revLinTagFile))
+            MakeBarcodeDictionary(forward:true);
+            foreach (string key in forBarcodeDict.Keys)
             {
-
+                SendOutputText(key);
             }
+
+
+            //foreach (string[] stringArr in GetNextLinTags(forLinTagFile, revLinTagFile))
+            //{
+
+            //}
 
 
             DateTime endTime = DateTime.Now;
