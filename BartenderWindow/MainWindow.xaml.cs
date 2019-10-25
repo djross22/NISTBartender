@@ -20,6 +20,7 @@ using Microsoft.Win32;
 using System.Xml;
 using BarcodeParser;
 using BarcodeClusterer;
+using BarcodeSorter;
 
 namespace BartenderWindow
 {
@@ -123,6 +124,9 @@ namespace BartenderWindow
         private string clusterMergeThresholdStr;
         private double clusterMergeThreshold;
         private int threadsForClustering;
+
+        //Parameters/fields for barcode sorting
+        private Sorter sorter;
 
         //List of controls to disable/enable when parser or clusterer is running
         private List<Control> inputControlsList;

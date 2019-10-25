@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\BarcodeClusterer\BarcodeClusterer.csproj" />
     <ProjectReference Include="..\BarcodeParser\BarcodeParser.csproj" />
+    <ProjectReference Include="..\BarcodeSorter\BarcodeSorter.csproj" />
   </ItemGroup>
 
 </Project>
