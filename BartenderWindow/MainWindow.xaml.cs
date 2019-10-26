@@ -1754,12 +1754,47 @@ namespace BartenderWindow
 
         private void RunSorter()
         {
+            DisableInputControls();
+
+            InitSorter();
+
+            //Run sorter as background worker
+            BackgroundWorker sorterWorker = new BackgroundWorker();
+            sorterWorker.WorkerReportsProgress = false;
+            sorterWorker.DoWork += sorterWorker_DoWork;
+            sorterWorker.RunWorkerCompleted += sorterWorker_RunWorkerCompleted;
+
+            sorterWorker.RunWorkerAsync();
+        }
+
+        private void InitSorter()
+        {
             sorter = new Sorter(this);
 
             sorter.forBarcodeFile = ClusterOutputDir + $"\\{OutputFileLabel}_forward_barcode.csv";
             sorter.revBarcodeFile = ClusterOutputDir + $"\\{OutputFileLabel}_reverse_barcode.csv";
 
             sorter.SortBarcodes();
+        }
+
+        void sorterWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            try
+            {
+                sorter.SortBarcodes();
+            }
+            catch (Exception ex)
+            {
+                //this has to be delegated becasue it interacts with the GUI by sending text to the outputTextBox
+                this.Dispatcher.Invoke(() => {
+                    AddOutputText($"Exception in Sorter.SortBarcodes() while attempting to sort barcodes: {ex})");
+                });
+            }
+        }
+
+        void sorterWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            EnableInputControls();
         }
 
         private void SetClusteringDefaults()
