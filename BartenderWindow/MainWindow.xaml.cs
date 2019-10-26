@@ -1756,6 +1756,8 @@ namespace BartenderWindow
         {
             DisableInputControls();
 
+            AnalyzeMultiTags(printOutput: false);
+
             InitSorter();
 
             //Run sorter as background worker
@@ -1774,10 +1776,13 @@ namespace BartenderWindow
             sorter.forBarcodeFile = ClusterOutputDir + $"\\{OutputFileLabel}_forward_barcode.csv";
             sorter.revBarcodeFile = ClusterOutputDir + $"\\{OutputFileLabel}_reverse_barcode.csv";
 
+            sorter.forClusterFile = ClusterOutputDir + $"\\{OutputFileLabel}_forward_cluster.csv";
+            sorter.revClusterFile = ClusterOutputDir + $"\\{OutputFileLabel}_reverse_cluster.csv";
+
             sorter.forLinTagFile = ClusterOutputDir + $"\\{OutputFileLabel}_forward_lintags.txt";
             sorter.revLinTagFile = ClusterOutputDir + $"\\{OutputFileLabel}_reverse_lintags.txt";
 
-            sorter.outputPrefix = ClusterOutputDir;
+            sorter.outputPrefix = ClusterOutputDir + $"\\{OutputFileLabel}";
 
             sorter.sampleIdList = mutiTagIdDict.Values.ToList();
         }

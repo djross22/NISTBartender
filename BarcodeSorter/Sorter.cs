@@ -12,13 +12,15 @@ namespace BarcodeSorter
         //All public fields need to be set by controlling app before SortBarcodes() is called
         //    input file strings should be set to the full path for the file
 
-        public string forLinTagFile, revLinTagFile; //lineage tag files ourput from Parser
+        public string forLinTagFile, revLinTagFile; //lineage tag files output from Parser
 
         public string outputPrefix; //output prefix used to automatically create output files; directory plus partial filename
 
         public string forBarcodeFile, revBarcodeFile; // "..._barcode.csv" files output from Clusterer; 1st column is lin-tag sequence, third column is cluster ID
 
+        public string forClusterFile, revClusterFile; // "..._cluster.csv" files output from Clusterer; 1st column is cluster ID. 2nd column is cluster center
 
+        public List<string> sampleIdList; //List of sample IDs; = MainWindow.mutiTagIdDict.Values
 
 
         //***********************************************************************************************
@@ -26,6 +28,9 @@ namespace BarcodeSorter
         private IDisplaysOutputText outputReceiver;
 
         private Dictionary<string, int> forBarcodeDict, revBarcodeDict; //Dictionaries for looking up barcode cluster IDs: key = lin-tag sequence, value = barcode ID.
+        private Dictionary<int, string> forCenterDict, revCenterDict; //Dictionaries for looking up barcode cluster centers: key = barcode ID, value = barcode center sequence.
+
+        private Dictionary<(int, int), HashSet<string>> barcodeSetDict; //Dictionary for storing a List of sampleID+UMI corresponding to each pair of forward, reverse barcodes; key = (forwardBarcodeID, reversebarcodeID); value = List of sampleID+UMI
 
 
         public Sorter(BarcodeParser.IDisplaysOutputText receiver)
@@ -64,8 +69,8 @@ namespace BarcodeSorter
                 {
                     count += 1;
 
-                    //Returns an array of 4 strings: forwardTag, reverseTag, samplePlusUmi, count in that order
-                    string[] retString = new string[4];
+                    //Returns an array of 3 strings: forwardTag, reverseTag, samplePlusUmi
+                    string[] retString = new string[3];
 
                     //each line from forward and reverse lin-tag files is the lin-tag sequence and sampleID+UMI, separated by a comma
                     string forLine = forwardReader.ReadLine();
@@ -93,10 +98,7 @@ namespace BarcodeSorter
                     retString[0] = forwardSplitLine[0]; //forward lin-tag
                     retString[1] = reverseSplitLine[0]; //reverse lin-tag
                     retString[2] = reverseSplitLine[1]; //sample ID plus UMI
-
-
-                    retString[3] = $"{count}";
-
+                    
                     yield return retString;
                 }
             }
@@ -104,20 +106,23 @@ namespace BarcodeSorter
 
         private void MakeBarcodeDictionary(bool forward)
         {
-            string inFile;
-            Dictionary<string, int> dict = new Dictionary<string, int>(); ;
+            string inFile, backInFile;
+            Dictionary<string, int> dict = new Dictionary<string, int>();
+            Dictionary<int, string> backDict = new Dictionary<int, string>();
             if (forward)
             {
                 inFile = forBarcodeFile;
+                backInFile = forClusterFile;
             }
             else
             {
                 inFile = revBarcodeFile;
+                backInFile = revClusterFile;
             }
 
             string line;
             string[] splitLine;
-            //each line of input should be in the form: "{lin-tag sequence},{frequence},{cluster ID}"
+            //"_barcode.csv" files: each line of input should be in the form: "{lin-tag sequence},{frequence},{cluster ID}"
             using (StreamReader reader = new StreamReader(inFile))
             {
                 reader.ReadLine(); //first line of file is header, so read it but don't do anything with it.
@@ -131,13 +136,29 @@ namespace BarcodeSorter
                 }
             }
 
+            //"_cluster.csv" files: each line of input should be in the form: "{cluster ID},{cluster center},..."
+            using (StreamReader reader = new StreamReader(backInFile))
+            {
+                reader.ReadLine(); //first line of file is header, so read it but don't do anything with it.
+
+                while ((line = reader.ReadLine()) != null)
+                {
+                    splitLine = line.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    splitLine = splitLine.Select(s => s.Trim()).ToArray();
+
+                    backDict[int.Parse(splitLine[0])] = splitLine[1];
+                }
+            }
+
             if (forward)
             {
                 forBarcodeDict = dict;
+                forCenterDict = backDict;
             }
             else
             {
                 revBarcodeDict = dict;
+                revCenterDict = backDict;
             }
 
         }
@@ -156,19 +177,76 @@ namespace BarcodeSorter
 
 
             MakeBarcodeDictionary(forward: true);
+            MakeBarcodeDictionary(forward: false);
+
+            barcodeSetDict = new Dictionary<(int, int), HashSet<string>>();
             int count = 0;
-            foreach (string key in forBarcodeDict.Keys)
+            int deduplCount = 0;
+            foreach (string[] stringArr in GetNextLinTags(forLinTagFile, revLinTagFile))
             {
-                if (count > 100) break;
-                SendOutputText(key);
+                //stringArr[0] = forward lin-tag
+                //stringArr[1] = reverse lin-tag
+                //stringArr[2] = sample ID plus UMI
+
+                int forBarcodeId = forBarcodeDict[stringArr[0]];
+                int revBarcodeId = revBarcodeDict[stringArr[1]];
+
+                HashSet<string> sampleIdPlusUmiSet;
+                if (barcodeSetDict.TryGetValue( (forBarcodeId, revBarcodeId), out sampleIdPlusUmiSet))
+                {
+                    if (sampleIdPlusUmiSet.Add(stringArr[2])) deduplCount++;
+                }
+                else
+                {
+                    sampleIdPlusUmiSet = new HashSet<string>();
+                    sampleIdPlusUmiSet.Add(stringArr[2]);
+                    barcodeSetDict[(forBarcodeId, revBarcodeId)] = sampleIdPlusUmiSet;
+                    deduplCount++;
+                }
+
                 count++;
             }
 
+            SendOutputText(logFileWriter, $"Number of forward-reverse lineage tag pairs before PCR jackpot correction: {count}");
+            SendOutputText(logFileWriter, $"Number of forward-reverse lineage tag pairs after PCR jackpot correction: {deduplCount}");
+            SendOutputText(logFileWriter, $"Number of distinct double barcode cluster IDs: {barcodeSetDict.Count}");
 
-            //foreach (string[] stringArr in GetNextLinTags(forLinTagFile, revLinTagFile))
-            //{
+            string outFileStr = $"{outputPrefix}.sorted_counts.csv";
+            SendOutputText(logFileWriter);
+            SendOutputText(logFileWriter, $"{DateTime.Now}; Writing barcode counts to file: {outFileStr}");
+            using (StreamWriter outFileWriter = new StreamWriter(outFileStr))
+            {
+                // Write header to output .csv file
+                string outStr = $"forward_BC, reverse_BC";
+                foreach (string s in sampleIdList)
+                {
+                    outStr = $"{outStr}, {s}";
+                }
+                outFileWriter.WriteLine(outStr);
 
-            //}
+                //Write line for each observed barcode pair
+                //count = 0;
+                foreach (var entry in barcodeSetDict)
+                {
+                    outStr = $"{forCenterDict[entry.Key.Item1]}, {revCenterDict[entry.Key.Item2]}";
+                    var list = entry.Value.ToList();
+                    foreach (string s in sampleIdList)
+                    {
+                        var resultSet = list.Where(r => r.StartsWith(s));
+                        int num = resultSet.Count();
+
+                        outStr = $"{outStr}, {num}";
+                    }
+
+                    outFileWriter.WriteLine(outStr);
+
+                    //count++;
+
+                    //if (count < 5) SendOutputText($"IDs: {entry.Key}");
+                    //if (count < 5) SendOutputText($"    {outStr}");
+                }
+            }
+                
 
 
             DateTime endTime = DateTime.Now;
