@@ -1774,7 +1774,12 @@ namespace BartenderWindow
             sorter.forBarcodeFile = ClusterOutputDir + $"\\{OutputFileLabel}_forward_barcode.csv";
             sorter.revBarcodeFile = ClusterOutputDir + $"\\{OutputFileLabel}_reverse_barcode.csv";
 
-            sorter.SortBarcodes();
+            sorter.forLinTagFile = ClusterOutputDir + $"\\{OutputFileLabel}_forward_lintags.txt";
+            sorter.revLinTagFile = ClusterOutputDir + $"\\{OutputFileLabel}_reverse_lintags.txt";
+
+            sorter.outputPrefix = ClusterOutputDir;
+
+            sorter.sampleIdList = mutiTagIdDict.Values.ToList();
         }
 
         void sorterWorker_DoWork(object sender, DoWorkEventArgs e)
