@@ -232,7 +232,7 @@ namespace BarcodeSorter
                     var list = entry.Value.ToList();
                     foreach (string s in sampleIdList)
                     {
-                        var resultSet = list.Where(r => r.StartsWith(s));
+                        var resultSet = list.Where(r => r.StartsWith($"{s}_"));
                         int num = resultSet.Count();
 
                         outStr = $"{outStr}, {num}";
