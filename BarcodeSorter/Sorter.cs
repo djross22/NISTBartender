@@ -65,7 +65,7 @@ namespace BarcodeSorter
             using (StreamReader forwardReader = new StreamReader(forwardFile), reverseReader = new StreamReader(reverseFile))
             {
                 //check to be sure there are more lines first
-                while ((forwardReader.ReadLine() != null) & (reverseReader.ReadLine() != null))
+                while (true)
                 {
                     count += 1;
 
@@ -75,6 +75,8 @@ namespace BarcodeSorter
                     //each line from forward and reverse lin-tag files is the lin-tag sequence and sampleID+UMI, separated by a comma
                     string forLine = forwardReader.ReadLine();
                     string revLine = reverseReader.ReadLine();
+
+                    if ((forLine is null) || (revLine is null)) break;
 
                     string[] forwardSplitLine = forLine.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                     //Then clean up forwardSplitLine by trimming white space from ends of each string, and removing empty strings.
