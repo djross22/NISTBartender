@@ -190,29 +190,39 @@ namespace BarcodeSorter
             barcodeSetDict = new Dictionary<(int, int), HashSet<string>>();
             int count = 0;
             int deduplCount = 0;
+            int notFoundCount = 0;
             foreach (string[] stringArr in GetNextLinTags(forLinTagFile, revLinTagFile))
             {
                 //stringArr[0] = forward lin-tag
                 //stringArr[1] = reverse lin-tag
                 //stringArr[2] = sample ID plus UMI
 
-                int forBarcodeId = forBarcodeDict[stringArr[0]];
-                int revBarcodeId = revBarcodeDict[stringArr[1]];
-
-                HashSet<string> sampleIdPlusUmiSet;
-                if (barcodeSetDict.TryGetValue( (forBarcodeId, revBarcodeId), out sampleIdPlusUmiSet))
+                try
                 {
-                    if (sampleIdPlusUmiSet.Add(stringArr[2])) deduplCount++;
-                }
-                else
-                {
-                    sampleIdPlusUmiSet = new HashSet<string>();
-                    sampleIdPlusUmiSet.Add(stringArr[2]);
-                    barcodeSetDict[(forBarcodeId, revBarcodeId)] = sampleIdPlusUmiSet;
-                    deduplCount++;
-                }
+                    int forBarcodeId = forBarcodeDict[stringArr[0]];
+                    int revBarcodeId = revBarcodeDict[stringArr[1]];
 
-                count++;
+                    HashSet<string> sampleIdPlusUmiSet;
+                    if (barcodeSetDict.TryGetValue((forBarcodeId, revBarcodeId), out sampleIdPlusUmiSet))
+                    {
+                        if (sampleIdPlusUmiSet.Add(stringArr[2])) deduplCount++;
+                    }
+                    else
+                    {
+                        sampleIdPlusUmiSet = new HashSet<string>();
+                        sampleIdPlusUmiSet.Add(stringArr[2]);
+                        barcodeSetDict[(forBarcodeId, revBarcodeId)] = sampleIdPlusUmiSet;
+                        deduplCount++;
+                    }
+
+                    count++;
+                }
+                catch (KeyNotFoundException ex)
+                {
+                    //Don't need to do anything here except keep count.
+                    //    If one of the lin-tags is not in the look-up dictionary, it is presumably becasue it belongs to a barcode below the cutoff frequency.
+                    notFoundCount++;
+                }
             }
             SendOutputText(logFileWriter, $"{DateTime.Now}; Finished sorting barcodes.");
             SendOutputText(logFileWriter);
@@ -221,9 +231,10 @@ namespace BarcodeSorter
             double deduplePerc = 100.0 * ((double)deduplCount) / ((double)(count));
             SendOutputText(logFileWriter, $"Number of forward-reverse lineage tag pairs after PCR jackpot correction:  {deduplCount} ({deduplePerc:0.##}%)");
             SendOutputText(logFileWriter, $"Number of distinct double barcode cluster IDs: {barcodeSetDict.Count}");
+            SendOutputText(logFileWriter, $"Number of forward-reverse lineage tag pairs not found in look-up dictionary (frequency below cutoff): {notFoundCount}");
+            SendOutputText(logFileWriter);
 
             string outFileStr = $"{outputPrefix}.sorted_counts.csv";
-            SendOutputText(logFileWriter);
             SendOutputText(logFileWriter, $"{DateTime.Now}; Writing barcode counts to file: {outFileStr}");
             using (StreamWriter outFileWriter = new StreamWriter(outFileStr))
             {

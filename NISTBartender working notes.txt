@@ -102,11 +102,13 @@ Add option to accept zero or one mismatches in each flanking sequence region
 Figure out what's going on with N's
 	Make short test dataset that I can edit by hand
 
+Add SampleSorter to sort barcode cluster counts into samples
+
+Fix bug in Sorter lines 199-200: forBarcodeDict, and revBarcodeDict - if keys don't exist because cutoff frquency set >1
+
 
 --------------------------------------------------------
 NISTBartender TODO List:
-
-Add SampleSorter to sort barcode cluster counts into samples
 
 
 
