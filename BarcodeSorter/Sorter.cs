@@ -175,10 +175,16 @@ namespace BarcodeSorter
             SendOutputText(logFileWriter, $"Sorting started: {startTime}.");
             SendOutputText(logFileWriter, "");
 
-
+            SendOutputText(logFileWriter, $"{DateTime.Now}; Start building barcode look-up dictionaries.");
             MakeBarcodeDictionary(forward: true);
             MakeBarcodeDictionary(forward: false);
+            SendOutputText(logFileWriter, $"{DateTime.Now}; Finished building barcode look-up dictionaries.");
+            SendOutputText(logFileWriter);
 
+
+            SendOutputText(logFileWriter, $"{DateTime.Now}; Start sorting barcodes from:");
+            SendOutputText(logFileWriter, $"    {forLinTagFile}");
+            SendOutputText(logFileWriter, $"    {revLinTagFile}.");
             barcodeSetDict = new Dictionary<(int, int), HashSet<string>>();
             int count = 0;
             int deduplCount = 0;
@@ -206,9 +212,12 @@ namespace BarcodeSorter
 
                 count++;
             }
+            SendOutputText(logFileWriter, $"{DateTime.Now}; Finished sorting barcodes.");
+            SendOutputText(logFileWriter);
 
             SendOutputText(logFileWriter, $"Number of forward-reverse lineage tag pairs before PCR jackpot correction: {count}");
-            SendOutputText(logFileWriter, $"Number of forward-reverse lineage tag pairs after PCR jackpot correction: {deduplCount}");
+            double deduplePerc = 100.0 * ((double)deduplCount) / ((double)(count));
+            SendOutputText(logFileWriter, $"Number of forward-reverse lineage tag pairs after PCR jackpot correction:  {deduplCount} ({deduplePerc:0.##}%)");
             SendOutputText(logFileWriter, $"Number of distinct double barcode cluster IDs: {barcodeSetDict.Count}");
 
             string outFileStr = $"{outputPrefix}.sorted_counts.csv";
