@@ -118,7 +118,7 @@ namespace BartenderWindow
 
         //Parameters for barcode clustering
         private Clusterer forwardClusterer, reverseClusterer;
-        private string forClusterInputPath, revClusterInputPath, clusterOutputDir;
+        private string forClusterInputPath, revClusterInputPath;
         private string clusterCutoffFrequencyStr, maxClusterDistanceStr, clusterSeedLengthStr, clusterSeedStepStr;
         private int clusterCutoffFrequency, maxClusterDistance, clusterSeedLength, clusterSeedStep;
         private string clusterMergeThresholdStr;
@@ -227,19 +227,6 @@ namespace BartenderWindow
                     this.clusterCutoffFrequencyStr = value;
                     OnPropertyChanged("ClusterCutoffFrequencyStr");
                     int.TryParse(clusterCutoffFrequencyStr, out clusterCutoffFrequency);
-                }
-            }
-        }
-
-        public string ClusterOutputDir
-        {
-            get { return this.clusterOutputDir; }
-            set
-            {
-                if (this.clusterOutputDir != value)
-                {
-                    this.clusterOutputDir = value;
-                    OnPropertyChanged("ClusterOutputDir");
                 }
             }
         }
@@ -847,7 +834,7 @@ namespace BartenderWindow
 
             inputControlsList.Add(forClusterInputTextBox);
             inputControlsList.Add(revClusterInputTextBox);
-            inputControlsList.Add(clusterOutputDirTextBox);
+
             inputControlsList.Add(clusterCutoffFreqTextBox);
             inputControlsList.Add(maxClusterDistTextBox);
             inputControlsList.Add(clusterMergeTextBox);
@@ -910,7 +897,7 @@ namespace BartenderWindow
 
             paramsList.Add("ForClusterInputPath");
             paramsList.Add("RevClusterInputPath");
-            paramsList.Add("ClusterOutputDir");
+
             paramsList.Add("ClusterCutoffFrequencyStr");
             paramsList.Add("MaxClusterDistanceStr");
             paramsList.Add("ClusterMergeThresholdStr");
@@ -1667,7 +1654,7 @@ namespace BartenderWindow
 
         private void RunParserThenClusterer()
         {
-            if (string.IsNullOrEmpty(ClusterOutputDir))
+            if (string.IsNullOrEmpty(OutputDirectory))
             {
                 MessageBox.Show("Clustering output directory not properly set.");
                 return;
@@ -1710,9 +1697,7 @@ namespace BartenderWindow
             RevClusterInputPath = parser.revLintagOutFile;
 
             InitClusterers();
-
-            ClusterOutputDir = OutputDirectory;
-
+            
             try
             {
                 forwardClusterer.ClusterBarcodes();
@@ -1773,16 +1758,16 @@ namespace BartenderWindow
         {
             sorter = new Sorter(this);
 
-            sorter.forBarcodeFile = ClusterOutputDir + $"\\{OutputFileLabel}_forward_barcode.csv";
-            sorter.revBarcodeFile = ClusterOutputDir + $"\\{OutputFileLabel}_reverse_barcode.csv";
+            sorter.forBarcodeFile = OutputDirectory + $"\\{OutputFileLabel}_forward_barcode.csv";
+            sorter.revBarcodeFile = OutputDirectory + $"\\{OutputFileLabel}_reverse_barcode.csv";
 
-            sorter.forClusterFile = ClusterOutputDir + $"\\{OutputFileLabel}_forward_cluster.csv";
-            sorter.revClusterFile = ClusterOutputDir + $"\\{OutputFileLabel}_reverse_cluster.csv";
+            sorter.forClusterFile = OutputDirectory + $"\\{OutputFileLabel}_forward_cluster.csv";
+            sorter.revClusterFile = OutputDirectory + $"\\{OutputFileLabel}_reverse_cluster.csv";
 
-            sorter.forLinTagFile = ClusterOutputDir + $"\\{OutputFileLabel}_forward_lintags.txt";
-            sorter.revLinTagFile = ClusterOutputDir + $"\\{OutputFileLabel}_reverse_lintags.txt";
+            sorter.forLinTagFile = OutputDirectory + $"\\{OutputFileLabel}_forward_lintags.txt";
+            sorter.revLinTagFile = OutputDirectory + $"\\{OutputFileLabel}_reverse_lintags.txt";
 
-            sorter.outputPrefix = ClusterOutputDir + $"\\{OutputFileLabel}";
+            sorter.outputPrefix = OutputDirectory + $"\\{OutputFileLabel}";
 
             sorter.sampleIdList = mutiTagIdDict.Values.ToList();
         }
@@ -1814,9 +1799,7 @@ namespace BartenderWindow
                 if (!string.IsNullOrEmpty(parser.forLintagOutFile)) ForClusterInputPath = parser.forLintagOutFile;
                 if (!string.IsNullOrEmpty(parser.revLintagOutFile)) RevClusterInputPath = parser.revLintagOutFile;
             }
-
-            if (!string.IsNullOrEmpty(OutputDirectory)) ClusterOutputDir = OutputDirectory;
-
+            
             ClusterCutoffFrequencyStr = "1";
             MaxClusterDistanceStr = "2";
             ClusterMergeThresholdStr = "5.0";
@@ -1849,7 +1832,7 @@ namespace BartenderWindow
         private void RunClusterer()
         {
 
-            if ( (string.IsNullOrEmpty(ForClusterInputPath)) || (string.IsNullOrEmpty(RevClusterInputPath)) || (string.IsNullOrEmpty(ClusterOutputDir)) )
+            if ( (string.IsNullOrEmpty(ForClusterInputPath)) || (string.IsNullOrEmpty(RevClusterInputPath)) || (string.IsNullOrEmpty(OutputDirectory)) )
             {
                 MessageBox.Show("Clustering input and output files not properly set.");
             }
@@ -1882,9 +1865,9 @@ namespace BartenderWindow
 
             //Set clusterer parameters
             forwardClusterer.inputFile = ForClusterInputPath;
-            forwardClusterer.outputPrefix = $"{ClusterOutputDir}\\{OutputFileLabel}_forward";
+            forwardClusterer.outputPrefix = $"{OutputDirectory}\\{OutputFileLabel}_forward";
             reverseClusterer.inputFile = RevClusterInputPath;
-            reverseClusterer.outputPrefix = $"{ClusterOutputDir}\\{OutputFileLabel}_reverse";
+            reverseClusterer.outputPrefix = $"{OutputDirectory}\\{OutputFileLabel}_reverse";
             foreach (Clusterer clust in new Clusterer[] { forwardClusterer, reverseClusterer })
             {
                 clust.clusterSeedStep = clusterSeedStep;
