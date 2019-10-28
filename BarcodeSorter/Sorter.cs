@@ -233,6 +233,7 @@ namespace BarcodeSorter
                 {
                     outStr = $"{outStr}, {s}";
                 }
+                outStr = $"{outStr}, total_counts";
                 outFileWriter.WriteLine(outStr);
 
                 //Write line for each observed barcode pair
@@ -241,13 +242,17 @@ namespace BarcodeSorter
                 {
                     outStr = $"{forCenterDict[entry.Key.Item1]}, {revCenterDict[entry.Key.Item2]}";
                     var list = entry.Value.ToList();
+                    int sum = 0;
                     foreach (string s in sampleIdList)
                     {
                         var resultSet = list.Where(r => r.StartsWith($"{s}_"));
                         int num = resultSet.Count();
 
                         outStr = $"{outStr}, {num}";
+
+                        sum += num;
                     }
+                    outStr = $"{outStr}, {sum}";
 
                     outFileWriter.WriteLine(outStr);
 
