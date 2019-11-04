@@ -216,6 +216,8 @@ namespace BarcodeSorter
                     }
 
                     count++;
+                    if (count % 1000000 == 0) SendOutputText(".", newLine: false);
+                    if (count % 10000000 == 0 && count > 0) SendOutputText($"{count}", newLine: false);
                 }
                 catch (KeyNotFoundException ex)
                 {
