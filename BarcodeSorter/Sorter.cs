@@ -30,8 +30,12 @@ namespace BarcodeSorter
         private Dictionary<string, int> forBarcodeDict, revBarcodeDict; //Dictionaries for looking up barcode cluster IDs: key = lin-tag sequence, value = barcode ID.
         private Dictionary<int, string> forCenterDict, revCenterDict; //Dictionaries for looking up barcode cluster centers: key = barcode ID, value = barcode center sequence.
 
-        private Dictionary<(int, int), HashSet<string>> barcodeSetDict; //Dictionary for storing a List of sampleID+UMI corresponding to each pair of forward, reverse barcodes; key = (forwardBarcodeID, reversebarcodeID); value = List of sampleID+UMI
+        //private Dictionary<(int, int), HashSet<string>> barcodeSetDict; //Dictionary for storing a List of sampleID+UMI corresponding to each pair of forward, reverse barcodes; key = (forwardBarcodeID, reversebarcodeID); value = List of sampleID+UMI
 
+        //Dictionary for storing output counts for each sample; key = (forwardBarcodeID, reversebarcodeID); value = Dictionary<sampleID, count>
+        private Dictionary<(int, int), Dictionary<string, int>> outputCountDictionary;
+
+        private string sampleFileDirectory; //path to directory for sample-specific output files used during sorting
 
         public Sorter(BarcodeParser.IDisplaysOutputText receiver)
         {
@@ -184,13 +188,30 @@ namespace BarcodeSorter
             SendOutputText(logFileWriter);
 
 
-            SendOutputText(logFileWriter, $"{DateTime.Now}; Start sorting barcodes from:");
-            SendOutputText(logFileWriter, $"    {forLinTagFile}");
-            SendOutputText(logFileWriter, $"    {revLinTagFile}.");
-            barcodeSetDict = new Dictionary<(int, int), HashSet<string>>();
+            SendOutputText(logFileWriter, $"{DateTime.Now}; Start sorting barcodes from input files:");
+            SendOutputText(logFileWriter, $"    {forLinTagFile},");
+            SendOutputText(logFileWriter, $"    {revLinTagFile},");
+            SendOutputText(logFileWriter, $"... to sample files.");
+
+            //open a file for each sample to save list of barcode IDs and UMIs
+            sampleFileDirectory = $"{outputPrefix}_samples";
+            if (!Directory.Exists(sampleFileDirectory))
+            {
+                Directory.CreateDirectory(sampleFileDirectory);
+            }
+            Dictionary<string, TextWriter> sampleFileWriters = new Dictionary<string, TextWriter>();
+            Dictionary<string, string> sampleFilePaths = new Dictionary<string, string>();
+            foreach (string s in sampleIdList)
+            {
+                string filePath = $"{sampleFileDirectory}\\{s}.txt";
+                sampleFileWriters[s] = new StreamWriter(filePath);
+                sampleFilePaths[s] = filePath;
+            }
+
             int count = 0;
-            int deduplCount = 0;
             int notFoundCount = 0;
+            //First, read each barcode from the input files and write info to sample-specific files:
+            //    forward barcode ID, reverse barcode ID, sample ID plus UMI string
             foreach (string[] stringArr in GetNextLinTags(forLinTagFile, revLinTagFile))
             {
                 //stringArr[0] = forward lin-tag
@@ -202,18 +223,10 @@ namespace BarcodeSorter
                     int forBarcodeId = forBarcodeDict[stringArr[0]];
                     int revBarcodeId = revBarcodeDict[stringArr[1]];
 
-                    HashSet<string> sampleIdPlusUmiSet;
-                    if (barcodeSetDict.TryGetValue((forBarcodeId, revBarcodeId), out sampleIdPlusUmiSet))
-                    {
-                        if (sampleIdPlusUmiSet.Add(stringArr[2])) deduplCount++;
-                    }
-                    else
-                    {
-                        sampleIdPlusUmiSet = new HashSet<string>();
-                        sampleIdPlusUmiSet.Add(stringArr[2]);
-                        barcodeSetDict[(forBarcodeId, revBarcodeId)] = sampleIdPlusUmiSet;
-                        deduplCount++;
-                    }
+                    string sampleIdPlusUmi = stringArr[2];
+                    string sampleId = sampleIdPlusUmi.Remove(sampleIdPlusUmi.IndexOf('_'));
+
+                    sampleFileWriters[sampleId].Write($"{forBarcodeId},{revBarcodeId},{sampleIdPlusUmi}\n");
 
                     count++;
                     if (count % 1000000 == 0) SendOutputText(".", newLine: false);
@@ -223,16 +236,84 @@ namespace BarcodeSorter
                 {
                     //Don't need to do anything here except keep count.
                     //    If one of the lin-tags is not in the look-up dictionary, it is presumably becasue it belongs to a barcode below the cutoff frequency.
+                    //Also, if the sample ID starts with "unexpected", then will also not be found as a key in the sampleFileWriters dictionary
                     notFoundCount++;
                 }
             }
-            SendOutputText(logFileWriter, $"{DateTime.Now}; Finished sorting barcodes.");
+            //Close the sample-specific output files
+            foreach (string s in sampleIdList)
+            {
+                sampleFileWriters[s].Close();
+            }
+            SendOutputText(logFileWriter, $"{DateTime.Now}; Finished sorting barcodes into sample-specific files.");
             SendOutputText(logFileWriter);
+
+            //Next, for each sample-specific file, make the barcodeSetDict = Dictionary<(int, int), HashSet<string>>
+            //    TODO?: replace with ParallelForEach?
+            //Then, convert to counts for each file
+            SendOutputText(logFileWriter, $"{DateTime.Now}; Start counting and de-jackpotting barcodes for each sample.");
+            int deduplCount = 0;
+            outputCountDictionary = new Dictionary<(int, int), Dictionary<string, int>>();
+            foreach (string s in sampleIdList)
+            {
+                SendOutputText(s, newLine:false);
+
+                Dictionary<(int, int), HashSet<string>> barcodeSetDict = new Dictionary<(int, int), HashSet<string>>();
+                using (StreamReader sampleReader = new StreamReader(sampleFilePaths[s]))
+                {
+                    while (true)
+                    {
+                        string line = sampleReader.ReadLine();
+                        if (line is null) break;
+
+                        string[] splitLine = line.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+                        int forBarcodeId = int.Parse(splitLine[0]);
+                        int revBarcodeId = int.Parse(splitLine[1]);
+
+                        HashSet<string> sampleIdPlusUmiSet;
+                        if (barcodeSetDict.TryGetValue((forBarcodeId, revBarcodeId), out sampleIdPlusUmiSet))
+                        {
+                            if (sampleIdPlusUmiSet.Add(splitLine[2])) deduplCount++;
+                        }
+                        else
+                        {
+                            sampleIdPlusUmiSet = new HashSet<string>();
+                            sampleIdPlusUmiSet.Add(splitLine[2]);
+                            barcodeSetDict[(forBarcodeId, revBarcodeId)] = sampleIdPlusUmiSet;
+                            deduplCount++;
+                        }
+                    }
+                }
+                SendOutputText("... ", newLine: false);
+
+                //Convert to counts and store in outputCountDictionary:
+                foreach (var entry in barcodeSetDict)
+                {
+                    var key = entry.Key;
+                    var list = entry.Value.ToList();
+
+                    Dictionary<string, int> countDictionary;
+                    if (outputCountDictionary.TryGetValue(key, out countDictionary))
+                    {
+                        countDictionary[s] = list.Count;
+                    }
+                    else
+                    {
+                        countDictionary = new Dictionary<string, int>();
+                        countDictionary[s] = list.Count;
+                        outputCountDictionary[key] = countDictionary;
+                    }
+                }
+            }
+            SendOutputText(logFileWriter, $"{DateTime.Now}; Finished counting and de-jackpotting barcodes for each sample.");
+            SendOutputText(logFileWriter);
+
 
             SendOutputText(logFileWriter, $"Number of forward-reverse lineage tag pairs before PCR jackpot correction: {count}");
             double deduplePerc = 100.0 * ((double)deduplCount) / ((double)(count));
             SendOutputText(logFileWriter, $"Number of forward-reverse lineage tag pairs after PCR jackpot correction:  {deduplCount} ({deduplePerc:0.##}%)");
-            SendOutputText(logFileWriter, $"Number of distinct double barcode cluster IDs: {barcodeSetDict.Count}");
+            SendOutputText(logFileWriter, $"Number of distinct double barcode cluster IDs: {outputCountDictionary.Count}");
             SendOutputText(logFileWriter, $"Number of forward-reverse lineage tag pairs not found in look-up dictionary (frequency below cutoff): {notFoundCount}");
             SendOutputText(logFileWriter);
 
@@ -251,15 +332,15 @@ namespace BarcodeSorter
 
                 //Write line for each observed barcode pair
                 //count = 0;
-                foreach (var entry in barcodeSetDict)
+                foreach (var entry in outputCountDictionary)
                 {
                     outStr = $"{forCenterDict[entry.Key.Item1]}, {revCenterDict[entry.Key.Item2]}";
-                    var list = entry.Value.ToList();
+                    var countDictionary = entry.Value;
                     int sum = 0;
                     foreach (string s in sampleIdList)
                     {
-                        var resultSet = list.Where(r => r.StartsWith($"{s}_"));
-                        int num = resultSet.Count();
+                        int num = 0;
+                        countDictionary.TryGetValue(s, out num);
 
                         outStr = $"{outStr}, {num}";
 
