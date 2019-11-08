@@ -112,6 +112,10 @@ Remove Clustering Output Directory Control (make same as Top-level Output Direct
 --------------------------------------------------------
 NISTBartender TODO List:
 
+Add cluster merge for different length clusters (after main Bartender Clustering step)
+
+Multiple input files (from different runs/lanes, etc.)
+
 
 
 Add warning during AnalyzeMultiTags() if Hamming distance is <= allowed mismatch number from multiTagErrorRate
