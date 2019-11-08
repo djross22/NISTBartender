@@ -2038,7 +2038,17 @@ namespace BartenderWindow
 
         }
 
-        private string CondenseRepeatedNs(Match match)
+        private string CondenseRepeatedNsLong(Match match)
+        {
+            return CondenseRepeatedNs(match, true);
+        }
+
+        private string CondenseRepeatedNsShort(Match match)
+        {
+            return CondenseRepeatedNs(match, false);
+        }
+
+        private string CondenseRepeatedNs(Match match, bool isLong)
         {
             //The code in this method assumes that the match.Value is a repeated string of *'s
             string matchStr = match.Value;
@@ -2081,8 +2091,16 @@ namespace BartenderWindow
                 else
                 {
                     string ret = ".{";
-                    ret += $"{min},{max}";
-                    ret += "}?";
+                    if (isLong)
+                    {
+                        ret += $"{matchLen},{max}";
+                        ret += "}?";
+                    }
+                    else
+                    {
+                        ret += $"{min},{matchLen-1}";
+                        ret += "}";
+                    }
                     return ret;
                 }
             }
@@ -2132,22 +2150,29 @@ namespace BartenderWindow
             lengthStr += $"{linTagLen}";
             if (max != linTagLen) lengthStr += $"-{max}";
             ForwardLinTagLengthStr = lengthStr;
+
             //Find runs of one or more *'s (again) and replace them accordingly using CondenseRepeatedNs()
-            MatchEvaluator evaluator = new MatchEvaluator(CondenseRepeatedNs);
-            linTag = Regex.Replace(linTag, @"\*+", evaluator);
-            //DisplayOutput($"3 *** {linTag} ***");
-            //regExStr += linTag;
-            regExStr += linTag.Replace('*', '.'); //include the Replace() here just in case
-            //DisplayOutput($"4 *** {regExStr} ***");
+            //  this needs to be done for both the "Long" and "Short" versions of CondenseRepeatedNs()
+            //  so that the Regex search will start at the nominal length, then check longer lengths, and then check shorter lengths;
+            //  this minimizes spurious short barcodes found when the end of the random barcode matches part of the flanking sequences
+            MatchEvaluator evaluatorLong = new MatchEvaluator(CondenseRepeatedNsLong);
+            MatchEvaluator evaluatorShort = new MatchEvaluator(CondenseRepeatedNsShort);
+            string linTagLong = Regex.Replace(linTag, @"\*+", evaluatorLong);
+            string linTagShort = Regex.Replace(linTag, @"\*+", evaluatorShort);
+            string regExStrLong = regExStr + linTagLong.Replace('*', '.'); //include the Replace() here just in case
+            string regExStrShort = regExStr + linTagShort.Replace('*', '.'); //include the Replace() here just in case
             if (linTagFlankErr == 0)
             {
-                regExStr += forwardLinTagFlankStrs[1];
+                regExStrLong += forwardLinTagFlankStrs[1];
+                regExStrShort += forwardLinTagFlankStrs[1];
             }
             else
             {
-                regExStr += Parser.RegExStrWithOneSnip(forwardLinTagFlankStrs[1]);
+                string oneSnip = Parser.RegExStrWithOneSnip(forwardLinTagFlankStrs[1]);
+                regExStrLong += oneSnip;
+                regExStrShort += oneSnip;
             }
-            ForLintagRegexStr = regExStr;
+            ForLintagRegexStr = $"({regExStrLong})|({regExStrShort})";
 
             //Reverse Lin-tag RegEx
             if (linTagFlankErr == 0)
@@ -2185,19 +2210,27 @@ namespace BartenderWindow
             lengthStr += $"{linTagLen}";
             if (max != linTagLen) lengthStr += $"-{max}";
             ReverseLinTagLengthStr = lengthStr;
+
             //find runs of one or more *'s (again) and replace them accordingly using CondenseRepeatedNs()
-            linTag = Regex.Replace(linTag, @"\*+", evaluator);
-            //regExStr += linTag;
-            regExStr += linTag.Replace('*', '.'); //include the Replace() here just in case
+            //  this needs to be done for both the "Long" and "Short" versions of CondenseRepeatedNs()
+            //  so that the Regex search will start at the nominal length, then check longer lengths, and then check shorter lengths;
+            //  this minimizes spurious short barcodes found when the end of the random barcode matches part of the flanking sequences
+            linTagLong = Regex.Replace(linTag, @"\*+", evaluatorLong);
+            linTagShort = Regex.Replace(linTag, @"\*+", evaluatorShort);
+            regExStrLong = regExStr + linTagLong.Replace('*', '.'); //include the Replace() here just in case
+            regExStrShort = regExStr + linTagShort.Replace('*', '.'); //include the Replace() here just in case
             if (linTagFlankErr == 0)
             {
-                regExStr += reverseLinTagFlankStrs[1];
+                regExStrLong += reverseLinTagFlankStrs[1];
+                regExStrShort += reverseLinTagFlankStrs[1];
             }
             else
             {
-                regExStr += Parser.RegExStrWithOneSnip(reverseLinTagFlankStrs[1]);
+                string oneSnip = Parser.RegExStrWithOneSnip(reverseLinTagFlankStrs[1]);
+                regExStrLong += oneSnip;
+                regExStrShort += oneSnip;
             }
-            RevLintagRegexStr = regExStr;
+            RevLintagRegexStr = $"({regExStrLong})|({regExStrShort})";
         }
 
         private void readLengthTextBox_KeyUp(object sender, KeyEventArgs e)
