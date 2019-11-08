@@ -9,10 +9,9 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
-            <RowDefinition Height="75"/>
-            <RowDefinition Height="400"/>
-            <RowDefinition Height="110
-                           "/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="100"/>
             <RowDefinition MinHeight="100"/>
         </Grid.RowDefinitions>
         <DockPanel LastChildFill="False" Grid.RowSpan="2">
@@ -78,8 +77,8 @@
                     <RowDefinition Height="80"/>
                     <RowDefinition Height="18"/>
                     <RowDefinition Height="80"/>
-                    <RowDefinition Height="70"/>
-                    <RowDefinition Height="115"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <TextBlock HorizontalAlignment="Left" Text="Read Length:" VerticalAlignment="Center" Foreground="White" Grid.Row="0" Margin="250,0,0,0" Grid.RowSpan="2"/>
                 <TextBox x:Name="readLengthTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="60" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" KeyUp="readLengthTextBox_KeyUp" Margin="325,0,0,0" Grid.RowSpan="2">
@@ -122,6 +121,8 @@
                         <RowDefinition Height="18"/>
                         <RowDefinition Height="25"/>
                         <RowDefinition Height="25"/>
+                        <RowDefinition Height="25"/>
+                        <RowDefinition Height="25"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="150"/>
@@ -149,10 +150,10 @@
                         </TextBox.Text>
                     </TextBox>
                     <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Lineage tag Regex:" VerticalAlignment="Center" Foreground="White" Grid.Column="1"/>
-                    <TextBlock HorizontalAlignment="Left" Margin="30,0,0,0" Text="Forward:" VerticalAlignment="Center" Foreground="White" Grid.Row="1" Grid.Column="1"/>
-                    <TextBox x:Name="forRegExTextBox" HorizontalAlignment="Stretch" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="80,0,10,0" Grid.Row="1" FontFamily="Courier New" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" KeyUp="forRegExTextBox_KeyUp" Grid.Column="1" Text="{Binding ForLintagRegexStr, Mode=TwoWay}"/>
-                    <TextBlock HorizontalAlignment="Left" Margin="30,0,0,0" Text="Reverse:" VerticalAlignment="Center" Foreground="White" Grid.Row="2" Grid.Column="1"/>
-                    <TextBox x:Name="revRegExTextBox" HorizontalAlignment="Stretch" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="80,0,10,0" Grid.Row="2" FontFamily="Courier New" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" KeyUp="revRegExTextBox_KeyUp" Grid.Column="1" Text="{Binding RevLintagRegexStr, Mode=TwoWay}"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="30,0,0,0" Text="Forward:" VerticalAlignment="Center" Foreground="White" Grid.Row="1" Grid.Column="1" Grid.RowSpan="2"/>
+                    <TextBox x:Name="forRegExTextBox" HorizontalAlignment="Stretch" Height="40" TextWrapping="Wrap"  VerticalAlignment="Center" Margin="80,0,10,0" Grid.Row="1" FontFamily="Courier New" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" KeyUp="forRegExTextBox_KeyUp" Grid.Column="1" Text="{Binding ForLintagRegexStr, Mode=TwoWay}" Grid.RowSpan="2"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="30,0,0,0" Text="Reverse:" VerticalAlignment="Center" Foreground="White" Grid.Row="3" Grid.Column="1" Grid.RowSpan="2"/>
+                    <TextBox x:Name="revRegExTextBox" HorizontalAlignment="Stretch" Height="40" TextWrapping="Wrap" VerticalAlignment="Center" Margin="80,0,10,0" Grid.Row="3" FontFamily="Courier New" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" KeyUp="revRegExTextBox_KeyUp" Grid.Column="1" Text="{Binding RevLintagRegexStr, Mode=TwoWay}" Grid.RowSpan="2"/>
 
                 </Grid>
                 <Grid Grid.Row="6">
