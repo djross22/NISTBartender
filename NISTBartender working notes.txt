@@ -114,6 +114,8 @@ NISTBartender TODO List:
 
 Add cluster merge for different length clusters (after main Bartender Clustering step)
 
+Add flag for possible Chimeras in Sorter
+
 Multiple input files (from different runs/lanes, etc.)
 
 
