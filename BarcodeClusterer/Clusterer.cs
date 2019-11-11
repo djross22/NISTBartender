@@ -132,5 +132,15 @@ namespace BarcodeClusterer
 
             logFileWriter.Close();
         }
+
+        public double BayesMergeRatio(double p, int N1, int N2)
+        {
+            //p is the probability of seeing a read error with a given distance from the correct sequence
+            //N1 is the number of reads in the largere cluster
+            //N2 is the number of reads in the smaller cluster
+            double logLikeRatioAprox = 1 + Math.Log(N1 + N2) + Math.Log(p) - Math.Log(N2) - 1 / 2 * Math.Log(N2 * 6.28) / N2;
+            return logLikeRatioAprox;
+        }
+
     }
 }
