@@ -182,6 +182,7 @@ namespace BarcodeSorter
             SendOutputText(logFileWriter, "");
 
             SendOutputText(logFileWriter, $"{DateTime.Now}; Start building barcode look-up dictionaries.");
+            //Create the dictionaries to look up barcode IDs and barcode centers
             MakeBarcodeDictionary(forward: true);
             MakeBarcodeDictionary(forward: false);
             SendOutputText(logFileWriter, $"{DateTime.Now}; Finished building barcode look-up dictionaries.");
@@ -249,8 +250,9 @@ namespace BarcodeSorter
             SendOutputText(logFileWriter);
 
             //Next, for each sample-specific file, make the barcodeSetDict = Dictionary<(int, int), HashSet<string>>
-            //    TODO?: replace with ParallelForEach?
+            //    key = (forward barcode ID, reverse barcode ID); value = HashSet of sampleIdPlusUmiSet
             //Then, convert to counts for each file
+            //    TODO?: replace with ParallelForEach?
             SendOutputText(logFileWriter, $"{DateTime.Now}; Start counting and de-jackpotting barcodes for each sample.");
             int deduplCount = 0;
             outputCountDictionary = new Dictionary<(int, int), Dictionary<string, int>>();
