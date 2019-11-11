@@ -309,7 +309,7 @@
                     <TextBox.Text>
                         <Binding Path="FowardMultiTagText" UpdateSourceTrigger="PropertyChanged"  Mode="TwoWay">
                             <Binding.ValidationRules>
-                                <local:MultiLineValidationRule RegexText = "^[AGCT]{5,20}$|^[AGCT]{5,20},[^_]*$" ErrorMessage="Each line must have the form: '{Tag sequence}, Short-ID'." ValidationOptions="None"/>
+                                <local:MultiLineValidationRule RegexText = "^[AGCT]{5,50}$|^[AGCT]{5,50},[^_]*$" ErrorMessage="Each line must have the form: '{Tag sequence}, Short-ID'." ValidationOptions="None"/>
                             </Binding.ValidationRules>
                         </Binding>
                     </TextBox.Text>
@@ -318,7 +318,7 @@
                     <TextBox.Text>
                         <Binding Path="ReverseMultiTagText" UpdateSourceTrigger="PropertyChanged"  Mode="TwoWay">
                             <Binding.ValidationRules>
-                                <local:MultiLineValidationRule RegexText = "^[AGCT]{5,20}$|^[AGCT]{5,20},[^_]*$" ErrorMessage="Each line must have the form: '{Tag sequence}, Short-ID'." ValidationOptions="None"/>
+                                <local:MultiLineValidationRule RegexText = "^[AGCT]{5,50}$|^[AGCT]{5,50},[^_]*$" ErrorMessage="Each line must have the form: '{Tag sequence}, Short-ID'." ValidationOptions="None"/>
                             </Binding.ValidationRules>
                         </Binding>
                     </TextBox.Text>
@@ -328,7 +328,7 @@
                     <TextBox.Text>
                         <Binding Path="ExtraMultiTagText" UpdateSourceTrigger="PropertyChanged"  Mode="TwoWay">
                             <Binding.ValidationRules>
-                                <local:MultiLineValidationRule RegexText = "^[AGCT]{5,20}, [AGCT]{5,20}$|^[AGCT]{5,20}, [AGCT]{5,20},[^_]*$" ErrorMessage="Each line must have the form: '{F-Tag sequence}, {R-Tag sequence}, Short-ID'." ValidationOptions="None"/>
+                                <local:MultiLineValidationRule RegexText = "^[AGCT]{5,50}, [AGCT]{5,50}$|^[AGCT]{5,50}, [AGCT]{5,50},[^_]*$" ErrorMessage="Each line must have the form: '{F-Tag sequence}, {R-Tag sequence}, Short-ID'." ValidationOptions="None"/>
                             </Binding.ValidationRules>
                         </Binding>
                     </TextBox.Text>
