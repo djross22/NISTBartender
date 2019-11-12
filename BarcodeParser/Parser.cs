@@ -1092,50 +1092,46 @@ namespace BarcodeParser
         {
             Int64 count = 0;
 
-            //for testing, loop over the files multiple times
-            for (int i = 0; i < 1; i++)
+            FileInfo f_fileToDecompress = new FileInfo(f_gzipped_fastqfile);
+            FileInfo r_fileToDecompress = new FileInfo(r_gzipped_fastqfile);
+
+            //Create StreamReaders from both forward and reverse read files
+            using (FileStream forwardFileStream = f_fileToDecompress.OpenRead(), reverseFileStream = r_fileToDecompress.OpenRead())
+            using (GZipStream f_gzip = new GZipStream(forwardFileStream, CompressionMode.Decompress), r_gzip = new GZipStream(reverseFileStream, CompressionMode.Decompress))
+            using (StreamReader f_file = new StreamReader(f_gzip), r_file = new StreamReader(r_gzip))
             {
-                FileInfo f_fileToDecompress = new FileInfo(f_gzipped_fastqfile);
-                FileInfo r_fileToDecompress = new FileInfo(r_gzipped_fastqfile);
-
-                //Create StreamReaders from both forward and reverse read files
-                using (FileStream forwardFileStream = f_fileToDecompress.OpenRead(), reverseFileStream = r_fileToDecompress.OpenRead())
-                using (GZipStream f_gzip = new GZipStream(forwardFileStream, CompressionMode.Decompress), r_gzip = new GZipStream(reverseFileStream, CompressionMode.Decompress))
-                using (StreamReader f_file = new StreamReader(f_gzip), r_file = new StreamReader(r_gzip))
+                //check to be sure there are more lines first
+                //while ((f_file.ReadLine() != null) & (r_file.ReadLine() != null))
+                while ((f_file.ReadLine() != null) & (r_file.ReadLine() != null))
                 {
-                    //check to be sure there are more lines first
-                    //while ((f_file.ReadLine() != null) & (r_file.ReadLine() != null))
-                    while ((f_file.ReadLine() != null) & (r_file.ReadLine() != null))
-                    {
-                        count += 1;
-                        if (count > num_reads) break;
+                    count += 1;
+                    if (count > num_reads) break;
 
-                        //Returns an array of 4 strings: f_seq, r_seq, f_qual, r_qual, in that order
-                            string[] retString = new string[5];
+                    //Returns an array of 4 strings: f_seq, r_seq, f_qual, r_qual, in that order
+                    string[] retString = new string[5];
 
-                        //parse fastq here, four lines per sequence
-                        //First line is identifier, already read it, and don't need it
-                        //f_file.ReadLine();
-                        //r_file.ReadLine();
+                    //parse fastq here, four lines per sequence
+                    //First line is identifier, already read it, and don't need it
+                    //f_file.ReadLine();
+                    //r_file.ReadLine();
 
-                        //2nd line is sequence
-                        retString[0] = f_file.ReadLine(); //f_seq
-                        retString[1] = r_file.ReadLine(); //r_seq
+                    //2nd line is sequence
+                    retString[0] = f_file.ReadLine(); //f_seq
+                    retString[1] = r_file.ReadLine(); //r_seq
 
 
-                        //3rd line is nothing, "+" 
-                        f_file.ReadLine();  //f_qual
-                        r_file.ReadLine();  //r_qual
+                    //3rd line is nothing, "+" 
+                    f_file.ReadLine();  //f_qual
+                    r_file.ReadLine();  //r_qual
 
 
-                        //4th line is quality 
-                        retString[2] = f_file.ReadLine();
-                        retString[3] = r_file.ReadLine();
+                    //4th line is quality 
+                    retString[2] = f_file.ReadLine();
+                    retString[3] = r_file.ReadLine();
 
-                        retString[4] = $"{count}";
+                    retString[4] = $"{count}";
 
-                        yield return retString;
-                    }
+                    yield return retString;
                 }
             }
         }
