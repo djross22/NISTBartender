@@ -1090,50 +1090,68 @@ namespace BarcodeParser
 
         public static IEnumerable<string[]> GetNextSequencesFromGZip(string f_gzipped_fastqfile, string r_gzipped_fastqfile, Int64 num_reads = Int64.MaxValue)
         {
+            string[] forList = new string[] { f_gzipped_fastqfile };
+            string[] revList = new string[] { r_gzipped_fastqfile };
+            return GetNextSequencesFromGZip(forList, revList, num_reads);
+        }
+
+        public static IEnumerable<string[]> GetNextSequencesFromGZip(string[] forwardFileList, string[] reverseFileList, Int64 num_reads = Int64.MaxValue)
+        {
+            int forFileListLength = forwardFileList.Length;
+            int revFileListLength = reverseFileList.Length;
+            if (forFileListLength!=revFileListLength)
+            {
+                throw new ArgumentException("Forward and Reverse input file lists are not the same length");
+            }
+
             Int64 count = 0;
 
-            FileInfo f_fileToDecompress = new FileInfo(f_gzipped_fastqfile);
-            FileInfo r_fileToDecompress = new FileInfo(r_gzipped_fastqfile);
-
-            //Create StreamReaders from both forward and reverse read files
-            using (FileStream forwardFileStream = f_fileToDecompress.OpenRead(), reverseFileStream = r_fileToDecompress.OpenRead())
-            using (GZipStream f_gzip = new GZipStream(forwardFileStream, CompressionMode.Decompress), r_gzip = new GZipStream(reverseFileStream, CompressionMode.Decompress))
-            using (StreamReader f_file = new StreamReader(f_gzip), r_file = new StreamReader(r_gzip))
+            for (int i=0; i<forFileListLength; i++)
             {
-                //check to be sure there are more lines first
-                //while ((f_file.ReadLine() != null) & (r_file.ReadLine() != null))
-                while ((f_file.ReadLine() != null) & (r_file.ReadLine() != null))
+                FileInfo f_fileToDecompress = new FileInfo(forwardFileList[i]);
+                FileInfo r_fileToDecompress = new FileInfo(reverseFileList[i]);
+
+                //Create StreamReaders from both forward and reverse read files
+                using (FileStream forwardFileStream = f_fileToDecompress.OpenRead(), reverseFileStream = r_fileToDecompress.OpenRead())
+                using (GZipStream f_gzip = new GZipStream(forwardFileStream, CompressionMode.Decompress), r_gzip = new GZipStream(reverseFileStream, CompressionMode.Decompress))
+                using (StreamReader f_file = new StreamReader(f_gzip), r_file = new StreamReader(r_gzip))
                 {
-                    count += 1;
-                    if (count > num_reads) break;
+                    //check to be sure there are more lines first
+                    //while ((f_file.ReadLine() != null) & (r_file.ReadLine() != null))
+                    while ((f_file.ReadLine() != null) & (r_file.ReadLine() != null))
+                    {
+                        count += 1;
+                        if (count > num_reads) break;
 
-                    //Returns an array of 4 strings: f_seq, r_seq, f_qual, r_qual, in that order
-                    string[] retString = new string[5];
+                        //Returns an array of 4 strings: f_seq, r_seq, f_qual, r_qual, in that order
+                        string[] retString = new string[5];
 
-                    //parse fastq here, four lines per sequence
-                    //First line is identifier, already read it, and don't need it
-                    //f_file.ReadLine();
-                    //r_file.ReadLine();
+                        //parse fastq here, four lines per sequence
+                        //First line is identifier, already read it, and don't need it
+                        //f_file.ReadLine();
+                        //r_file.ReadLine();
 
-                    //2nd line is sequence
-                    retString[0] = f_file.ReadLine(); //f_seq
-                    retString[1] = r_file.ReadLine(); //r_seq
-
-
-                    //3rd line is nothing, "+" 
-                    f_file.ReadLine();  //f_qual
-                    r_file.ReadLine();  //r_qual
+                        //2nd line is sequence
+                        retString[0] = f_file.ReadLine(); //f_seq
+                        retString[1] = r_file.ReadLine(); //r_seq
 
 
-                    //4th line is quality 
-                    retString[2] = f_file.ReadLine();
-                    retString[3] = r_file.ReadLine();
+                        //3rd line is nothing, "+" 
+                        f_file.ReadLine();  //f_qual
+                        r_file.ReadLine();  //r_qual
 
-                    retString[4] = $"{count}";
 
-                    yield return retString;
+                        //4th line is quality 
+                        retString[2] = f_file.ReadLine();
+                        retString[3] = r_file.ReadLine();
+
+                        retString[4] = $"{count}";
+
+                        yield return retString;
+                    }
                 }
             }
+
         }
 
         static int[] Quality(string s)
