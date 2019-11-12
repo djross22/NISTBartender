@@ -1864,8 +1864,12 @@ namespace BartenderWindow
 
 
             //Set clusterer parameters
+            forwardClusterer.lintagLength = forwardLinTag.Length;
             forwardClusterer.inputFile = ForClusterInputPath;
             forwardClusterer.outputPrefix = $"{OutputDirectory}\\{OutputFileLabel}_forward";
+
+
+            reverseClusterer.lintagLength = reverseLinTag.Length;
             reverseClusterer.inputFile = RevClusterInputPath;
             reverseClusterer.outputPrefix = $"{OutputDirectory}\\{OutputFileLabel}_reverse";
             foreach (Clusterer clust in new Clusterer[] { forwardClusterer, reverseClusterer })
