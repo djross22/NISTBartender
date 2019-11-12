@@ -27,7 +27,7 @@ namespace BarcodeSorter
 
         private IDisplaysOutputText outputReceiver;
 
-        private Dictionary<string, int> forBarcodeDict, revBarcodeDict; //Dictionaries for looking up barcode cluster IDs: key = lin-tag sequence, value = barcode ID.
+        private Dictionary<string, int> forBarcodeDict, revBarcodeDict; //Dictionaries for looking up barcode cluster IDs: key = barcode sequence, value = barcode ID.
         private Dictionary<int, string> forCenterDict, revCenterDict; //Dictionaries for looking up barcode cluster centers: key = barcode ID, value = barcode center sequence.
 
         //private Dictionary<(int, int), HashSet<string>> barcodeSetDict; //Dictionary for storing a List of sampleID+UMI corresponding to each pair of forward, reverse barcodes; key = (forwardBarcodeID, reversebarcodeID); value = List of sampleID+UMI
