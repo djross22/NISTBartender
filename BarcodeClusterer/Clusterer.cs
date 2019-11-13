@@ -61,10 +61,8 @@ namespace BarcodeClusterer
             string bartenderArgStr = "bartender_single_com";
 
             // path string have to use .Replace("\\", "/")..Replace("C:/", "/mnt/c/") because the call to wsl uses Unix syntax
-            bartenderArgStr += $" -f {inputFile.Replace("\\", "/").Replace("C:/", "/mnt/c/")}"; //.Replace("\\", "/").Replace("C:/", "/mnt/c/")
-            bartenderArgStr += $" -o {outputPrefix.Replace("\\", "/").Replace("C:/", "/mnt/c/")}"; //.Replace("\\", "/").Replace("C:/", "/mnt/c/")
-            bartenderArgStr += $" -f {inputFile.Replace("\\", "/").Replace("E:/", "/mnt/e/")}";
-            bartenderArgStr += $" -o {outputPrefix.Replace("\\", "/").Replace("E:/", "/mnt/e/")}";
+            bartenderArgStr += $" -f {inputFile.Replace("\\", "/").Replace("C:/", "/mnt/c/").Replace("E:/", "/mnt/e/")}"; //.Replace("\\", "/").Replace("C:/", "/mnt/c/")
+            bartenderArgStr += $" -o {outputPrefix.Replace("\\", "/").Replace("C:/", "/mnt/c/").Replace("E:/", "/mnt/e/")}"; //.Replace("\\", "/").Replace("C:/", "/mnt/c/")
 
             bartenderArgStr += $" -c {clusterCutoffFrequency}";
             bartenderArgStr += $" -z {clusterMergeThreshold}";
