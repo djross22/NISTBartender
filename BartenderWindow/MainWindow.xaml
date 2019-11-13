@@ -369,11 +369,11 @@
                 <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Reverse Input File:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="Path to reverse input file for clustering." Height="16" Grid.Column="2" Grid.Row="2"/>
                 <TextBox x:Name="revClusterInputTextBox" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="115,0,10,0" FontFamily="Courier New" MaxLines="1" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Text="{Binding RevClusterInputPath, Mode=TwoWay}" Grid.Column="2" Grid.Row="2"/>
                 <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Cutoff Frequency:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="All clusters with size less then this threshold will not be reported in the results." Height="16" Grid.Row="1" Grid.Column="1"/>
-                <TextBox x:Name="clusterCutoffFreqTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="40" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="115,0,0,0" Grid.Row="1" Grid.Column="1">
+                <TextBox x:Name="clusterCutoffFreqTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="60" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="115,0,0,0" Grid.Row="1" Grid.Column="1">
                     <TextBox.Text>
                         <Binding Path="ClusterCutoffFrequencyStr" UpdateSourceTrigger="PropertyChanged">
                             <Binding.ValidationRules>
-                                <local:RegexValidationRule RegexText = "^[0-9]{1,2}$" ErrorMessage="Clustering Cutoff Frequency must be an integer between 0 and 99." ValidationOptions="None"/>
+                                <local:RegexValidationRule RegexText = "^[0-9]{1,4}$" ErrorMessage="Clustering Cutoff Frequency must be an integer between 0 and 9999." ValidationOptions="None"/>
                             </Binding.ValidationRules>
                         </Binding>
                     </TextBox.Text>
