@@ -1126,6 +1126,8 @@ namespace BarcodeParser
 
             for (int i=0; i<forFileListLength; i++)
             {
+                Int64 subCount = 0;
+
                 FileInfo f_fileToDecompress = new FileInfo(forwardFileList[i]);
                 FileInfo r_fileToDecompress = new FileInfo(reverseFileList[i]);
 
@@ -1139,7 +1141,9 @@ namespace BarcodeParser
                     while ((f_file.ReadLine() != null) & (r_file.ReadLine() != null))
                     {
                         count += 1;
-                        if (count > num_reads) break;
+                        subCount += 1;
+                        //if (count > num_reads) break;
+                        if (subCount > num_reads) break;
 
                         //Returns an array of 4 strings: f_seq, r_seq, f_qual, r_qual, in that order
                         string[] retString = new string[5];
