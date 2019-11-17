@@ -1690,6 +1690,11 @@ namespace BartenderWindow
             if (printOutput) AddOutputText("");
         }
 
+        private void MergeLengthsButton_Click(object sender, RoutedEventArgs e)
+        {
+            RunMergeLengths();
+        }
+
         private void clusterButton_Click(object sender, RoutedEventArgs e)
         {
             RunClusterer();
@@ -1907,6 +1912,65 @@ namespace BartenderWindow
                 clusterWorker.RunWorkerAsync();
 
             }
+        }
+
+        private void RunMergeLengths()
+        {
+
+            if ( (string.IsNullOrEmpty(ForClusterInputPath)) || (string.IsNullOrEmpty(RevClusterInputPath)) || (string.IsNullOrEmpty(OutputDirectory)) )
+            {
+                MessageBox.Show("Clustering input and output files not properly set.");
+            }
+            else
+            {
+                DisableInputControls();
+
+                ParamsFilePath = System.IO.Path.Combine(outputDirectory, $"{outputFileLabel}.xml");
+                Save();
+
+                InitClusterers();
+
+                //Run cluster merging as background worker
+                BackgroundWorker mergeWorker = new BackgroundWorker();
+                mergeWorker.WorkerReportsProgress = false;
+                mergeWorker.DoWork += mergeWorker_DoWork;
+                mergeWorker.RunWorkerCompleted += mergeWorker_RunWorkerCompleted;
+
+                mergeWorker.RunWorkerAsync();
+
+            }
+        }
+
+        void mergeWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            try
+            {
+                forwardClusterer.MergeDifferentLengths();
+            }
+            catch (Exception ex)
+            {
+                //this has to be delegated becasue it interacts with the GUI by sending text to the outputTextBox
+                this.Dispatcher.Invoke(() => {
+                    AddOutputText($"Exception in Clusterer.MergeDifferentLengths() while attempting to merge forward barcodes: {ex})");
+                });
+            }
+
+            try
+            {
+                reverseClusterer.MergeDifferentLengths();
+            }
+            catch (Exception ex)
+            {
+                //this has to be delegated becasue it interacts with the GUI by sending text to the outputTextBox
+                this.Dispatcher.Invoke(() => {
+                    AddOutputText($"Exception in Clusterer.MergeDifferentLengths() while attempting to merge reverse barcodes: {ex})");
+                });
+            }
+        }
+
+        void mergeWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            EnableInputControls();
         }
 
         void InitClusterers()
