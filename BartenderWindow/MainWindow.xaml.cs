@@ -124,6 +124,8 @@ namespace BartenderWindow
         private int clusterCutoffFrequency, maxClusterDistance, clusterSeedLength, clusterSeedStep;
         private string clusterMergeThresholdStr;
         private double clusterMergeThreshold;
+        private string inDelProbStr;
+        private double[] inDelProbArr;
         private int threadsForClustering;
 
         //Parameters/fields for barcode sorting
@@ -133,6 +135,26 @@ namespace BartenderWindow
         private List<Control> inputControlsList;
 
         #region Properties Getters and Setters
+
+        public string InDelProbStr
+        {
+            get { return this.inDelProbStr; }
+            set
+            {
+                if (this.inDelProbStr != value)
+                {
+                    this.inDelProbStr = value;
+                    OnPropertyChanged("InDelProbStr");
+
+                    string[] splitString = inDelProbStr.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                    inDelProbArr = new double[splitString.Length];
+                    for (int i=0; i<splitString.Length; i++)
+                    {
+                        double.TryParse(splitString[i], out inDelProbArr[i]);
+                    }
+                }
+            }
+        }
 
         public string ParsingThreadsStr
         {
@@ -861,6 +883,7 @@ namespace BartenderWindow
             inputControlsList.Add(clusterSeedLenTextBox);
             inputControlsList.Add(clusterSeedStepTextBox);
             inputControlsList.Add(clusterDefaultButton);
+            inputControlsList.Add(inDelProbTextBox);
 
             inputControlsList.Add(linTagFlankErrTextBox);
             inputControlsList.Add(multiTagFlankErrTextBox);
@@ -925,6 +948,7 @@ namespace BartenderWindow
             paramsList.Add("ClusterMergeThresholdStr");
             paramsList.Add("ClusterSeedLengthStr");
             paramsList.Add("ClusterSeedStepStr");
+            paramsList.Add("InDelProbStr");
             //paramsList.Add("");
         }
 
@@ -1909,7 +1933,7 @@ namespace BartenderWindow
                 clust.clusterMergeThreshold = clusterMergeThreshold;
                 clust.maxClusterDistance = maxClusterDistance;
                 clust.threadsForClustering = threadsForClustering;
-
+                clust.inDelProbArr = inDelProbArr;
             }
         }
 

@@ -428,6 +428,16 @@
                         </Binding>
                     </TextBox.Text>
                 </TextBox>
+                <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="In-Del Probability:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="Comma separated list of insertion-deletion probabilities used for decisions about merging different length barcode clusters. The list should have an entry for each length difference (e.g. 1, 2...) fow which merges will be allowed." Height="16" Grid.Row="4" Grid.Column="1"/>
+                <TextBox x:Name="inDelProbTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="80" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="115,0,0,0" Grid.Row="4" Grid.Column="1">
+                    <TextBox.Text>
+                        <Binding Path="InDelProbStr" UpdateSourceTrigger="PropertyChanged">
+                            <Binding.ValidationRules>
+                                <local:RegexValidationRule RegexText = "^(0\.[0-9]+,)*0\.[0-9]+$" ErrorMessage="In-Del probability should be a list of comma separated numbers." ValidationOptions="None"/>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
                 <Button x:Name="clusterDefaultButton" Content="Use Default Settings" HorizontalAlignment="Left" Margin="20,0,0,0" Grid.Row="4" VerticalAlignment="Center" Width="120" Height="20" Click="clusterDefaultButton_Click"/>
             </Grid>
         </Border>
