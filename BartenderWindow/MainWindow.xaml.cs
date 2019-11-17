@@ -820,6 +820,9 @@ namespace BartenderWindow
             inputControlsList.Add(linTagFlankLengthTextBox);
             inputControlsList.Add(minQualityTextBox);
 
+            inputControlsList.Add(forFastqTextBox);
+            inputControlsList.Add(revFastqTextBox);
+
             inputControlsList.Add(regexDelRateTextBox);
             inputControlsList.Add(regexInsRateTextBox);
             inputControlsList.Add(ignoreSingleConstCheckBox);
