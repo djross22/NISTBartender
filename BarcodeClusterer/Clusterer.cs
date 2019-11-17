@@ -214,81 +214,91 @@ namespace BarcodeClusterer
                 SendOutputText(logFileWriter, $"{DateTime.Now}: Adding barcodes to cluster list with length {lintagLength}");
                 Dictionary<int, string> outputClusterDictionary = new Dictionary<int, string>(clusterCenterDictList[nominalIndex]);
 
-                //test length+1, length+2, length+3...:
+                //test length+1, length+2, length+3...
+                //    then test length-1, test length-2...
+                //make list of index values for clusterCenterDictList/barcodeLengthList to set the order in which testing/merging is done
+                List<int> indexList = new List<int>();
                 if (barcodeLengthList.Count > nominalIndex + 1)
                 {
-                    List<Dictionary<int, string>> longBarcodeList = clusterCenterDictList.GetRange(nominalIndex + 1, barcodeLengthList.Count - nominalIndex - 1);
-                    //SendOutputText($"longBarcodeList.Count: {longBarcodeList.Count}");
                     for (int i = nominalIndex + 1; i < clusterCenterDictList.Count; i++)
-                    //foreach (Dictionary<int, string> dict in longBarcodeList)
                     {
-                        int barcodeLength = barcodeLengthList[i];
-                        SendOutputText(logFileWriter, $"{DateTime.Now}: Testing barcodes with length {barcodeLength} for merging with barcodes in cluster list");
-                        var compDict = new Dictionary<int, string>(outputClusterDictionary); //copy of the current outputClusterDictionary to use for iteration
-                        Dictionary<int, string> dict = longBarcodeList[i - nominalIndex - 1]; //dictionary of 
-                        foreach (var entry in dict)
-                        {
-                            string s1 = entry.Value;
-                            int n1 = clusterCountDict[entry.Key];
-                            bool wasMerged = false;
-                            foreach (var compEntry in compDict)
-                            {
-                                string s2 = compEntry.Value;
-                                int n2 = clusterCountDict[compEntry.Key];
-
-                                int lengthDifference = barcodeLength - s2.Length;
-                                lengthDifference = Math.Abs(lengthDifference);
-                                double indelProb;
-                                if (inDelProbArr.Length < lengthDifference)
-                                {
-                                    //If there is not an entry in the inDelProbArr that corresponds to this length difference,
-                                    //    then don't merge.
-                                    break;
-                                }
-                                else
-                                {
-                                    indelProb = inDelProbArr[lengthDifference - 1];
-                                }
-
-                                int N1, N2;
-                                if (n1 > n2)
-                                {
-                                    N1 = n1;
-                                    N2 = n2;
-                                }
-                                else
-                                {
-                                    N1 = n2;
-                                    N2 = n1;
-                                }
-                                if (BayesMergeRatio(indelProb, N1, N2) > 1)
-                                {
-                                    //if merge:
-                                    //    add clusterCount to merge target in clusterCountDict
-                                    //    change clusterIds in barcodeDictionary (barcodeClusterIdDict?)
-                                    //barcodeClusterIdDict
-                                    clusterCountDict[compEntry.Key] = n1 + n2;
-                                    //not sure if I need this: clusterCountDict[entry.Key] = 0;
-                                    var result = barcodeClusterIdDict.Where(x => x.Value == entry.Key).ToList();
-                                    foreach (KeyValuePair<string, int> keyValuePair in result)
-                                    {
-                                        barcodeClusterIdDict[keyValuePair.Key] = compEntry.Key;
-                                    }
-                                    wasMerged = true;
-                                    break; // Only allow merge into one target cluster
-                                }
-                            }
-                            if (!wasMerged)
-                            {
-                                //If the cluster doesn't get merged, then add it to outputClusterDictionary
-                                outputClusterDictionary[entry.Key] = entry.Value;
-                            }
-                        }
+                        indexList.Add(i);
+                    }
+                }
+                if (nominalIndex > 0)
+                {
+                    for (int i = 0; i < nominalIndex; i++)
+                    {
+                        indexList.Add(i);
                     }
                 }
 
+                foreach (int i in indexList)
+                {
+                    int barcodeLength = barcodeLengthList[i];
+                    SendOutputText(logFileWriter, $"{DateTime.Now}: Testing barcodes with length {barcodeLength} for merging with barcodes in cluster list");
+                    var compDict = new Dictionary<int, string>(outputClusterDictionary); //copy of the current outputClusterDictionary to use for iteration
+                                                                                         //Dictionary<int, string> dict = longBarcodeList[i - nominalIndex - 1];
+                    Dictionary<int, string> dict = clusterCenterDictList[i]; //dictionary of cluster centers with length = barcodeLengthList[i] 
+                    foreach (var entry in dict)
+                    {
+                        string s1 = entry.Value;
+                        int n1 = clusterCountDict[entry.Key];
+                        bool wasMerged = false;
+                        foreach (var compEntry in compDict)
+                        {
+                            string s2 = compEntry.Value;
+                            int n2 = clusterCountDict[compEntry.Key];
 
-                //test length-1, test length-2...
+                            int lengthDifference = barcodeLength - s2.Length;
+                            lengthDifference = Math.Abs(lengthDifference);
+                            double indelProb;
+                            if (inDelProbArr.Length < lengthDifference)
+                            {
+                                //If there is not an entry in the inDelProbArr that corresponds to this length difference,
+                                //    then don't merge.
+                                break;
+                            }
+                            else
+                            {
+                                indelProb = inDelProbArr[lengthDifference - 1];
+                            }
+
+                            int N1, N2;
+                            if (n1 > n2)
+                            {
+                                N1 = n1;
+                                N2 = n2;
+                            }
+                            else
+                            {
+                                N1 = n2;
+                                N2 = n1;
+                            }
+                            if (BayesMergeRatio(indelProb, N1, N2) > 1)
+                            {
+                                //if merge:
+                                //    add clusterCount to merge target in clusterCountDict
+                                //    change clusterIds in barcodeDictionary (barcodeClusterIdDict?)
+                                //barcodeClusterIdDict
+                                clusterCountDict[compEntry.Key] = n1 + n2;
+                                //not sure if I need this: clusterCountDict[entry.Key] = 0;
+                                var result = barcodeClusterIdDict.Where(x => x.Value == entry.Key).ToList();
+                                foreach (KeyValuePair<string, int> keyValuePair in result)
+                                {
+                                    barcodeClusterIdDict[keyValuePair.Key] = compEntry.Key;
+                                }
+                                wasMerged = true;
+                                break; // Only allow merge into one target cluster
+                            }
+                        }
+                        if (!wasMerged)
+                        {
+                            //If the cluster doesn't get merged, then add it to outputClusterDictionary
+                            outputClusterDictionary[entry.Key] = entry.Value;
+                        }
+                    }
+                }
 
                 //Save outputClusterDictionary, clusterScoreDict, clusterCountDict -> "_merged_cluster.csv"
                 string mergedClusterFile = $"{outputPrefix}_merged_cluster.csv";
