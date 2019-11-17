@@ -218,13 +218,14 @@ namespace BarcodeClusterer
                 if (barcodeLengthList.Count > nominalIndex + 1)
                 {
                     List<Dictionary<int, string>> longBarcodeList = clusterCenterDictList.GetRange(nominalIndex + 1, barcodeLengthList.Count - nominalIndex - 1);
+                    //SendOutputText($"longBarcodeList.Count: {longBarcodeList.Count}");
                     for (int i = nominalIndex + 1; i < clusterCenterDictList.Count; i++)
                     //foreach (Dictionary<int, string> dict in longBarcodeList)
                     {
                         int barcodeLength = barcodeLengthList[i];
                         SendOutputText(logFileWriter, $"{DateTime.Now}: Testing barcodes with length {barcodeLength} for merging with barcodes in cluster list");
                         var compDict = new Dictionary<int, string>(outputClusterDictionary); //copy of the current outputClusterDictionary to use for iteration
-                        Dictionary<int, string> dict = longBarcodeList[i]; //dictionary of 
+                        Dictionary<int, string> dict = longBarcodeList[i - nominalIndex - 1]; //dictionary of 
                         foreach (var entry in dict)
                         {
                             string s1 = entry.Value;
