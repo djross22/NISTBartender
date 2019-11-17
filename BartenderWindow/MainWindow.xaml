@@ -429,8 +429,8 @@
                         </Binding>
                     </TextBox.Text>
                 </TextBox>
-                <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="In-Del Probability:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="Comma separated list of insertion-deletion probabilities used for decisions about merging different length barcode clusters. The list should have an entry for each length difference (e.g. 1, 2...) fow which merges will be allowed." Height="16" Grid.Row="4" Grid.Column="1"/>
-                <TextBox x:Name="inDelProbTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="80" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="115,0,0,0" Grid.Row="4" Grid.Column="1">
+                <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="In-Del Probability:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="Comma separated list of insertion-deletion probabilities used for decisions about merging different length barcode clusters. The list should have an entry for each Levenschtein distance (e.g. 1, 2...) fow which merges will be allowed. Each entry is the estimated probability of read errors with the corresponding Levenschtein distance." Height="16" Grid.Row="4" Grid.Column="1"/>
+                <TextBox x:Name="inDelProbTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="200" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Left"  VerticalContentAlignment="Center" Margin="115,0,0,0" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2">
                     <TextBox.Text>
                         <Binding Path="InDelProbStr" UpdateSourceTrigger="PropertyChanged">
                             <Binding.ValidationRules>
