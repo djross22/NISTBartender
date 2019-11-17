@@ -105,6 +105,7 @@ namespace BartenderWindow
         private static Brush FlankHighlight = Brushes.PowderBlue;
 
         //Parameters for sequence file parsing
+        private string parsingThreadsStr;
         private int threadsForParsing;
         private string minQualityStr;
         private double minQuality;
@@ -132,6 +133,20 @@ namespace BartenderWindow
         private List<Control> inputControlsList;
 
         #region Properties Getters and Setters
+
+        public string ParsingThreadsStr
+        {
+            get { return this.parsingThreadsStr; }
+            set
+            {
+                if (this.parsingThreadsStr != value)
+                {
+                    this.parsingThreadsStr = value;
+                    OnPropertyChanged("ParsingThreadsStr");
+                    int.TryParse(parsingThreadsStr, out threadsForParsing);
+                }
+            }
+        }
 
         public string MultiTagFlankErrStr
         {
@@ -756,8 +771,6 @@ namespace BartenderWindow
             InitMultiTagLists();
 
             AddOutputText($"Number of Logical Processors: {Environment.ProcessorCount}");
-            threadsForParsing = Environment.ProcessorCount / 2;
-            AddOutputText($"Number of threads to use for sequence file parsing: {threadsForParsing}");
             threadsForClustering = Environment.ProcessorCount;
             AddOutputText($"Number of threads to use for barcode clustering: {threadsForClustering}");
             AddOutputText($"");
@@ -770,6 +783,8 @@ namespace BartenderWindow
 
         private void SetParsingDefaults()
         {
+            ParsingThreadsStr = "3";
+
             ReadLengthStr = "150";
 
             LinTagFlankLengthStr = "4";
@@ -822,6 +837,8 @@ namespace BartenderWindow
 
             inputControlsList.Add(forFastqTextBox);
             inputControlsList.Add(revFastqTextBox);
+
+            inputControlsList.Add(parsingThreadsTextBox);
 
             inputControlsList.Add(regexDelRateTextBox);
             inputControlsList.Add(regexInsRateTextBox);
@@ -897,6 +914,8 @@ namespace BartenderWindow
             paramsList.Add("SpacerInsRateStr");
 
             paramsList.Add("MaxParseStr");
+
+            paramsList.Add("ParsingThreadsStr");
 
             paramsList.Add("ForClusterInputPath");
             paramsList.Add("RevClusterInputPath");
