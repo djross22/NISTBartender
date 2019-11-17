@@ -108,19 +108,21 @@ Fix bug in Sorter lines 199-200: forBarcodeDict, and revBarcodeDict - if keys do
 
 Remove Clustering Output Directory Control (make same as Top-level Output Directory)
 
+Add f/r g-zipped file textBoxes to disable/enable controls list
+
+Multiple input files (from different runs/lanes, etc.)
+
+Make threadsForParsing a user input control, default=3
+
+Move merging different length clusters to new public function - so that Bartender clustering can be run on AWS.
+
 
 --------------------------------------------------------
 NISTBartender TODO List:
 
-Make threadsForParsing a user input control, default=3
-
-Add f/r g-zipped file textBoxes to disable/enable controls list
-
 Add cluster merge for different length clusters (after main Bartender Clustering step)
 
 Add flag for possible Chimeras in Sorter
-
-Multiple input files (from different runs/lanes, etc.)
 
 
 
