@@ -1375,43 +1375,50 @@ namespace BartenderWindow
         private void ReadParamsXml(string filePath)
         {
             xmlDoc = new XmlDocument();
-            xmlDoc.Load(filePath);
-
-            rootNode = xmlDoc.SelectSingleNode("descendant::parameters");
-
-            //handle the Forward and Reverse Read Sequences separately, since propery binding to RichTextDocuments is wierd.
-            TextRange textRange = new TextRange(forwardRichTextBox.Document.ContentStart, forwardRichTextBox.Document.ContentEnd);
-            XmlNode paramNode = rootNode.SelectSingleNode($"descendant::ForwardReadSequence");
-            textRange.Text = paramNode.InnerText;
-
-            textRange = new TextRange(reverseRichTextBox.Document.ContentStart, reverseRichTextBox.Document.ContentEnd);
-            paramNode = rootNode.SelectSingleNode($"descendant::ReverseReadSequence");
-            textRange.Text = paramNode.InnerText;
-
-            //Read all the paramsList parameter values from the XML document
-            PropertyInfo propInfo;
-            foreach (string param in paramsList)
+            try
             {
-                paramNode = rootNode.SelectSingleNode($"descendant::{param}");
-                propInfo = this.GetType().GetProperty(param);
+                xmlDoc.Load(filePath);
+
+                rootNode = xmlDoc.SelectSingleNode("descendant::parameters");
+
+                //handle the Forward and Reverse Read Sequences separately, since propery binding to RichTextDocuments is wierd.
+                TextRange textRange = new TextRange(forwardRichTextBox.Document.ContentStart, forwardRichTextBox.Document.ContentEnd);
+                XmlNode paramNode = rootNode.SelectSingleNode($"descendant::ForwardReadSequence");
+                textRange.Text = paramNode.InnerText;
+
+                textRange = new TextRange(reverseRichTextBox.Document.ContentStart, reverseRichTextBox.Document.ContentEnd);
+                paramNode = rootNode.SelectSingleNode($"descendant::ReverseReadSequence");
+                textRange.Text = paramNode.InnerText;
+
+                //Read all the paramsList parameter values from the XML document
+                PropertyInfo propInfo;
+                foreach (string param in paramsList)
+                {
+                    paramNode = rootNode.SelectSingleNode($"descendant::{param}");
+                    propInfo = this.GetType().GetProperty(param);
+
+                    if (propInfo != null && paramNode != null)
+                    {
+                        string value = paramNode.InnerText;
+                        propInfo.SetValue(this, value);
+                    }
+
+                }
+
+                //handle bool Property as special case
+                string boolParam = "IgnoreSingleConst";
+                paramNode = rootNode.SelectSingleNode($"descendant::{boolParam}");
+                propInfo = this.GetType().GetProperty(boolParam);
 
                 if (propInfo != null && paramNode != null)
                 {
                     string value = paramNode.InnerText;
-                    propInfo.SetValue(this, value);
+                    propInfo.SetValue(this, (value == "True" || value == "true"));
                 }
-
             }
-
-            //handle bool Property as special case
-            string boolParam = "IgnoreSingleConst";
-            paramNode = rootNode.SelectSingleNode($"descendant::{boolParam}");
-            propInfo = this.GetType().GetProperty(boolParam);
-
-            if (propInfo != null && paramNode != null)
+            catch (XmlException ex)
             {
-                string value = paramNode.InnerText;
-                propInfo.SetValue(this, (value=="True" || value=="true"));
+                DisplayOutput($"Error reading .xml file: {ex.Message}");
             }
 
         }
