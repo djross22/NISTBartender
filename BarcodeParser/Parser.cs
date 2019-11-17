@@ -17,8 +17,8 @@ namespace BarcodeParser
         public string read_directory; //directory where files are read and saved
         public string outputFileLabel; //text used at the start of output filenames
 
-        public string f_gzipped_fastqfile; //The forward reads, gzipped fastq file
-        public string r_gzipped_fastqfile; //The reverse reads, gzipped fastq file
+        public string forFastqFileList; //The forward reads, gzipped fastq file
+        public string revFastqFileList; //The reverse reads, gzipped fastq file
 
         public string forLintagOutFile, revLintagOutFile;
 
@@ -99,6 +99,8 @@ namespace BarcodeParser
 
         public void ParseDoubleBarcodes(Int64 num_reads = Int64.MaxValue)
         {
+            //temp ********************** for testing: 
+            parsingThreads = 3;
             //Set up log file to keep record of output text from parsing
             TextWriter logFileWriter = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\{outputFileLabel}.parsing.log"));
 
@@ -300,7 +302,23 @@ namespace BarcodeParser
             int qualityReads = 0; //reads that passed the quality check (out of valid_sample_reads), bool meanQualOk
             int lineageTagReads = 0; //reads that match lin-tag pattern (out of quality_reads), bool revLinTagMatchFound
 
-
+            string[] forFiles = forFastqFileList.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] revFiles = revFastqFileList.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            //Then clean up forwardSplitLine by trimming white space from ends of each string, and removing empty strings.
+            forFiles = forFiles.Select(s => s.Trim()).ToArray();
+            revFiles = revFiles.Select(s => s.Trim()).ToArray();
+            //Then add full path info before passing to GetNextSequencesFromGZip() method
+            if (forFiles.Length != revFiles.Length)
+            {
+                throw new ArgumentException("Forward and Reverse input file lists are not the same length");
+            }
+            string[] forFilePaths = new string[forFiles.Length];
+            string[] revFilePaths = new string[revFiles.Length];
+            for (int i=0; i< forFiles.Length; i++)
+            {
+                forFilePaths[i] = $"{read_directory}\\{forFiles[i]}";
+                revFilePaths[i] = $"{read_directory}\\{revFiles[i]}";
+            }
 
             //while ( ((f_id = f_file.ReadLine()) != null) & ((r_id = r_file.ReadLine()) != null) )
             //foreach (string[] stringArr in GetNextSequences(f_fastqfile, r_fastqfile))
@@ -312,14 +330,14 @@ namespace BarcodeParser
                 //If the UMI and multi-tags have constant length, run the faster pasring loop that looks for the multi-tag in a defined position
                 SendOutputText(logFileWriter, $"Parsing with LoopBodyConstantMultiTag().");
                 SendOutputText(logFileWriter, "");
-                Parallel.ForEach(GetNextSequencesFromGZip($"{read_directory}\\{f_gzipped_fastqfile}", $"{read_directory}\\{r_gzipped_fastqfile}", num_reads: num_reads), new ParallelOptions { MaxDegreeOfParallelism = 1 }, stringArr => LoopBodyConstantMultiTag(stringArr));
+                Parallel.ForEach(GetNextSequencesFromGZip(forFilePaths, revFilePaths, num_reads: num_reads), new ParallelOptions { MaxDegreeOfParallelism = parsingThreads }, stringArr => LoopBodyConstantMultiTag(stringArr));
             }
             else
             {
                 //If the UMI tags or multi-ags have different lengths, use the more general parsing loop that uses a Regex search to find/match the multi-tags
                 SendOutputText(logFileWriter, $"Parsing with LoopBodyRegexMultiTag().");
                 SendOutputText(logFileWriter, "");
-                Parallel.ForEach(GetNextSequencesFromGZip($"{read_directory}\\{f_gzipped_fastqfile}", $"{read_directory}\\{r_gzipped_fastqfile}", num_reads: num_reads), new ParallelOptions { MaxDegreeOfParallelism = 1 }, stringArr => LoopBodyRegexMultiTag(stringArr));
+                Parallel.ForEach(GetNextSequencesFromGZip(forFilePaths, revFilePaths, num_reads: num_reads), new ParallelOptions { MaxDegreeOfParallelism = parsingThreads }, stringArr => LoopBodyRegexMultiTag(stringArr));
             }
 
 
@@ -1090,13 +1108,28 @@ namespace BarcodeParser
 
         public static IEnumerable<string[]> GetNextSequencesFromGZip(string f_gzipped_fastqfile, string r_gzipped_fastqfile, Int64 num_reads = Int64.MaxValue)
         {
+            string[] forList = new string[] { f_gzipped_fastqfile };
+            string[] revList = new string[] { r_gzipped_fastqfile };
+            return GetNextSequencesFromGZip(forList, revList, num_reads);
+        }
+
+        public static IEnumerable<string[]> GetNextSequencesFromGZip(string[] forwardFileList, string[] reverseFileList, Int64 num_reads = Int64.MaxValue)
+        {
+            int forFileListLength = forwardFileList.Length;
+            int revFileListLength = reverseFileList.Length;
+            if (forFileListLength!=revFileListLength)
+            {
+                throw new ArgumentException("Forward and Reverse input file lists are not the same length");
+            }
+
             Int64 count = 0;
 
-            //for testing, loop over the files multiple times
-            for (int i = 0; i < 1; i++)
+            for (int i=0; i<forFileListLength; i++)
             {
-                FileInfo f_fileToDecompress = new FileInfo(f_gzipped_fastqfile);
-                FileInfo r_fileToDecompress = new FileInfo(r_gzipped_fastqfile);
+                Int64 subCount = 0;
+
+                FileInfo f_fileToDecompress = new FileInfo(forwardFileList[i]);
+                FileInfo r_fileToDecompress = new FileInfo(reverseFileList[i]);
 
                 //Create StreamReaders from both forward and reverse read files
                 using (FileStream forwardFileStream = f_fileToDecompress.OpenRead(), reverseFileStream = r_fileToDecompress.OpenRead())
@@ -1108,10 +1141,12 @@ namespace BarcodeParser
                     while ((f_file.ReadLine() != null) & (r_file.ReadLine() != null))
                     {
                         count += 1;
-                        if (count > num_reads) break;
+                        subCount += 1;
+                        //if (count > num_reads) break;
+                        if (subCount > num_reads) break;
 
                         //Returns an array of 4 strings: f_seq, r_seq, f_qual, r_qual, in that order
-                            string[] retString = new string[5];
+                        string[] retString = new string[5];
 
                         //parse fastq here, four lines per sequence
                         //First line is identifier, already read it, and don't need it
@@ -1138,6 +1173,7 @@ namespace BarcodeParser
                     }
                 }
             }
+
         }
 
         static int[] Quality(string s)

@@ -1942,8 +1942,8 @@ namespace BartenderWindow
             parser.write_directory = OutputDirectory;
             parser.outputFileLabel = outputFileLabel;
             parser.read_directory = InputDirectory;
-            parser.f_gzipped_fastqfile = ForwardGzFastQ;
-            parser.r_gzipped_fastqfile = ReverseGzFastQ;
+            parser.forFastqFileList = ForwardGzFastQ;
+            parser.revFastqFileList = ReverseGzFastQ;
 
             parser.forUmiTagLen = forUmiTagLen;
             parser.revUmiTagLen = revUmiTagLen;
