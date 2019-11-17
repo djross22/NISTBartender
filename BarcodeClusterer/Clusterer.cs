@@ -24,6 +24,8 @@ namespace BarcodeClusterer
 
         public int lintagLength;
 
+        public double[] inDelProbArr;
+
         //********************************************************************************
 
         //private Process clusterProcess;
@@ -142,11 +144,13 @@ namespace BarcodeClusterer
                 Dictionary<int, int> clusterCountDict = new Dictionary<int, int>();
 
                 string clusterFile = $"{outputPrefix}_cluster.csv";
+                string clusterFileHeader;
                 string line;
                 string[] splitLine;
+                SendOutputText(logFileWriter, $"{DateTime.Now}: Loading cluster file: {clusterFile}");
                 using (StreamReader reader = new StreamReader(clusterFile))
                 {
-                    reader.ReadLine(); //first line of file is header, so read it but don't do anything with it.
+                    clusterFileHeader = reader.ReadLine(); //first line of file is header.
 
                     Dictionary<int, string> clusterCenterDict = new Dictionary<int, string>();
 
@@ -179,9 +183,11 @@ namespace BarcodeClusterer
                 Dictionary<string, int> barcodeFreqDict = new Dictionary<string, int>();
                 Dictionary<string, int> barcodeClusterIdDict = new Dictionary<string, int>();
                 string barcodeFile = $"{outputPrefix}_barcode.csv";
+                string barcodeFileHeader;
+                SendOutputText(logFileWriter, $"{DateTime.Now}: Loading barcode file: {barcodeFile}");
                 using (StreamReader reader = new StreamReader(barcodeFile))
                 {
-                    reader.ReadLine(); //first line of file is header, so read it but don't do anything with it.
+                    barcodeFileHeader = reader.ReadLine(); //first line of file is header.
                     while ((line = reader.ReadLine()) != null)
                     {
                         splitLine = line.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
@@ -203,6 +209,7 @@ namespace BarcodeClusterer
                 {
                     throw new InvalidOperationException("Zero barcode clusters with the nominal length.");
                 }
+                SendOutputText(logFileWriter, $"");
                 SendOutputText(logFileWriter, $"Nominal barcode length: {lintagLength}");
                 SendOutputText(logFileWriter, $"{DateTime.Now}: Adding barcodes to cluster list with length {lintagLength}");
                 Dictionary<int, string> outputClusterDictionary = new Dictionary<int, string>(clusterCenterDictList[nominalIndex]);
@@ -214,17 +221,33 @@ namespace BarcodeClusterer
                     for (int i = nominalIndex + 1; i < clusterCenterDictList.Count; i++)
                     //foreach (Dictionary<int, string> dict in longBarcodeList)
                     {
-                        SendOutputText(logFileWriter, $"{DateTime.Now}: Testing barcodes with length {barcodeLengthList[i]} for merging with barcodes in cluster list");
-                        var compDict = new Dictionary<int, string>(outputClusterDictionary);
-                        Dictionary<int, string> dict = longBarcodeList[i];
+                        int barcodeLength = barcodeLengthList[i];
+                        SendOutputText(logFileWriter, $"{DateTime.Now}: Testing barcodes with length {barcodeLength} for merging with barcodes in cluster list");
+                        var compDict = new Dictionary<int, string>(outputClusterDictionary); //copy of the current outputClusterDictionary to use for iteration
+                        Dictionary<int, string> dict = longBarcodeList[i]; //dictionary of 
                         foreach (var entry in dict)
                         {
                             string s1 = entry.Value;
                             int n1 = clusterCountDict[entry.Key];
+                            bool wasMerged = false;
                             foreach (var compEntry in compDict)
                             {
                                 string s2 = compEntry.Value;
                                 int n2 = clusterCountDict[compEntry.Key];
+
+                                int lengthDifference = barcodeLength - s2.Length;
+                                lengthDifference = Math.Abs(lengthDifference);
+                                double indelProb;
+                                if (inDelProbArr.Length < lengthDifference)
+                                {
+                                    //If there is not an entry in the inDelProbArr that corresponds to this length difference,
+                                    //    then don't merge.
+                                    break;
+                                }
+                                else
+                                {
+                                    indelProb = inDelProbArr[lengthDifference - 1];
+                                }
 
                                 int N1, N2;
                                 if (n1 > n2)
@@ -237,21 +260,27 @@ namespace BarcodeClusterer
                                     N1 = n2;
                                     N2 = n1;
                                 }
-                                if (BayesMergeRatio(double p, N1, N2) > 1)
+                                if (BayesMergeRatio(indelProb, N1, N2) > 1)
                                 {
                                     //if merge:
                                     //    add clusterCount to merge target in clusterCountDict
-                                    //    change clusterIds in barcodeDictionary
+                                    //    change clusterIds in barcodeDictionary (barcodeClusterIdDict?)
                                     //barcodeClusterIdDict
+                                    clusterCountDict[compEntry.Key] = n1 + n2;
+                                    //not sure if I need this: clusterCountDict[entry.Key] = 0;
                                     var result = barcodeClusterIdDict.Where(x => x.Value == entry.Key).ToList();
-                                    result.
-                                    //var result = Enumerable.Range(0, barcodeClusterIdDict.Count).Where(i => lst1[i] == "a").ToList();
-                            }
-                                else
-                                {
-                                    //else:
-                                    //    add new item to outputClusterDictionary
+                                    foreach (KeyValuePair<string, int> keyValuePair in result)
+                                    {
+                                        barcodeClusterIdDict[keyValuePair.Key] = compEntry.Key;
+                                    }
+                                    wasMerged = true;
+                                    break; // Only allow merge into one target cluster
                                 }
+                            }
+                            if (!wasMerged)
+                            {
+                                //If the cluster doesn't get merged, then add it to outputClusterDictionary
+                                outputClusterDictionary[entry.Key] = entry.Value;
                             }
                         }
                     }
@@ -261,7 +290,33 @@ namespace BarcodeClusterer
                 //test length-1, test length-2...
 
                 //Save outputClusterDictionary, clusterScoreDict, clusterCountDict -> "_merged_cluster.csv"
+                string mergedClusterFile = $"{outputPrefix}_merged_cluster.csv";
+                using (StreamWriter outFileWriter = new StreamWriter(mergedClusterFile))
+                {
+                    //write header line (copied from "_cluster.csv" file
+                    outFileWriter.WriteLine(clusterFileHeader);
+                    foreach (var entry in outputClusterDictionary)
+                    {
+                        int bcId = entry.Key;
+                        string outStr = $"{bcId}, {entry.Value}, {clusterScoreDict[bcId]}, {clusterCountDict[bcId]}";
+                        outFileWriter.WriteLine(outStr);
+                    }
+                }
                 //Save barcodeFreqDict, barcodeClusterIdDict -> "_merged_barcode.csv"
+                string mergedBarcodeFile = $"{outputPrefix}_merged_barcode.csv";
+                using (StreamWriter outFileWriter = new StreamWriter(mergedBarcodeFile))
+                {
+                    //write header line (copied from "_barcode.csv" file
+                    outFileWriter.WriteLine(barcodeFileHeader);
+                    foreach (var entry in barcodeClusterIdDict)
+                    {
+                        int bcId = entry.Value;
+                        string bcSeq = entry.Key;
+                        int bcFreq = barcodeFreqDict[bcSeq];
+                        string outStr = $"{bcSeq}, {bcFreq}, {bcId}";
+                        outFileWriter.WriteLine(outStr);
+                    }
+                }
 
 
                 DateTime endTime = DateTime.Now;
