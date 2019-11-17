@@ -116,11 +116,11 @@ Make threadsForParsing a user input control, default=3
 
 Move merging different length clusters to new public function - so that Bartender clustering can be run on AWS.
 
+Add cluster merge for different length clusters (after main Bartender Clustering step)
+
 
 --------------------------------------------------------
 NISTBartender TODO List:
-
-Add cluster merge for different length clusters (after main Bartender Clustering step)
 
 Add flag for possible Chimeras in Sorter
 
