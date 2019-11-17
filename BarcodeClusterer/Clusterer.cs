@@ -298,7 +298,7 @@ namespace BarcodeClusterer
                     foreach (var entry in outputClusterDictionary)
                     {
                         int bcId = entry.Key;
-                        string outStr = $"{bcId}, {entry.Value}, {clusterScoreDict[bcId]}, {clusterCountDict[bcId]}";
+                        string outStr = $"{bcId},{entry.Value},{clusterScoreDict[bcId]},{clusterCountDict[bcId]}";
                         outFileWriter.WriteLine(outStr);
                     }
                 }
@@ -313,7 +313,7 @@ namespace BarcodeClusterer
                         int bcId = entry.Value;
                         string bcSeq = entry.Key;
                         int bcFreq = barcodeFreqDict[bcSeq];
-                        string outStr = $"{bcSeq}, {bcFreq}, {bcId}";
+                        string outStr = $"{bcSeq},{bcFreq},{bcId}";
                         outFileWriter.WriteLine(outStr);
                     }
                 }
