@@ -1816,11 +1816,22 @@ namespace BartenderWindow
         {
             sorter = new Sorter(this);
 
-            sorter.forBarcodeFile = OutputDirectory + $"\\{OutputFileLabel}_forward_barcode.csv";
-            sorter.revBarcodeFile = OutputDirectory + $"\\{OutputFileLabel}_reverse_barcode.csv";
+            if (File.Exists(OutputDirectory + $"\\{OutputFileLabel}_forward_merged_barcode.csv"))
+            {
+                sorter.forBarcodeFile = OutputDirectory + $"\\{OutputFileLabel}_forward_merged_barcode.csv";
+                sorter.revBarcodeFile = OutputDirectory + $"\\{OutputFileLabel}_reverse_merged_barcode.csv";
 
-            sorter.forClusterFile = OutputDirectory + $"\\{OutputFileLabel}_forward_cluster.csv";
-            sorter.revClusterFile = OutputDirectory + $"\\{OutputFileLabel}_reverse_cluster.csv";
+                sorter.forClusterFile = OutputDirectory + $"\\{OutputFileLabel}_forward_merged_cluster.csv";
+                sorter.revClusterFile = OutputDirectory + $"\\{OutputFileLabel}_reverse_merged_cluster.csv";
+            }
+            else
+            {
+                sorter.forBarcodeFile = OutputDirectory + $"\\{OutputFileLabel}_forward_barcode.csv";
+                sorter.revBarcodeFile = OutputDirectory + $"\\{OutputFileLabel}_reverse_barcode.csv";
+
+                sorter.forClusterFile = OutputDirectory + $"\\{OutputFileLabel}_forward_cluster.csv";
+                sorter.revClusterFile = OutputDirectory + $"\\{OutputFileLabel}_reverse_cluster.csv";
+            }
 
             sorter.forLinTagFile = OutputDirectory + $"\\{OutputFileLabel}_forward_lintags.txt";
             sorter.revLinTagFile = OutputDirectory + $"\\{OutputFileLabel}_reverse_lintags.txt";
