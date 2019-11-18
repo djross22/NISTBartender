@@ -127,6 +127,7 @@ namespace BartenderWindow
         private string inDelProbStr;
         private double[] inDelProbArr;
         private int threadsForClustering;
+        private bool autoMergeSubstrings;
 
         //Parameters/fields for barcode sorting
         private Sorter sorter;
@@ -348,6 +349,19 @@ namespace BartenderWindow
                     this.spacerInsRateStr = value;
                     OnPropertyChanged("SpacerInsRateStr");
                     double.TryParse(spacerInsRateStr, out spacerInsRate);
+                }
+            }
+        }
+
+        public bool AutoMergeSubstrings
+        {
+            get { return this.autoMergeSubstrings; }
+            set
+            {
+                if (this.autoMergeSubstrings != value)
+                {
+                    this.autoMergeSubstrings = value;
+                    OnPropertyChanged("AutoMergeSubstrings");
                 }
             }
         }
@@ -884,6 +898,7 @@ namespace BartenderWindow
             inputControlsList.Add(clusterSeedStepTextBox);
             inputControlsList.Add(clusterDefaultButton);
             inputControlsList.Add(inDelProbTextBox);
+            inputControlsList.Add(autoMergeSubstringsCheckBox);
 
             inputControlsList.Add(linTagFlankErrTextBox);
             inputControlsList.Add(multiTagFlankErrTextBox);
@@ -1317,17 +1332,19 @@ namespace BartenderWindow
                 
             }
 
-            //handle bool Property as special case
-            string boolParam = "IgnoreSingleConst";
-            propInfo = this.GetType().GetProperty(boolParam);
-            if (propInfo != null)
+            //handle bool Properties as special case
+            string[] boolParams = new string[] { "IgnoreSingleConst", "AutoMergeSubstrings" };
+            foreach (string boolParam in boolParams)
             {
-                value = $"{propInfo.GetValue(this)}";
-                paramNode = xmlDoc.CreateElement(boolParam);
-                paramNode.InnerText = value;
-                rootNode.AppendChild(paramNode);
+                propInfo = this.GetType().GetProperty(boolParam);
+                if (propInfo != null)
+                {
+                    value = $"{propInfo.GetValue(this)}";
+                    paramNode = xmlDoc.CreateElement(boolParam);
+                    paramNode.InnerText = value;
+                    rootNode.AppendChild(paramNode);
+                }
             }
-
 
         }
 
@@ -1875,6 +1892,7 @@ namespace BartenderWindow
             ClusterSeedLengthStr = "5";
             ClusterSeedStepStr = "1";
             InDelProbStr = "0.0004,0.00003";
+            AutoMergeSubstrings = true;
         }
 
         private void parseButton_Click(object sender, RoutedEventArgs e)
@@ -2010,6 +2028,7 @@ namespace BartenderWindow
                 clust.maxClusterDistance = maxClusterDistance;
                 clust.threadsForClustering = threadsForClustering;
                 clust.inDelProbArr = inDelProbArr;
+                clust.autoMergeSubstrings = AutoMergeSubstrings;
             }
         }
 
