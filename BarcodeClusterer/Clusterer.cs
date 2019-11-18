@@ -233,14 +233,19 @@ namespace BarcodeClusterer
                     }
                 }
 
+                int countsMerged = 0;
+                int totalNumMerged = 0;
                 foreach (int i in indexList)
                 {
                     int barcodeLength = barcodeLengthList[i];
+                    SendOutputText(logFileWriter);
                     SendOutputText(logFileWriter, $"{DateTime.Now}: Testing barcodes with length {barcodeLength} for merging with barcodes in cluster list");
                     var compDict = new Dictionary<int, string>(outputClusterDictionary); //copy of the current outputClusterDictionary to use for iteration
                                                                                          //Dictionary<int, string> dict = longBarcodeList[i - nominalIndex - 1];
                     Dictionary<int, string> dict = clusterCenterDictList[i]; //dictionary of cluster centers with length = barcodeLengthList[i] 
-                    SendOutputText(logFileWriter, $"Comparing {dict.Count} x {compDict.Count} = {dict.Count * compDict.Count} barcode pairs");
+                    SendOutputText(logFileWriter, $"    Comparing {dict.Count:N0} x {compDict.Count:N0} = {dict.Count * compDict.Count:N0} barcode pairs");
+                    int numMerged = 0;
+                    int numAdded = 0;
                     foreach (var entry in dict)
                     {
                         string s1 = entry.Value;
@@ -272,11 +277,11 @@ namespace BarcodeClusterer
                                     N1 = n2;
                                     N2 = n1;
                                 }
-                                SendOutputText(logFileWriter);
-                                SendOutputText(logFileWriter, $"    Distance {distance}: {entry.Key}, {entry.Value} -> {compEntry.Key}, {compEntry.Value} :: BayesMergeRatio({indelProb}, {N1}, {N2}) = {BayesMergeRatio(indelProb, N1, N2)}");
+                                //SendOutputText(logFileWriter);
+                                SendOutputText(logFileWriter, $"    Distance {distance}: {entry.Key}, {entry.Value} -> {compEntry.Key}, {compEntry.Value} : BayesMergeRatio({indelProb}, {N1:N0}, {N2:N0}) = {BayesMergeRatio(indelProb, N1, N2):N4}");
                                 if (BayesMergeRatio(indelProb, N1, N2) > 0)
                                 {
-                                    SendOutputText(logFileWriter, $"    Merging, {n1} + {n2} = {n1 + n2}");
+                                    SendOutputText(logFileWriter, $"        Merging, {n1:N0} + {n2:N0} = {n1 + n2:N0}");
                                     //if merge:
                                     //    add clusterCount to merge target in clusterCountDict
                                     //    change clusterIds in barcodeDictionary (barcodeClusterIdDict?)
@@ -289,6 +294,8 @@ namespace BarcodeClusterer
                                         barcodeClusterIdDict[keyValuePair.Key] = compEntry.Key;
                                     }
                                     wasMerged = true;
+                                    numMerged++;
+                                    countsMerged += N2;
                                     break; // Only allow merge into one target cluster
                                 }
                             }
@@ -298,9 +305,15 @@ namespace BarcodeClusterer
                         {
                             //If the cluster doesn't get merged, then add it to outputClusterDictionary
                             outputClusterDictionary[entry.Key] = entry.Value;
+                            numAdded++;
                         }
                     }
+                    SendOutputText(logFileWriter, $"    Merged {numMerged:N0} barcode clusters of length {barcodeLength} into larger clusters.");
+                    SendOutputText(logFileWriter, $"    Added {numAdded:N0} barcode clusters of length {barcodeLength} to output without merging.");
+                    totalNumMerged += numMerged;
                 }
+                SendOutputText(logFileWriter);
+                SendOutputText(logFileWriter, $"A total of {totalNumMerged:N0} barcode clusters with {countsMerged:N0} read counts were merged into larger clusters.");
 
                 //Save outputClusterDictionary, clusterScoreDict, clusterCountDict -> "_merged_cluster.csv"
                 string mergedClusterFile = $"{outputPrefix}_merged_cluster.csv";
