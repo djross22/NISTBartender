@@ -209,8 +209,9 @@ namespace BarcodeClusterer
                 {
                     throw new InvalidOperationException("Zero barcode clusters with the nominal length.");
                 }
-                SendOutputText(logFileWriter, $"");
+                SendOutputText(logFileWriter);
                 SendOutputText(logFileWriter, $"Nominal barcode length: {lintagLength}");
+                SendOutputText(logFileWriter);
                 SendOutputText(logFileWriter, $"{DateTime.Now}: Adding barcodes to cluster list with length {lintagLength}");
                 Dictionary<int, string> outputClusterDictionary = new Dictionary<int, string>(clusterCenterDictList[nominalIndex]);
 
@@ -227,7 +228,7 @@ namespace BarcodeClusterer
                 }
                 if (nominalIndex > 0)
                 {
-                    for (int i = 0; i < nominalIndex; i++)
+                    for (int i = nominalIndex-1; i >= 0; i--)
                     {
                         indexList.Add(i);
                     }
@@ -256,6 +257,26 @@ namespace BarcodeClusterer
                             string s2 = compEntry.Value;
                             int n2 = clusterCountDict[compEntry.Key];
 
+                            //Test is one sequence is a substring of the other
+                            if (s1.Length < s2.Length)
+                            {
+                                if (s2.Contains(s1))
+                                {
+                                    SendOutputText(logFileWriter, $"    Substring: {entry.Key}, {s1} -> {compEntry.Key}, {s2}");
+                                    SendOutputText(logFileWriter, $"        Merging, {n1:N0} + {n2:N0} = {n1 + n2:N0}");
+                                    break; // Only allow merge into one target cluster
+                                }
+                            }
+                            else
+                            {
+                                if (s1.Contains(s2))
+                                {
+                                    SendOutputText(logFileWriter, $"    Substring: {entry.Key}, {s1} <- {compEntry.Key}, {s2}");
+                                    SendOutputText(logFileWriter, $"        Merging, {n1:N0} + {n2:N0} = {n1 + n2:N0}");
+                                    break; // Only allow merge into one target cluster
+                                }
+                            }
+
                             int distance = Parser.LevenshteinDistance(s1, s2);
                             distance = Math.Abs(distance);
                             //SendOutputText(logFileWriter, $"distance: {distance}");
@@ -277,8 +298,9 @@ namespace BarcodeClusterer
                                     N1 = n2;
                                     N2 = n1;
                                 }
-                                //SendOutputText(logFileWriter);
-                                SendOutputText(logFileWriter, $"    Distance {distance}: {entry.Key}, {entry.Value} -> {compEntry.Key}, {compEntry.Value} : BayesMergeRatio({indelProb}, {N1:N0}, {N2:N0}) = {BayesMergeRatio(indelProb, N1, N2):N4}");
+                                
+                                //Test likelihood ratio for merge criteria
+                                SendOutputText(logFileWriter, $"    Distance {distance}: {entry.Key}, {s1} -> {compEntry.Key}, {s2} : BayesMergeRatio({indelProb}, {N1:N0}, {N2:N0}) = {BayesMergeRatio(indelProb, N1, N2):N4}");
                                 if (BayesMergeRatio(indelProb, N1, N2) > 0)
                                 {
                                     SendOutputText(logFileWriter, $"        Merging, {n1:N0} + {n2:N0} = {n1 + n2:N0}");
