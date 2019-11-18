@@ -273,11 +273,10 @@ namespace BarcodeClusterer
                                     N2 = n1;
                                 }
                                 SendOutputText(logFileWriter);
-                                SendOutputText(logFileWriter, $"    BayesMergeRatio({indelProb}, {N1}, {N2}) = {BayesMergeRatio(indelProb, N1, N2)}");
+                                SendOutputText(logFileWriter, $"    Distance {distance}: {entry.Key}, {entry.Value} -> {compEntry.Key}, {compEntry.Value} :: BayesMergeRatio({indelProb}, {N1}, {N2}) = {BayesMergeRatio(indelProb, N1, N2)}");
                                 if (BayesMergeRatio(indelProb, N1, N2) > 0)
                                 {
-                                    SendOutputText(logFileWriter, $"    Merging {entry.Key}, {entry.Value} into {compEntry.Key}, {compEntry.Value}.");
-                                    SendOutputText(logFileWriter, $"    {n1} + {n2} = {n1 + n2}");
+                                    SendOutputText(logFileWriter, $"    Merging, {n1} + {n2} = {n1 + n2}");
                                     //if merge:
                                     //    add clusterCount to merge target in clusterCountDict
                                     //    change clusterIds in barcodeDictionary (barcodeClusterIdDict?)
