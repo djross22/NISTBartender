@@ -1874,6 +1874,7 @@ namespace BartenderWindow
             ClusterMergeThresholdStr = "5.0";
             ClusterSeedLengthStr = "5";
             ClusterSeedStepStr = "1";
+            InDelProbStr = "0.0004,0.00003";
         }
 
         private void parseButton_Click(object sender, RoutedEventArgs e)
