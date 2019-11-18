@@ -125,7 +125,7 @@ namespace BarcodeClusterer
 
         public void MergeDifferentLengths()
         {
-            using (StreamWriter logFileWriter = File.AppendText($"{outputPrefix}.clustering.log"))
+            using (StreamWriter logFileWriter = new StreamWriter($"{outputPrefix}.cluster_merging.log"))
             {
                 DateTime startTime = DateTime.Now;
                 SendOutputText(logFileWriter);
