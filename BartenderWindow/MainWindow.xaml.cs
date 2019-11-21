@@ -1838,6 +1838,7 @@ namespace BartenderWindow
         private void RunPostSorterThreshold()
         {
             DisableInputControls();
+            Save();
 
             InitSorter();
 
@@ -1853,6 +1854,7 @@ namespace BartenderWindow
         private void RunSorter()
         {
             DisableInputControls();
+            Save();
 
             AnalyzeMultiTags(printOutput: false);
 
