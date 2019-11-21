@@ -141,7 +141,7 @@ namespace BartenderWindow
 
         public string SortedBarcodeThresholdStr
         {
-            get { return this.parsingThreadsStr; }
+            get { return this.sortedBarcodeThresholdStr; }
             set
             {
                 if (this.sortedBarcodeThresholdStr != value)
@@ -1830,6 +1830,26 @@ namespace BartenderWindow
             RunSorter();
         }
 
+        private void thresholdButton_Click(object sender, RoutedEventArgs e)
+        {
+            RunPostSorterThreshold();
+        }
+
+        private void RunPostSorterThreshold()
+        {
+            DisableInputControls();
+
+            InitSorter();
+
+            //Run sorter as background worker
+            BackgroundWorker sorterWorker = new BackgroundWorker();
+            sorterWorker.WorkerReportsProgress = false;
+            sorterWorker.DoWork += sorterWorker_Threshold;
+            sorterWorker.RunWorkerCompleted += sorterWorker_RunWorkerCompleted;
+
+            sorterWorker.RunWorkerAsync();
+        }
+
         private void RunSorter()
         {
             DisableInputControls();
@@ -1876,6 +1896,21 @@ namespace BartenderWindow
             sorter.sampleIdList = mutiTagIdDict.Values.ToList();
 
             sorter.sortedBarcodeThreshold = sortedBarcodeThreshold;
+        }
+
+        void sorterWorker_Threshold(object sender, DoWorkEventArgs e)
+        {
+            try
+            {
+                sorter.ThresholdSortedBarcodes();
+            }
+            catch (Exception ex)
+            {
+                //this has to be delegated becasue it interacts with the GUI by sending text to the outputTextBox
+                this.Dispatcher.Invoke(() => {
+                    AddOutputText($"Exception in Sorter.ThresholdSortedBarcodes() while attempting to threshold sorted barcodes: {ex})");
+                });
+            }
         }
 
         void sorterWorker_DoWork(object sender, DoWorkEventArgs e)
