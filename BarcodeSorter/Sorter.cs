@@ -374,6 +374,63 @@ namespace BarcodeSorter
             logFileWriter.Close();
         }
 
+        public void ThresholdSortedBarcodes()
+        {
+            string inFileStr = $"{outputPrefix}.sorted_counts.csv";
+            string outFileStr = $"{outputPrefix}.trimmed_sorted_counts.csv";
+            //Read in sorted barcodes line-by-line and write to output file if total_counts > threshold
+            using (StreamWriter logFileWriter = File.AppendText($"{outputPrefix}.cluster_merging.log"))
+            using (StreamWriter outFileWriter = new StreamWriter(outFileStr))
+            using (StreamReader inFileReader = new StreamReader(inFileStr))
+            {
+                DateTime startTime = DateTime.Now;
+                SendOutputText(logFileWriter);
+                SendOutputText(logFileWriter, "*********************************************");
+                SendOutputText(logFileWriter, $"Thresholding Sorted Barcodes.");
+                SendOutputText(logFileWriter, $"Thresholding started: {startTime}.");
+                SendOutputText(logFileWriter, "");
+                SendOutputText(logFileWriter, $"    Reading Sorted Barcodes in from file: {inFileStr}.");
+                SendOutputText(logFileWriter, $"    Writing Sorted Barcodes out to file: {outFileStr}.");
+
+                string line = inFileReader.ReadLine(); //first line of file is header, so read and write it back out.
+                outFileWriter.WriteLine(line);
+
+                int lineCount = 0;
+                int outputCount = 0;
+                while ((line = inFileReader.ReadLine()) != null)
+                {
+                    string[] splitLine = line.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    splitLine = splitLine.Select(s => s.Trim()).ToArray();
+
+                    //Last column is total counts, so check if it is >= threshold
+                    int totalCounts = 0;
+                    int.TryParse(splitLine.Last(), out totalCounts);
+
+                    if (totalCounts >= sortedBarcodeThreshold)
+                    {
+                        outFileWriter.WriteLine(line);
+                        outputCount++;
+                    }
+
+                    lineCount++;
+                    if (lineCount % 10000 == 0) SendOutputText(".", newLine: false);
+                    if (lineCount % 100000 == 0 && lineCount > 0) SendOutputText($"{lineCount:N0}", newLine: false);
+                }
+
+                double outPercentage = 100.0 * ((double)outputCount) / ((double)(lineCount));
+                SendOutputText(logFileWriter, "");
+                SendOutputText(logFileWriter, $"    Number of input barcodes: {lineCount}.");
+                SendOutputText(logFileWriter, $"    Number of output barcodes: {outputCount} ({outPercentage:0.##}%).");
+
+                DateTime endTime = DateTime.Now;
+                SendOutputText(logFileWriter);
+                SendOutputText(logFileWriter, $"Thresholding finished: {endTime}.");
+                SendOutputText(logFileWriter, $"Elapsed time: {endTime - startTime}.");
+                SendOutputText(logFileWriter, "*********************************************");
+                SendOutputText(logFileWriter);
+
+            }
+        }
 
     }
 }
