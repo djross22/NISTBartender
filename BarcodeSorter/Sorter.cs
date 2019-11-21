@@ -413,8 +413,8 @@ namespace BarcodeSorter
                     }
 
                     lineCount++;
-                    if (lineCount % 10000 == 0) SendOutputText(".", newLine: false);
-                    if (lineCount % 100000 == 0 && lineCount > 0) SendOutputText($"{lineCount:N0}", newLine: false);
+                    if (lineCount % 100000 == 0) SendOutputText(".", newLine: false);
+                    if (lineCount % 1000000 == 0 && lineCount > 0) SendOutputText($"{lineCount:N0}", newLine: false);
                 }
 
                 double outPercentage = 100.0 * ((double)outputCount) / ((double)(lineCount));
