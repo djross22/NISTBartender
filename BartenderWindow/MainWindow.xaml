@@ -441,6 +441,16 @@
                     </TextBox.Text>
                 </TextBox>
                 <CheckBox x:Name="autoMergeSubstringsCheckBox" Content="Auto-merge substrings" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="White" ToolTip="Automatically merge barcodes that are substrings" IsChecked="{Binding AutoMergeSubstrings}" Height="16" Width="142" Grid.Row="4" Margin="10,0,0,0" Grid.Column="3"/>
+                <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Sorted Barcode Cutoff Frequency:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="Threshold for trimming barcodes after sorting." Height="16" Grid.Row="3" Grid.Column="3"/>
+                <TextBox x:Name="sortedBarcodeThresholdTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="60" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="195,0,0,0" Grid.Row="3" Grid.Column="3">
+                    <TextBox.Text>
+                        <Binding Path="SortedBarcodeThresholdStr" UpdateSourceTrigger="PropertyChanged">
+                            <Binding.ValidationRules>
+                                <local:RegexValidationRule RegexText = "^[0-9]{1,4}$" ErrorMessage="Sorted Barcode Cutoff Frequency must be an integer between 0 and 9999." ValidationOptions="None"/>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
                 <Button x:Name="clusterDefaultButton" Content="Use Default Settings" HorizontalAlignment="Left" Margin="20,0,0,0" Grid.Row="4" VerticalAlignment="Center" Width="120" Height="20" Click="clusterDefaultButton_Click"/>
             </Grid>
         </Border>

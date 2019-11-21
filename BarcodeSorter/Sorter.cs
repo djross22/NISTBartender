@@ -22,6 +22,8 @@ namespace BarcodeSorter
 
         public List<string> sampleIdList; //List of sample IDs; = MainWindow.mutiTagIdDict.Values
 
+        public int sortedBarcodeThreshold; //threshold for trimming low-count double barcodes after sorting
+
 
         //***********************************************************************************************
 

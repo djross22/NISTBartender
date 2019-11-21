@@ -131,11 +131,27 @@ namespace BartenderWindow
 
         //Parameters/fields for barcode sorting
         private Sorter sorter;
+        private string sortedBarcodeThresholdStr;
+        private int sortedBarcodeThreshold;
 
         //List of controls to disable/enable when parser or clusterer is running
         private List<Control> inputControlsList;
 
         #region Properties Getters and Setters
+
+        public string SortedBarcodeThresholdStr
+        {
+            get { return this.parsingThreadsStr; }
+            set
+            {
+                if (this.sortedBarcodeThresholdStr != value)
+                {
+                    this.sortedBarcodeThresholdStr = value;
+                    OnPropertyChanged("SortedBarcodeThresholdStr");
+                    int.TryParse(sortedBarcodeThresholdStr, out sortedBarcodeThreshold);
+                }
+            }
+        }
 
         public string InDelProbStr
         {
@@ -899,6 +915,7 @@ namespace BartenderWindow
             inputControlsList.Add(clusterDefaultButton);
             inputControlsList.Add(inDelProbTextBox);
             inputControlsList.Add(autoMergeSubstringsCheckBox);
+            inputControlsList.Add(sortedBarcodeThresholdTextBox);
 
             inputControlsList.Add(linTagFlankErrTextBox);
             inputControlsList.Add(multiTagFlankErrTextBox);
@@ -964,6 +981,7 @@ namespace BartenderWindow
             paramsList.Add("ClusterSeedLengthStr");
             paramsList.Add("ClusterSeedStepStr");
             paramsList.Add("InDelProbStr");
+            paramsList.Add("SortedBarcodeThresholdStr");
             //paramsList.Add("");
         }
 
@@ -1856,6 +1874,8 @@ namespace BartenderWindow
             sorter.outputPrefix = OutputDirectory + $"\\{OutputFileLabel}";
 
             sorter.sampleIdList = mutiTagIdDict.Values.ToList();
+
+            sorter.sortedBarcodeThreshold = sortedBarcodeThreshold;
         }
 
         void sorterWorker_DoWork(object sender, DoWorkEventArgs e)
@@ -1893,6 +1913,7 @@ namespace BartenderWindow
             ClusterSeedStepStr = "1";
             InDelProbStr = "0.0004,0.00003";
             AutoMergeSubstrings = true;
+            SortedBarcodeThresholdStr = "100";
         }
 
         private void parseButton_Click(object sender, RoutedEventArgs e)
