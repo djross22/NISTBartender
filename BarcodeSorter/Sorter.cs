@@ -425,8 +425,8 @@ namespace BarcodeSorter
                 }
 
 
-                SendOutputText(logFileWriter, $"{DateTime.Now}: Re-writing {outFileStr} in rank order by total read counts.");
-                RankBarcodeListByTotal(outFileStr);
+                SendOutputText(logFileWriter, $"{DateTime.Now}: Marking possible chimera reads in {outFileStr}.");
+                FlagPossibleChimeras(outFileStr);
 
                 DateTime endTime = DateTime.Now;
                 SendOutputText(logFileWriter);
@@ -438,7 +438,7 @@ namespace BarcodeSorter
 
         }
 
-        private void RankBarcodeListByTotal(string fileStr)
+        private void FlagPossibleChimeras(string fileStr)
         {
             string header;
             List<string> lineList;
@@ -457,7 +457,45 @@ namespace BarcodeSorter
             //Sort the list of lines
             lineList.Sort(CompareByTotal);
 
-            //Write the list back out, in sorted order
+            //Detect and flag possible chimera reads
+            header += ", possibleChimera, parent_geo_mean";
+            List<string> newLineList = new List<string>();
+            //Make list of forward and reverse barcodes with their count totals
+            List<(string BC, int Count)> for_BC_list = new List<(string BC, int Count)>();
+            List<(string BC, int Count)> rev_BC_list = new List<(string BC, int Count)>();
+            foreach (string line in lineList)
+            {
+                (string forBC, string revBC, int total) = GetBarcodesAndTotal(line);
+                for_BC_list.Add((forBC, total));
+                rev_BC_list.Add((revBC, total));
+            }
+            //Search for possible chimeras by looking for parent reads with greater total count number
+            for (int i=1; i<lineList.Count; i++)
+            {
+                (string forBC, string revBC, int total) = GetBarcodesAndTotal(lineList[i]);
+                int forParentCount = 0;
+                int revParentCount = 0;
+                for (int j=0; j<i; j++)
+                {
+                    (string forParentBC, int parentTotal) = for_BC_list[j];
+                    string revParentBC = rev_BC_list[j].BC;
+                    if ((forParentCount == 0) && (forBC == forParentBC))
+                    {
+                        forParentCount = parentTotal;
+                    }
+                    if ((revParentCount == 0) && (revBC == revParentBC))
+                    {
+                        revParentCount = parentTotal;
+                    }
+                    if (forParentCount > 0 && revParentCount > 0) break; //Can stop searching once the most abundant possible parents are found
+                }
+
+                bool possibleChimera = (forParentCount > 0) && (revParentCount > 0);
+                double goeMean = Math.Sqrt(forParentCount * revParentCount);
+                newLineList.Add($"{lineList[i]}, {possibleChimera}, {goeMean}");
+            }
+
+            //Write the list back out, in sorted order, with possible chimeras indicated
             using (StreamWriter outFileWriter = new StreamWriter(fileStr))
             {
                 outFileWriter.WriteLine(header);
@@ -466,6 +504,23 @@ namespace BarcodeSorter
                     outFileWriter.WriteLine(line);
                 }
             }
+        }
+
+        private (string BC1, string BC2, int Count) GetBarcodesAndTotal(string line)
+        {
+            string[] splitLine = line.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            splitLine = splitLine.Select(s => s.Trim()).ToArray();
+
+            //Last column is total counts,
+            int totalCounts = 0;
+            int.TryParse(splitLine.Last(), out totalCounts);
+
+            //Forward BCs, first column is BC
+            string forBarcode = splitLine[0];
+            //Forward BCs, 2nd column is BC
+            string revBarcode = splitLine[1];
+
+            return (forBarcode, revBarcode, totalCounts);
         }
 
         private int CompareByTotal(string line1, string line2)
