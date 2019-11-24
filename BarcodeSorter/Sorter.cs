@@ -424,9 +424,10 @@ namespace BarcodeSorter
                     SendOutputText(logFileWriter, $"    Number of output barcodes: {outputCount} ({outPercentage:0.##}%).");
                 }
 
-
+                SendOutputText(logFileWriter);
                 SendOutputText(logFileWriter, $"{DateTime.Now}: Marking possible chimera reads in {outFileStr}.");
-                FlagPossibleChimeras(outFileStr);
+                int chimeraCount = FlagPossibleChimeras(outFileStr);
+                SendOutputText(logFileWriter, $"    Number of possible chimera barcodes identified: {chimeraCount}.");
 
                 DateTime endTime = DateTime.Now;
                 SendOutputText(logFileWriter);
@@ -438,7 +439,7 @@ namespace BarcodeSorter
 
         }
 
-        private void FlagPossibleChimeras(string fileStr)
+        private int FlagPossibleChimeras(string fileStr)
         {
             string header;
             List<string> lineList;
@@ -470,6 +471,7 @@ namespace BarcodeSorter
                 rev_BC_list.Add((revBC, total));
             }
             //Search for possible chimeras by looking for parent reads with greater total count number
+            int count = 0;
             for (int i=1; i<lineList.Count; i++)
             {
                 (string forBC, string revBC, int total) = GetBarcodesAndTotal(lineList[i]);
@@ -487,13 +489,18 @@ namespace BarcodeSorter
                     {
                         revParentCount = parentTotal;
                     }
-                    if (forParentCount > 0 && revParentCount > 0) break; //Can stop searching once the most abundant possible parents are found
+                    if (forParentCount > 0 && revParentCount > 0)
+                    {
+                        count++;
+                        break; //Can stop searching once the most abundant possible parents are found
+                    }
                 }
 
                 bool possibleChimera = (forParentCount > 0) && (revParentCount > 0);
                 double goeMean = Math.Sqrt(forParentCount * revParentCount);
                 newLineList.Add($"{lineList[i]}, {possibleChimera}, {goeMean}");
             }
+            lineList = newLineList;
 
             //Write the list back out, in sorted order, with possible chimeras indicated
             using (StreamWriter outFileWriter = new StreamWriter(fileStr))
@@ -504,6 +511,8 @@ namespace BarcodeSorter
                     outFileWriter.WriteLine(line);
                 }
             }
+
+            return count;
         }
 
         private (string BC1, string BC2, int Count) GetBarcodesAndTotal(string line)
@@ -538,7 +547,7 @@ namespace BarcodeSorter
             int totalCounts2 = 0;
             int.TryParse(splitLine2.Last(), out totalCounts2);
 
-            return totalCounts1 - totalCounts2;
+            return totalCounts2 - totalCounts1;
         }
 
     }
