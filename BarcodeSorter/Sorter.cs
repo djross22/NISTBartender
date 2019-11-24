@@ -472,6 +472,7 @@ namespace BarcodeSorter
             }
             //Search for possible chimeras by looking for parent reads with greater total count number
             int count = 0;
+            newLineList.Add($"{lineList[0]}, False, 0"); //Add in first line
             for (int i=1; i<lineList.Count; i++)
             {
                 (string forBC, string revBC, int total) = GetBarcodesAndTotal(lineList[i]);
