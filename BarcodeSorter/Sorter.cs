@@ -380,8 +380,6 @@ namespace BarcodeSorter
             string outFileStr = $"{outputPrefix}.trimmed_sorted_counts.csv";
             //Read in sorted barcodes line-by-line and write to output file if total_counts > threshold
             using (StreamWriter logFileWriter = File.AppendText($"{outputPrefix}.cluster_merging.log"))
-            using (StreamWriter outFileWriter = new StreamWriter(outFileStr))
-            using (StreamReader inFileReader = new StreamReader(inFileStr))
             {
                 DateTime startTime = DateTime.Now;
                 SendOutputText(logFileWriter);
@@ -392,35 +390,43 @@ namespace BarcodeSorter
                 SendOutputText(logFileWriter, $"    Reading Sorted Barcodes in from file: {inFileStr}.");
                 SendOutputText(logFileWriter, $"    Writing Sorted Barcodes out to file: {outFileStr}.");
 
-                string line = inFileReader.ReadLine(); //first line of file is header, so read and write it back out.
-                outFileWriter.WriteLine(line);
-
-                int lineCount = 0;
-                int outputCount = 0;
-                while ((line = inFileReader.ReadLine()) != null)
+                using (StreamWriter outFileWriter = new StreamWriter(outFileStr))
+                using (StreamReader inFileReader = new StreamReader(inFileStr))
                 {
-                    string[] splitLine = line.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                    splitLine = splitLine.Select(s => s.Trim()).ToArray();
+                    string line = inFileReader.ReadLine(); //first line of file is header, so read and write it back out.
+                    outFileWriter.WriteLine(line);
 
-                    //Last column is total counts, so check if it is >= threshold
-                    int totalCounts = 0;
-                    int.TryParse(splitLine.Last(), out totalCounts);
-
-                    if (totalCounts >= sortedBarcodeThreshold)
+                    int lineCount = 0;
+                    int outputCount = 0;
+                    while ((line = inFileReader.ReadLine()) != null)
                     {
-                        outFileWriter.WriteLine(line);
-                        outputCount++;
+                        string[] splitLine = line.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                        splitLine = splitLine.Select(s => s.Trim()).ToArray();
+
+                        //Last column is total counts, so check if it is >= threshold
+                        int totalCounts = 0;
+                        int.TryParse(splitLine.Last(), out totalCounts);
+
+                        if (totalCounts >= sortedBarcodeThreshold)
+                        {
+                            outFileWriter.WriteLine(line);
+                            outputCount++;
+                        }
+
+                        lineCount++;
+                        if (lineCount % 100000 == 0) SendOutputText(".", newLine: false);
+                        if (lineCount % 1000000 == 0 && lineCount > 0) SendOutputText($"{lineCount:N0}", newLine: false);
                     }
 
-                    lineCount++;
-                    if (lineCount % 100000 == 0) SendOutputText(".", newLine: false);
-                    if (lineCount % 1000000 == 0 && lineCount > 0) SendOutputText($"{lineCount:N0}", newLine: false);
+                    double outPercentage = 100.0 * ((double)outputCount) / ((double)(lineCount));
+                    SendOutputText(logFileWriter, "");
+                    SendOutputText(logFileWriter, $"    Number of input barcodes: {lineCount}.");
+                    SendOutputText(logFileWriter, $"    Number of output barcodes: {outputCount} ({outPercentage:0.##}%).");
                 }
 
-                double outPercentage = 100.0 * ((double)outputCount) / ((double)(lineCount));
-                SendOutputText(logFileWriter, "");
-                SendOutputText(logFileWriter, $"    Number of input barcodes: {lineCount}.");
-                SendOutputText(logFileWriter, $"    Number of output barcodes: {outputCount} ({outPercentage:0.##}%).");
+
+                SendOutputText(logFileWriter, $"{DateTime.Now}: Re-writing {outFileStr} in rank order by total read counts.");
+                RankBarcodeListByTotal(outFileStr);
 
                 DateTime endTime = DateTime.Now;
                 SendOutputText(logFileWriter);
@@ -428,8 +434,56 @@ namespace BarcodeSorter
                 SendOutputText(logFileWriter, $"Elapsed time: {endTime - startTime}.");
                 SendOutputText(logFileWriter, "*********************************************");
                 SendOutputText(logFileWriter);
-
             }
+
+        }
+
+        private void RankBarcodeListByTotal(string fileStr)
+        {
+            string header;
+            List<string> lineList;
+            //Read in sorted counts .csv file, then re-write it in ranked order by total counts from most to least
+            using (StreamReader inFileReader = new StreamReader(fileStr))
+            {
+                header = inFileReader.ReadLine(); //first line of file is header.
+                string line;
+                lineList = new List<string>();
+                while ((line = inFileReader.ReadLine()) != null)
+                {
+                    lineList.Add(line);
+                }
+            }
+
+            //Sort the list of lines
+            lineList.Sort(CompareByTotal);
+
+            //Write the list back out, in sorted order
+            using (StreamWriter outFileWriter = new StreamWriter(fileStr))
+            {
+                outFileWriter.WriteLine(header);
+                foreach (string line in lineList)
+                {
+                    outFileWriter.WriteLine(line);
+                }
+            }
+        }
+
+        private int CompareByTotal(string line1, string line2)
+        {
+            string[] splitLine1 = line1.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            splitLine1 = splitLine1.Select(s => s.Trim()).ToArray();
+
+            string[] splitLine2 = line2.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            splitLine2 = splitLine2.Select(s => s.Trim()).ToArray();
+
+            //Last column is total counts,
+            int totalCounts1 = 0;
+            int.TryParse(splitLine1.Last(), out totalCounts1);
+
+            int totalCounts2 = 0;
+            int.TryParse(splitLine2.Last(), out totalCounts2);
+
+            return totalCounts1 - totalCounts2;
         }
 
     }
