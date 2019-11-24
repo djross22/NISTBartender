@@ -498,7 +498,7 @@ namespace BarcodeSorter
                 }
 
                 bool possibleChimera = (forParentCount > 0) && (revParentCount > 0);
-                double goeMean = Math.Sqrt(forParentCount * revParentCount);
+                double goeMean = Math.Sqrt((double)forParentCount * (double)revParentCount);
                 newLineList.Add($"{lineList[i]}, {possibleChimera}, {goeMean}");
             }
             lineList = newLineList;
