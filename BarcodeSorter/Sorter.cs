@@ -379,7 +379,7 @@ namespace BarcodeSorter
             string inFileStr = $"{outputPrefix}.sorted_counts.csv";
             string outFileStr = $"{outputPrefix}.trimmed_sorted_counts.csv";
             //Read in sorted barcodes line-by-line and write to output file if total_counts > threshold
-            using (StreamWriter logFileWriter = File.AppendText($"{outputPrefix}.cluster_merging.log"))
+            using (StreamWriter logFileWriter = new StreamWriter($"{outputPrefix}.cluster_trimming.log"))
             {
                 DateTime startTime = DateTime.Now;
                 SendOutputText(logFileWriter);
