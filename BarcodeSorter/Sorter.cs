@@ -427,7 +427,7 @@ namespace BarcodeSorter
                 SendOutputText(logFileWriter);
                 SendOutputText(logFileWriter, $"{DateTime.Now}: Marking possible chimera reads in {outFileStr}.");
                 int chimeraCount = FlagPossibleChimeras(outFileStr);
-                SendOutputText(logFileWriter, $"    Number of possible chimera barcodes identified: {chimeraCount}.");
+                SendOutputText(logFileWriter, $"    Number of possible chimera barcodes identified: {chimeraCount:N0}.");
 
                 DateTime endTime = DateTime.Now;
                 SendOutputText(logFileWriter);
