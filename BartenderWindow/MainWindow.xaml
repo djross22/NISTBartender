@@ -463,7 +463,7 @@
                         </Binding>
                     </TextBox.Text>
                 </TextBox>
-                <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Spike-In Merge Distance:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="Barcodes within this Levenshtein distance of spike-in barcodes will be automatically merged during the Merge Lengths operation. Set to zero to disable automatic spike-in merging." Height="16" Grid.Row="4" Grid.Column="4"/>
+                <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Spike-In Merge Distance:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="Barcodes within this Levenshtein distance of spike-in barcodes (identified by count > Spike-In Merge Threshold) will be automatically merged during the Merge Lengths operation. Set to zero to disable automatic spike-in merging." Height="16" Grid.Row="4" Grid.Column="4"/>
                 <TextBox x:Name="spikeinMergeDistanceTextBox" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="155,0,10,0" Grid.Row="4" Grid.Column="4">
                     <TextBox.Text>
                         <Binding Path="SpikeinMergeDistanceStr" UpdateSourceTrigger="PropertyChanged">

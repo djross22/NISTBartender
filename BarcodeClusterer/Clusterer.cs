@@ -28,6 +28,8 @@ namespace BarcodeClusterer
 
         public bool autoMergeSubstrings;
 
+        public int spikeinMergeThreshold, spikeinMergeDistance;
+
         //********************************************************************************
 
         //private Process clusterProcess;
@@ -350,6 +352,76 @@ namespace BarcodeClusterer
                 }
                 SendOutputText(logFileWriter);
                 SendOutputText(logFileWriter, $"A total of {totalNumMerged:N0} barcode clusters with {countsMerged:N0} read counts were merged into larger clusters.");
+
+                //Next, identify spike-in barcode clusters and merge clusters that are near them
+                if (spikeinMergeDistance>0)
+                {
+                    SendOutputText(logFileWriter);
+                    SendOutputText(logFileWriter, $"{DateTime.Now}: Testing all barcodes for merging with spike-in barcodes in cluster list");
+
+                    //Identify IDs for spike-in barcodes with count > threshold
+                    List<int> spikeinIdList = new List<int>();
+                    foreach (var entry in outputClusterDictionary)
+                    {
+                        int bcId = entry.Key;
+                        int bcCount = clusterCountDict[bcId];
+                        if (bcCount > spikeinMergeThreshold)
+                        {
+                            spikeinIdList.Add(bcId);
+                        }
+                    }
+
+                    if (spikeinIdList.Count>0)
+                    {
+                        int numMerged = 0;
+                        countsMerged = 0;
+                        foreach (int spikeinId in spikeinIdList)
+                        {
+                            string spikeinCenter = outputClusterDictionary[spikeinId];
+
+                            SendOutputText(logFileWriter, $"{DateTime.Now}: Spike-In ID: {spikeinId}; Spike-In Center: {spikeinCenter}");
+
+                            //Make new dictionary to add clusters to if they don't get merged into a spike-in cluster
+                            Dictionary<int, string> newOutputClusterDictionary = new Dictionary<int, string>();
+
+                            foreach (var entry in outputClusterDictionary)
+                            {
+                                int bcId = entry.Key;
+                                string bcCenter = entry.Value;
+
+                                if ((bcId != spikeinId) && (Parser.LevenshteinDistance(bcCenter, spikeinCenter) <= spikeinMergeDistance))
+                                {
+                                    //If cluster center is within threshold Levenshtein distance, merge it with spike-in cluster
+                                    int n1 = clusterCountDict[bcId]; //counts for cluster getting merged into spike-in cluster
+                                    int n2 = clusterCountDict[spikeinId]; //counts for spike-in cluster
+
+                                    SendOutputText(logFileWriter, $"    Spike-In Merge: {bcId}, {bcCenter} -> {spikeinId}, {spikeinCenter}");
+                                    SendOutputText(logFileWriter, $"        {n1:N0} + {n2:N0} = {n1 + n2:N0}");
+
+                                    //add clusterCount to merge target in clusterCountDict
+                                    clusterCountDict[spikeinId] = n1 + n2;
+
+                                    //change clusterIds in barcodeDictionary barcodeClusterIdDict
+                                    var result = barcodeClusterIdDict.Where(x => x.Value == bcId).ToList();
+                                    foreach (KeyValuePair<string, int> keyValuePair in result)
+                                    {
+                                        barcodeClusterIdDict[keyValuePair.Key] = spikeinId;
+                                    }
+                                    numMerged++;
+                                    countsMerged += n1;
+                                }
+                                else
+                                {
+                                    //If not merged, add the cluster to the newOutputClusterDictionary
+                                    newOutputClusterDictionary[bcId] = bcCenter;
+                                }
+                            }
+
+                            outputClusterDictionary = newOutputClusterDictionary;
+
+                        }
+                    }
+                }
 
                 //Save outputClusterDictionary, clusterScoreDict, clusterCountDict -> "_merged_cluster.csv"
                 string mergedClusterFile = $"{outputPrefix}_merged_cluster.csv";

@@ -2125,6 +2125,8 @@ namespace BartenderWindow
                 clust.threadsForClustering = threadsForClustering;
                 clust.inDelProbArr = inDelProbArr;
                 clust.autoMergeSubstrings = AutoMergeSubstrings;
+                clust.spikeinMergeThreshold = spikeinMergeThreshold;
+                clust.spikeinMergeDistance = spikeinMergeDistance;
             }
         }
 
