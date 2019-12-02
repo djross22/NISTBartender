@@ -117,7 +117,7 @@ namespace BartenderWindow
         private string multiTagErrorRateStr;
         private double multiTagErrorRate;
 
-        //Parameters for barcode clustering
+        //Parameters for barcode clustering and merging
         private Clusterer forwardClusterer, reverseClusterer;
         private string forClusterInputPath, revClusterInputPath;
         private string clusterCutoffFrequencyStr, maxClusterDistanceStr, clusterSeedLengthStr, clusterSeedStepStr;
@@ -128,6 +128,8 @@ namespace BartenderWindow
         private double[] inDelProbArr;
         private int threadsForClustering;
         private bool autoMergeSubstrings;
+        private string spikeinMergeThresholdStr, spikeinMergeDistanceStr;
+        private int spikeinMergeThreshold, spikeinMergeDistance;
 
         //Parameters/fields for barcode sorting
         private Sorter sorter;
@@ -138,6 +140,34 @@ namespace BartenderWindow
         private List<Control> inputControlsList;
 
         #region Properties Getters and Setters
+
+        public string SpikeinMergeDistanceStr
+        {
+            get { return this.spikeinMergeDistanceStr; }
+            set
+            {
+                if (this.spikeinMergeDistanceStr != value)
+                {
+                    this.spikeinMergeDistanceStr = value;
+                    OnPropertyChanged("SpikeinMergeDistanceStr");
+                    int.TryParse(spikeinMergeDistanceStr, out spikeinMergeDistance);
+                }
+            }
+        }
+
+        public string SpikeinMergeThresholdStr
+        {
+            get { return this.spikeinMergeThresholdStr; }
+            set
+            {
+                if (this.spikeinMergeThresholdStr != value)
+                {
+                    this.spikeinMergeThresholdStr = value;
+                    OnPropertyChanged("SpikeinMergeThresholdStr");
+                    int.TryParse(spikeinMergeThresholdStr, out spikeinMergeThreshold);
+                }
+            }
+        }
 
         public string SortedBarcodeThresholdStr
         {
@@ -907,6 +937,9 @@ namespace BartenderWindow
             inputControlsList.Add(forClusterInputTextBox);
             inputControlsList.Add(revClusterInputTextBox);
 
+            inputControlsList.Add(spikeinMergeThresholdTextBox);
+            inputControlsList.Add(spikeinMergeDistanceTextBox);
+
             inputControlsList.Add(clusterCutoffFreqTextBox);
             inputControlsList.Add(maxClusterDistTextBox);
             inputControlsList.Add(clusterMergeTextBox);
@@ -982,6 +1015,9 @@ namespace BartenderWindow
             paramsList.Add("ClusterSeedStepStr");
             paramsList.Add("InDelProbStr");
             paramsList.Add("SortedBarcodeThresholdStr");
+
+            paramsList.Add("SpikeinMergeThresholdStr");
+            paramsList.Add("SpikeinMergeDistanceStr");
             //paramsList.Add("");
         }
 
@@ -1951,6 +1987,8 @@ namespace BartenderWindow
             InDelProbStr = "0.0004,0.00003";
             AutoMergeSubstrings = true;
             SortedBarcodeThresholdStr = "100";
+            SpikeinMergeThresholdStr = "10000000";
+            SpikeinMergeDistanceStr = "6";
         }
 
         private void parseButton_Click(object sender, RoutedEventArgs e)

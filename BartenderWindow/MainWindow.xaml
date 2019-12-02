@@ -39,7 +39,7 @@
                     <Button x:Name="parseButton" Content="Parse" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ToolTip="Run Barcode Parser" Margin="5,0,5,0" Click="parseButton_Click"/>
                     <Button x:Name="clusterButton" Content="Cluster" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ToolTip="Run Barcode Clustering" Margin="5,0,5,0" Click="clusterButton_Click"/>
                     <Button x:Name="parseAndClusterButton" Content="Parse and Cluster" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ToolTip="Parse Barcodes then run Barcode Clustering" Margin="5,0,5,0" Click="parseAndClusterButton_Click"/>
-                    <Button x:Name="MergeLengthsButton" Content="Merge Lengths" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ToolTip="Merge different length barcode cluster centers" Margin="5,0,5,0" Click="MergeLengthsButton_Click"/>
+                    <Button x:Name="MergeLengthsButton" Content="Merge Lengths" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ToolTip="Merge different length barcode cluster centers, and Auto-Merge barcodes that are close to spike-ins." Margin="5,0,5,0" Click="MergeLengthsButton_Click"/>
                     <Button x:Name="sortButton" Content="Sort" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ToolTip="Sort Barcodes by Sample ID and Correct for PCR Jackpotting" Margin="5,0,5,0" Click="sortButton_Click"/>
                     <Button x:Name="thresholdButton" Content="Trim Sorted BCs" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ToolTip="Threshold sorted barcodes and save to new file" Margin="5,0,5,0" Click="thresholdButton_Click"/>
                 </ToolBar>
@@ -449,6 +449,26 @@
                         <Binding Path="SortedBarcodeThresholdStr" UpdateSourceTrigger="PropertyChanged">
                             <Binding.ValidationRules>
                                 <local:RegexValidationRule RegexText = "^[0-9]{1,4}$" ErrorMessage="Sorted Barcode Cutoff Frequency must be an integer between 0 and 9999." ValidationOptions="None"/>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
+                <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Spike-In Merge Threshold:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="Barcodes with total count greater than this threshold will be treated as spike-in barcodes during the Merge Lengths operation." Height="16" Grid.Row="3" Grid.Column="4"/>
+                <TextBox x:Name="spikeinMergeThresholdTextBox" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="155,0,10,0" Grid.Row="3" Grid.Column="4">
+                    <TextBox.Text>
+                        <Binding Path="SpikeinMergeThresholdStr" UpdateSourceTrigger="PropertyChanged">
+                            <Binding.ValidationRules>
+                                <local:RegexValidationRule RegexText = "^[0-9]+$" ErrorMessage="Spike-In Merge Threshold must be a positive integer." ValidationOptions="None"/>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
+                <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Spike-In Merge Distance:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="Barcodes within this Levenshtein distance of spike-in barcodes will be automatically merged during the Merge Lengths operation. Set to zero to disable automatic spike-in merging." Height="16" Grid.Row="4" Grid.Column="4"/>
+                <TextBox x:Name="spikeinMergeDistanceTextBox" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="155,0,10,0" Grid.Row="4" Grid.Column="4">
+                    <TextBox.Text>
+                        <Binding Path="SpikeinMergeDistanceStr" UpdateSourceTrigger="PropertyChanged">
+                            <Binding.ValidationRules>
+                                <local:RegexValidationRule RegexText = "^[0-9]{1,4}$" ErrorMessage="Spike-In Merge Distance must be an integer between zero and 9999." ValidationOptions="None"/>
                             </Binding.ValidationRules>
                         </Binding>
                     </TextBox.Text>
