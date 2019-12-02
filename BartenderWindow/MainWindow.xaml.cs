@@ -1825,30 +1825,39 @@ namespace BartenderWindow
             ForClusterInputPath = parser.forLintagOutFile;
             RevClusterInputPath = parser.revLintagOutFile;
 
-            InitClusterers();
-            
             try
             {
-                forwardClusterer.ClusterBarcodes();
-            }
-            catch (Exception ex)
-            {
-                //this has to be delegated becasue it interacts with the GUI by sending text to the outputTextBox
-                this.Dispatcher.Invoke(() => {
-                    AddOutputText($"Exception in Clusterer.ClusterBarcodes() while attempting to cluster forward barcodes: {ex})");
-                });
-            }
+                InitClusterers();
 
-            try
-            {
-                reverseClusterer.ClusterBarcodes();
+                try
+                {
+                    forwardClusterer.ClusterBarcodes();
+                }
+                catch (Exception ex)
+                {
+                    //this has to be delegated becasue it interacts with the GUI by sending text to the outputTextBox
+                    this.Dispatcher.Invoke(() =>
+                    {
+                        AddOutputText($"Exception in Clusterer.ClusterBarcodes() while attempting to cluster forward barcodes: {ex})");
+                    });
+                }
+
+                try
+                {
+                    reverseClusterer.ClusterBarcodes();
+                }
+                catch (Exception ex)
+                {
+                    //this has to be delegated becasue it interacts with the GUI by sending text to the outputTextBox
+                    this.Dispatcher.Invoke(() =>
+                    {
+                        AddOutputText($"Exception in Clusterer.ClusterBarcodes() while attempting to cluster reverse barcodes: {ex})");
+                    });
+                }
             }
             catch (Exception ex)
             {
-                //this has to be delegated becasue it interacts with the GUI by sending text to the outputTextBox
-                this.Dispatcher.Invoke(() => {
-                    AddOutputText($"Exception in Clusterer.ClusterBarcodes() while attempting to cluster reverse barcodes: {ex})");
-                });
+                AddOutputText($"Exception in InitClusterers(): {ex})");
             }
 
 
@@ -2027,15 +2036,23 @@ namespace BartenderWindow
                 ParamsFilePath = System.IO.Path.Combine(outputDirectory, $"{outputFileLabel}.xml");
                 Save();
 
-                InitClusterers();
+                try
+                {
+                    InitClusterers();
 
-                //Run clusterers as background worker
-                BackgroundWorker clusterWorker = new BackgroundWorker();
-                clusterWorker.WorkerReportsProgress = false;
-                clusterWorker.DoWork += clusterWorker_DoWork;
-                clusterWorker.RunWorkerCompleted += clusterWorker_RunWorkerCompleted;
+                    //Run clusterers as background worker
+                    BackgroundWorker clusterWorker = new BackgroundWorker();
+                    clusterWorker.WorkerReportsProgress = false;
+                    clusterWorker.DoWork += clusterWorker_DoWork;
+                    clusterWorker.RunWorkerCompleted += clusterWorker_RunWorkerCompleted;
 
-                clusterWorker.RunWorkerAsync();
+                    clusterWorker.RunWorkerAsync();
+                }
+                catch (Exception ex)
+                {
+                    AddOutputText($"Exception in InitClusterers(): {ex})");
+                    EnableInputControls();
+                }
 
             }
         }
@@ -2054,15 +2071,23 @@ namespace BartenderWindow
                 ParamsFilePath = System.IO.Path.Combine(outputDirectory, $"{outputFileLabel}.xml");
                 Save();
 
-                InitClusterers();
+                try
+                {
+                    InitClusterers();
 
-                //Run cluster merging as background worker
-                BackgroundWorker mergeWorker = new BackgroundWorker();
-                mergeWorker.WorkerReportsProgress = false;
-                mergeWorker.DoWork += mergeWorker_DoWork;
-                mergeWorker.RunWorkerCompleted += mergeWorker_RunWorkerCompleted;
+                    //Run cluster merging as background worker
+                    BackgroundWorker mergeWorker = new BackgroundWorker();
+                    mergeWorker.WorkerReportsProgress = false;
+                    mergeWorker.DoWork += mergeWorker_DoWork;
+                    mergeWorker.RunWorkerCompleted += mergeWorker_RunWorkerCompleted;
 
-                mergeWorker.RunWorkerAsync();
+                    mergeWorker.RunWorkerAsync();
+                }
+                catch (Exception ex)
+                {
+                    AddOutputText($"Exception in InitClusterers(): {ex})");
+                    EnableInputControls();
+                }
 
             }
         }
