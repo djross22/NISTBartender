@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BartenderWindow"
         mc:Ignorable="d"
-        Title="{Binding DisplayTitle}" Height="800" Width="1090" Background="{DynamicResource PurpleBackgroundBrush}" MinWidth="1090" MinHeight="800" Closing="Window_Closing">
+        Title="{Binding DisplayTitle}" Height="800" Width="1090" Background="{DynamicResource PurpleBackgroundBrush}" MinWidth="1100" MinHeight="800" Closing="Window_Closing">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
@@ -454,7 +454,7 @@
                     </TextBox.Text>
                 </TextBox>
                 <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Spike-In Merge Threshold:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="Barcodes with total count greater than this threshold will be treated as spike-in barcodes during the Merge Lengths operation." Height="16" Grid.Row="3" Grid.Column="4"/>
-                <TextBox x:Name="spikeinMergeThresholdTextBox" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="155,0,10,0" Grid.Row="3" Grid.Column="4">
+                <TextBox x:Name="spikeinMergeThresholdTextBox" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="155,0,10,0" Grid.Row="3" Grid.Column="4" MaxWidth="200" HorizontalAlignment="Left" MinWidth="91">
                     <TextBox.Text>
                         <Binding Path="SpikeinMergeThresholdStr" UpdateSourceTrigger="PropertyChanged">
                             <Binding.ValidationRules>
@@ -464,7 +464,7 @@
                     </TextBox.Text>
                 </TextBox>
                 <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Spike-In Merge Distance:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" ToolTip="Barcodes within this Levenshtein distance of spike-in barcodes (identified by count > Spike-In Merge Threshold) will be automatically merged during the Merge Lengths operation. Set to zero to disable automatic spike-in merging." Height="16" Grid.Row="4" Grid.Column="4"/>
-                <TextBox x:Name="spikeinMergeDistanceTextBox" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="155,0,10,0" Grid.Row="4" Grid.Column="4">
+                <TextBox x:Name="spikeinMergeDistanceTextBox" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="155,0,10,0" Grid.Row="4" Grid.Column="4" HorizontalAlignment="Left" Width="80">
                     <TextBox.Text>
                         <Binding Path="SpikeinMergeDistanceStr" UpdateSourceTrigger="PropertyChanged">
                             <Binding.ValidationRules>
