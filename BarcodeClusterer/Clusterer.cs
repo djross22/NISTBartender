@@ -253,7 +253,7 @@ namespace BarcodeClusterer
                     {
                         string s1 = entry.Value;
                         int n1 = clusterCountDict[entry.Key];
-                        bool wasMerged = false;
+                        bool shouldMerge = false;
                         foreach (var compEntry in compDict)
                         {
                             string s2 = compEntry.Value;
@@ -279,7 +279,7 @@ namespace BarcodeClusterer
                                     {
                                         SendOutputText(logFileWriter, $"    Substring: {entry.Key}, {s1} -> {compEntry.Key}, {s2}");
                                         SendOutputText(logFileWriter, $"        Merging, {n1:N0} + {n2:N0} = {n1 + n2:N0}");
-                                        wasMerged = true;
+                                        shouldMerge = true;
                                     }
                                 }
                                 else
@@ -288,12 +288,12 @@ namespace BarcodeClusterer
                                     {
                                         SendOutputText(logFileWriter, $"    Substring: {entry.Key}, {s1} <- {compEntry.Key}, {s2}");
                                         SendOutputText(logFileWriter, $"        Merging, {n1:N0} + {n2:N0} = {n1 + n2:N0}");
-                                        wasMerged = true;
+                                        shouldMerge = true;
                                     }
                                 }
                             }
 
-                            if (!wasMerged)
+                            if (!shouldMerge)
                             {
                                 int distance = Parser.LevenshteinDistance(s1, s2);
                                 distance = Math.Abs(distance);
@@ -312,13 +312,13 @@ namespace BarcodeClusterer
                                     {
                                         SendOutputText(logFileWriter, $"        Merging, {n1:N0} + {n2:N0} = {n1 + n2:N0}");
 
-                                        wasMerged = true;
+                                        shouldMerge = true;
                                     }
                                 }
                             }
 
                             //Note: do NOT replace next line with else:
-                            if (wasMerged)
+                            if (shouldMerge)
                             {
                                 //if merge:
                                 //    add clusterCount to merge target in clusterCountDict
@@ -337,7 +337,7 @@ namespace BarcodeClusterer
                             }
 
                         }
-                        if (!wasMerged)
+                        if (!shouldMerge)
                         {
                             //If the cluster doesn't get merged, then add it to outputClusterDictionary
                             outputClusterDictionary[entry.Key] = entry.Value;
