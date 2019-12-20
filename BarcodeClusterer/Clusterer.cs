@@ -308,9 +308,9 @@ namespace BarcodeClusterer
                                     indelProb = inDelProbArr[distance - 1];
 
 
-                                    //Test likelihood ratio for merge criteria
-                                    SendOutputText(logFileWriter, $"    Distance {distance}: {entry.Key}, {s1} -> {compEntry.Key}, {s2} : BayesMergeRatio({indelProb}, {N1:N0}, {N2:N0}) = {BayesMergeRatio(indelProb, N1, N2):N4}");
-                                    if (BayesMergeRatio(indelProb, N1, N2) > 0)
+                                    //Test ratio vs. expected probability for merge criteria
+                                    SendOutputText(logFileWriter, $"    Distance {distance}: {entry.Key}, {s1} -> {compEntry.Key}, {s2}, count ratio: {N2:N0}/{N1 + N2:N0} = {(double)N2 / (N1 + N2)}, expected error probability: {indelProb}");
+                                    if ((double)N2 / (N1 + N2) <= indelProb)
                                     {
                                         SendOutputText(logFileWriter, $"        Merging, {n1:N0} + {n2:N0} = {n1 + n2:N0}");
 
