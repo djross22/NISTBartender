@@ -421,6 +421,10 @@ namespace BarcodeClusterer
 
                         }
                     }
+                    else
+                    {
+                        SendOutputText(logFileWriter, $"{DateTime.Now}: No spike-in barcodes found with count greater than merge threshold ({spikeinMergeThreshold})");
+                    }
                 }
 
                 //Save outputClusterDictionary, clusterScoreDict, clusterCountDict -> "_merged_cluster.csv"
