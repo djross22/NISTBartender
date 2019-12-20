@@ -1993,7 +1993,7 @@ namespace BartenderWindow
             ClusterMergeThresholdStr = "5.0";
             ClusterSeedLengthStr = "5";
             ClusterSeedStepStr = "1";
-            InDelProbStr = "0.0004,0.00003";
+            InDelProbStr = "0.001,0.0001";
             AutoMergeSubstrings = true;
             SortedBarcodeThresholdStr = "100";
             SpikeinMergeThresholdStr = "10000000";
