@@ -96,10 +96,6 @@ namespace BarcodeClusterer
 
                 clusterProcess.StartInfo.Arguments = bartenderArgStr;
 
-                //clusterProcess.StartInfo.ArgumentList.Add("bartender_single");// -c";
-                //clusterProcess.StartInfo.ArgumentList.Add("/mnt/c/Users/djross/Documents/temp/csharp_test/barcode_analysis_forward_lintags.txt");// -c";
-                //clusterProcess.StartInfo.ArgumentList.Add(@"-f C:\Users\djross\Documents\temp\csharp_test\barcode_analysis_forward_lintags.txt");// -c";
-
                 clusterProcess.StartInfo.CreateNoWindow = true;
                 clusterProcess.StartInfo.UseShellExecute = false;
                 clusterProcess.StartInfo.RedirectStandardOutput = true;
