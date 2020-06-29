@@ -44,9 +44,9 @@ The NISTBartender GUI creates a single output file, "output_file_label.trimmed_s
 Once each component is installed, follow these steps to analyze the sample dataset:
 
 1. Run the BartenderWindow.exe Windows GUI program.
-2. Load the file "example.xml", which contains the settings for analyzing the sample dataset.
+2. Load the file "example.xml" (located in the \examples\parameters folder), which contains the settings for analyzing the sample dataset.
    - The Forward Read Sequence field should contain the full amplicon sequence in the forward direction; the Reverse Read Sequence field should contain the reverse complement of the amplicon sequence. The "Copy Reverse Complement" button can be used to automatically fill in the Reverse Read Sequence field.
-3. Use the File menu to select the input and output data directories. 
+3. Use the File menu to select the input and output data directories (e.g. "\examples\input" and "\examples\barcode_analysis"). 
 4. Click the "Analyze Sequences" button. This automatically detects different sequence components and highlights them in Forward Read Sequence and Reverse Read Sequence fields.
 5. Click the "Analyze Multi-Tags" button. This uses information from the Multiplexing Tags fields to calculate and display nearest neighbor information for the sample multiplexing tags in the output field at the bottom of the GUI. It also initializes parameters used by the parsing algorithm to find the multiplexing tag sequences:
    - It assigns forward-reverse multi-tag pairs using all possible combinations of the Forward and Reverse multi-tags entered in the Multiplexing Tags fields on the right side of the GUI. It also adds any extra forward and reverse tags from the “Extra Multiplexing tags” field.
