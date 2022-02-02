@@ -1624,8 +1624,7 @@ namespace BartenderWindow
             dialog.FileName = "_";
 
             dialog.Title = "Select Directory Containing Input Sequencee Files";
-            if (InputDirectory != defaultDirectory) dialog.InitialDirectory = InputDirectory;
-            if (!Directory.Exists(InputDirectory)) dialog.InitialDirectory = defaultDirectory;
+            if ((InputDirectory != defaultDirectory)&(Directory.Exists(InputDirectory))) dialog.InitialDirectory = InputDirectory;
 
             if (dialog.ShowDialog() == true)
             {
@@ -1645,8 +1644,7 @@ namespace BartenderWindow
             dialog.FileName = "_";
 
             dialog.Title = "Select Directory For Saving Output Files";
-            if (OutputDirectory != defaultDirectory) dialog.InitialDirectory = OutputDirectory;
-            if (!Directory.Exists(OutputDirectory)) dialog.InitialDirectory = defaultDirectory;
+            if ((OutputDirectory != defaultDirectory)&(Directory.Exists(OutputDirectory))) dialog.InitialDirectory = OutputDirectory;
 
             if (dialog.ShowDialog() == true)
             {
