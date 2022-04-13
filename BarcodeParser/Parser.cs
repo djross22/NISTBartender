@@ -296,11 +296,11 @@ namespace BarcodeParser
             SendOutputText("");
 
             // Keep track of how many reads pass each check
-            int totalReads = 0;
-            int multiTagMatchingReads = 0; //reads that match to both forward and reverse multi-tags, bool revMatchFound
-            int validSampleReads = 0; //reads with multi-tags that mapped to a valid/defined sample ID (out of multi_tag_matching_reads), bool validSampleFound
-            int qualityReads = 0; //reads that passed the quality check (out of valid_sample_reads), bool meanQualOk
-            int lineageTagReads = 0; //reads that match lin-tag pattern (out of quality_reads), bool revLinTagMatchFound
+            long totalReads = 0;
+            long multiTagMatchingReads = 0; //reads that match to both forward and reverse multi-tags, bool revMatchFound
+            long validSampleReads = 0; //reads with multi-tags that mapped to a valid/defined sample ID (out of multi_tag_matching_reads), bool validSampleFound
+            long qualityReads = 0; //reads that passed the quality check (out of valid_sample_reads), bool meanQualOk
+            long lineageTagReads = 0; //reads that match lin-tag pattern (out of quality_reads), bool revLinTagMatchFound
 
             string[] forFiles = forFastqFileList.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             string[] revFiles = revFastqFileList.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
