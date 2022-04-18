@@ -211,8 +211,8 @@ namespace BarcodeSorter
                 sampleFilePaths[s] = filePath;
             }
 
-            int count = 0;
-            int notFoundCount = 0;
+            long count = 0;
+            long notFoundCount = 0;
             //First, read each barcode from the input files and write info to sample-specific files:
             //    forward barcode ID, reverse barcode ID, sample ID plus UMI string
             foreach (string[] stringArr in GetNextLinTags(forLinTagFile, revLinTagFile))
@@ -256,7 +256,7 @@ namespace BarcodeSorter
             //Then, convert to counts for each file
             //    TODO?: replace with ParallelForEach?
             SendOutputText(logFileWriter, $"{DateTime.Now}; Start counting and de-jackpotting barcodes for each sample.");
-            int deduplCount = 0;
+            long deduplCount = 0;
             outputCountDictionary = new Dictionary<(int, int), Dictionary<string, int>>();
             foreach (string s in sampleIdList)
             {
@@ -396,8 +396,8 @@ namespace BarcodeSorter
                     string line = inFileReader.ReadLine(); //first line of file is header, so read and write it back out.
                     outFileWriter.WriteLine(line);
 
-                    int lineCount = 0;
-                    int outputCount = 0;
+                    long lineCount = 0;
+                    long outputCount = 0;
                     while ((line = inFileReader.ReadLine()) != null)
                     {
                         string[] splitLine = line.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
