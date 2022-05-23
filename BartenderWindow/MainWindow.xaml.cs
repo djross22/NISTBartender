@@ -1935,8 +1935,8 @@ namespace BartenderWindow
                 sorter.revClusterFile = OutputDirectory + $"\\{OutputFileLabel}_reverse_cluster.csv";
             }
 
-            sorter.forLinTagFile = OutputDirectory + $"\\{OutputFileLabel}_forward_lintags.txt";
-            sorter.revLinTagFile = OutputDirectory + $"\\{OutputFileLabel}_reverse_lintags.txt";
+            sorter.forLinTagFile = ForClusterInputPath; //OutputDirectory + $"\\{OutputFileLabel}_forward_lintags.txt";
+            sorter.revLinTagFile = RevClusterInputPath; //OutputDirectory + $"\\{OutputFileLabel}_reverse_lintags.txt";
 
             sorter.outputPrefix = OutputDirectory + $"\\{OutputFileLabel}";
 
