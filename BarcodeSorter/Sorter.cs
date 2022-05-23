@@ -37,6 +37,9 @@ namespace BarcodeSorter
         //Dictionary for storing output counts for each sample; key = (forwardBarcodeID, reversebarcodeID); value = Dictionary<sampleID, count>
         private Dictionary<(int, int), Dictionary<string, int>> outputCountDictionary;
 
+        //Dictionary for storing raw output counts for each sample (without dejackpotting); key = (forwardBarcodeID, reversebarcodeID); value = Dictionary<sampleID, count>
+        private Dictionary<(int, int), Dictionary<string, long>> rawOutputCountDictionary;
+
         private string sampleFileDirectory; //path to directory for sample-specific output files used during sorting
 
         public Sorter(BarcodeParser.IDisplaysOutputText receiver)
@@ -257,12 +260,15 @@ namespace BarcodeSorter
             //    TODO?: replace with ParallelForEach?
             SendOutputText(logFileWriter, $"{DateTime.Now}; Start counting and de-jackpotting barcodes for each sample.");
             long deduplCount = 0;
+            long rawCount = 0;
             outputCountDictionary = new Dictionary<(int, int), Dictionary<string, int>>();
+            rawOutputCountDictionary = new Dictionary<(int, int), Dictionary<string, long>>();
             foreach (string s in sampleIdList)
             {
                 SendOutputText(s, newLine:false);
 
-                Dictionary<(int, int), HashSet<string>> barcodeSetDict = new Dictionary<(int, int), HashSet<string>>();
+                Dictionary<(int, int), HashSet<string>> barcodeSetDict = new Dictionary<(int, int), HashSet<string>>(); //used for de-jackpoting count
+                Dictionary<(int, int), long> barcodeCountDict = new Dictionary<(int, int), long>(); //used for raw count (without de-jackpoting)
                 using (StreamReader sampleReader = new StreamReader(sampleFilePaths[s]))
                 {
                     while (true)
@@ -287,6 +293,18 @@ namespace BarcodeSorter
                             barcodeSetDict[(forBarcodeId, revBarcodeId)] = sampleIdPlusUmiSet;
                             deduplCount++;
                         }
+
+                        rawCount++;
+                        long sampleCount;
+                        if (barcodeCountDict.TryGetValue((forBarcodeId, revBarcodeId), out sampleCount))
+                        {
+                            barcodeCountDict[(forBarcodeId, revBarcodeId)] = sampleCount + 1;
+                            
+                        }
+                        else
+                        {
+                            barcodeCountDict[(forBarcodeId, revBarcodeId)] = 1;
+                        }
                     }
                 }
                 SendOutputText("... ", newLine: false);
@@ -309,12 +327,30 @@ namespace BarcodeSorter
                         outputCountDictionary[key] = countDictionary;
                     }
                 }
+                foreach (var entry in barcodeCountDict)
+                {
+                    var key = entry.Key;
+                    long raw_count = entry.Value;
+
+                    Dictionary<string, long> countDictionary;
+                    if (rawOutputCountDictionary.TryGetValue(key, out countDictionary))
+                    {
+                        countDictionary[s] = raw_count;
+                    }
+                    else
+                    {
+                        countDictionary = new Dictionary<string, long>();
+                        countDictionary[s] = raw_count;
+                        rawOutputCountDictionary[key] = countDictionary;
+                    }
+                }
             }
             SendOutputText(logFileWriter, $"{DateTime.Now}; Finished counting and de-jackpotting barcodes for each sample.");
             SendOutputText(logFileWriter);
 
 
             SendOutputText(logFileWriter, $"Number of forward-reverse lineage tag pairs before PCR jackpot correction: {count}");
+            SendOutputText(logFileWriter, $"Double check number of forward-reverse lineage tag pairs before PCR jackpot correction: {rawCount}");
             double deduplePerc = 100.0 * ((double)deduplCount) / ((double)(count));
             SendOutputText(logFileWriter, $"Number of forward-reverse lineage tag pairs after PCR jackpot correction:  {deduplCount} ({deduplePerc:0.##}%)");
             SendOutputText(logFileWriter, $"Number of distinct double barcode cluster IDs: {outputCountDictionary.Count}");
@@ -322,7 +358,8 @@ namespace BarcodeSorter
             SendOutputText(logFileWriter);
 
             string outFileStr = $"{outputPrefix}.sorted_counts.csv";
-            SendOutputText(logFileWriter, $"{DateTime.Now}; Writing barcode counts to file: {outFileStr}");
+            string rawOutFileStr = $"{outputPrefix}.raw_sorted_counts.csv";
+            SendOutputText(logFileWriter, $"{DateTime.Now}; Writing barcode counts to files: {outFileStr} and {rawOutFileStr}");
             using (StreamWriter outFileWriter = new StreamWriter(outFileStr))
             {
                 // Write header to output .csv file
@@ -358,6 +395,38 @@ namespace BarcodeSorter
 
                     //if (count < 5) SendOutputText($"IDs: {entry.Key}");
                     //if (count < 5) SendOutputText($"    {outStr}");
+                }
+            }
+            using (StreamWriter outFileWriter = new StreamWriter(rawOutFileStr))
+            {
+                // Write header to output .csv file
+                string outStr = $"forward_BC, reverse_BC";
+                foreach (string s in sampleIdList)
+                {
+                    outStr = $"{outStr}, {s}";
+                }
+                outStr = $"{outStr}, total_counts";
+                outFileWriter.WriteLine(outStr);
+
+                //Write line for each observed barcode pair
+                //count = 0;
+                foreach (var entry in rawOutputCountDictionary)
+                {
+                    outStr = $"{forCenterDict[entry.Key.Item1]}, {revCenterDict[entry.Key.Item2]}";
+                    var countDictionary = entry.Value;
+                    long sum = 0;
+                    foreach (string s in sampleIdList)
+                    {
+                        long num = 0;
+                        countDictionary.TryGetValue(s, out num);
+
+                        outStr = $"{outStr}, {num}";
+
+                        sum += num;
+                    }
+                    outStr = $"{outStr}, {sum}";
+
+                    outFileWriter.WriteLine(outStr);
                 }
             }
                 
