@@ -267,8 +267,8 @@ namespace BarcodeSorter
             {
                 SendOutputText(s, newLine:false);
 
-                Dictionary<(int, int), HashSet<string>> barcodeSetDict = new Dictionary<(int, int), HashSet<string>>(); //used for de-jackpoting count
-                Dictionary<(int, int), long> barcodeCountDict = new Dictionary<(int, int), long>(); //used for raw count (without de-jackpoting)
+                Dictionary<(int, int), SampleIdUmiandCount> barcodeSetDict = new Dictionary<(int, int), SampleIdUmiandCount>(); //used for de-jackpoting count
+                //Dictionary<(int, int), long> barcodeCountDict = new Dictionary<(int, int), long>(); //used for raw count (without de-jackpoting)
                 using (StreamReader sampleReader = new StreamReader(sampleFilePaths[s]))
                 {
                     while (true)
@@ -281,29 +281,24 @@ namespace BarcodeSorter
                         int forBarcodeId = int.Parse(splitLine[0]);
                         int revBarcodeId = int.Parse(splitLine[1]);
 
-                        HashSet<string> sampleIdPlusUmiSet;
-                        if (barcodeSetDict.TryGetValue((forBarcodeId, revBarcodeId), out sampleIdPlusUmiSet))
-                        {
-                            if (sampleIdPlusUmiSet.Add(splitLine[2])) deduplCount++;
-                        }
-                        else
-                        {
-                            sampleIdPlusUmiSet = new HashSet<string>();
-                            sampleIdPlusUmiSet.Add(splitLine[2]);
-                            barcodeSetDict[(forBarcodeId, revBarcodeId)] = sampleIdPlusUmiSet;
-                            deduplCount++;
-                        }
-
                         rawCount++;
-                        long sampleCount;
-                        if (barcodeCountDict.TryGetValue((forBarcodeId, revBarcodeId), out sampleCount))
+
+                        SampleIdUmiandCount sampleIdPlusUmiSet_sampleCount;
+                        if (barcodeSetDict.TryGetValue((forBarcodeId, revBarcodeId), out sampleIdPlusUmiSet_sampleCount))
                         {
-                            barcodeCountDict[(forBarcodeId, revBarcodeId)] = sampleCount + 1;
-                            
+                            if (sampleIdPlusUmiSet_sampleCount.sampleIdPlusUmiSet.Add(splitLine[2])) deduplCount++;
+
+                            sampleIdPlusUmiSet_sampleCount.sampleCount++;
                         }
                         else
                         {
-                            barcodeCountDict[(forBarcodeId, revBarcodeId)] = 1;
+                            sampleIdPlusUmiSet_sampleCount = new SampleIdUmiandCount();
+                            sampleIdPlusUmiSet_sampleCount.sampleIdPlusUmiSet = new HashSet<string>();
+                            sampleIdPlusUmiSet_sampleCount.sampleIdPlusUmiSet.Add(splitLine[2]);
+
+                            sampleIdPlusUmiSet_sampleCount.sampleCount = 1;
+                            barcodeSetDict[(forBarcodeId, revBarcodeId)] = sampleIdPlusUmiSet_sampleCount;
+                            deduplCount++;
                         }
                     }
                 }
@@ -313,7 +308,8 @@ namespace BarcodeSorter
                 foreach (var entry in barcodeSetDict)
                 {
                     var key = entry.Key;
-                    var list = entry.Value.ToList();
+                    var list = entry.Value.sampleIdPlusUmiSet.ToList();
+                    long raw_count = entry.Value.sampleCount;
 
                     Dictionary<string, int> countDictionary;
                     if (outputCountDictionary.TryGetValue(key, out countDictionary))
@@ -326,22 +322,17 @@ namespace BarcodeSorter
                         countDictionary[s] = list.Count;
                         outputCountDictionary[key] = countDictionary;
                     }
-                }
-                foreach (var entry in barcodeCountDict)
-                {
-                    var key = entry.Key;
-                    long raw_count = entry.Value;
 
-                    Dictionary<string, long> countDictionary;
-                    if (rawOutputCountDictionary.TryGetValue(key, out countDictionary))
+                    Dictionary<string, long> rawCountDictionary;
+                    if (rawOutputCountDictionary.TryGetValue(key, out rawCountDictionary))
                     {
-                        countDictionary[s] = raw_count;
+                        rawCountDictionary[s] = raw_count;
                     }
                     else
                     {
-                        countDictionary = new Dictionary<string, long>();
-                        countDictionary[s] = raw_count;
-                        rawOutputCountDictionary[key] = countDictionary;
+                        rawCountDictionary = new Dictionary<string, long>();
+                        rawCountDictionary[s] = raw_count;
+                        rawOutputCountDictionary[key] = rawCountDictionary;
                     }
                 }
             }
@@ -620,5 +611,11 @@ namespace BarcodeSorter
             return totalCounts2 - totalCounts1;
         }
 
+    }
+
+    public class SampleIdUmiandCount
+    {
+        public HashSet<string> sampleIdPlusUmiSet;
+        public long sampleCount;
     }
 }
