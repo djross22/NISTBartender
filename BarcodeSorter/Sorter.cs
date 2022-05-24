@@ -436,8 +436,12 @@ namespace BarcodeSorter
 
         public void ThresholdSortedBarcodes()
         {
+            //de-jackpotted counts:
             string inFileStr = $"{outputPrefix}.sorted_counts.csv";
             string outFileStr = $"{outputPrefix}.trimmed_sorted_counts.csv";
+            //raw counts:
+            string rawInFileStr = $"{outputPrefix}.raw_sorted_counts.csv";
+            string rawOutFileStr = $"{outputPrefix}.trimmed_raw_sorted_counts.csv";
             //Read in sorted barcodes line-by-line and write to output file if total_counts > threshold
             using (StreamWriter logFileWriter = new StreamWriter($"{outputPrefix}.cluster_trimming.log"))
             {
@@ -447,46 +451,23 @@ namespace BarcodeSorter
                 SendOutputText(logFileWriter, $"Thresholding Sorted Barcodes.");
                 SendOutputText(logFileWriter, $"Thresholding started: {startTime}.");
                 SendOutputText(logFileWriter, "");
+
                 SendOutputText(logFileWriter, $"    Reading Sorted Barcodes in from file: {inFileStr}.");
-                SendOutputText(logFileWriter, $"    Writing Sorted Barcodes out to file: {outFileStr}.");
-
-                using (StreamWriter outFileWriter = new StreamWriter(outFileStr))
-                using (StreamReader inFileReader = new StreamReader(inFileStr))
-                {
-                    string line = inFileReader.ReadLine(); //first line of file is header, so read and write it back out.
-                    outFileWriter.WriteLine(line);
-
-                    long lineCount = 0;
-                    long outputCount = 0;
-                    while ((line = inFileReader.ReadLine()) != null)
-                    {
-                        string[] splitLine = line.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                        splitLine = splitLine.Select(s => s.Trim()).ToArray();
-
-                        //Last column is total counts, so check if it is >= threshold
-                        int totalCounts = 0;
-                        int.TryParse(splitLine.Last(), out totalCounts);
-
-                        if (totalCounts >= sortedBarcodeThreshold)
-                        {
-                            outFileWriter.WriteLine(line);
-                            outputCount++;
-                        }
-
-                        lineCount++;
-                        if (lineCount % 100000 == 0) SendOutputText(".", newLine: false);
-                        if (lineCount % 1000000 == 0 && lineCount > 0) SendOutputText($"{lineCount:N0}", newLine: false);
-                    }
-
-                    double outPercentage = 100.0 * ((double)outputCount) / ((double)(lineCount));
-                    SendOutputText(logFileWriter, "");
-                    SendOutputText(logFileWriter, $"    Number of input barcodes: {lineCount}.");
-                    SendOutputText(logFileWriter, $"    Number of output barcodes: {outputCount} ({outPercentage:0.##}%).");
-                }
+                SendOutputText(logFileWriter, $"    And writing Sorted Barcodes out to file: {outFileStr}.");
+                TrimCountFile(inFileStr, outFileStr, logFileWriter);
 
                 SendOutputText(logFileWriter);
-                SendOutputText(logFileWriter, $"{DateTime.Now}: Marking possible chimera reads in {outFileStr}.");
+                SendOutputText(logFileWriter, $"{DateTime.Now}: Marking possible chimera reads in de-jackpotted data: {outFileStr}.");
                 int chimeraCount = FlagPossibleChimeras(outFileStr);
+                SendOutputText(logFileWriter, $"    Number of possible chimera barcodes identified: {chimeraCount:N0}.");
+
+                SendOutputText(logFileWriter, $"    Reading Sorted Barcodes in from file: {rawInFileStr}.");
+                SendOutputText(logFileWriter, $"    And writing Sorted Barcodes out to file: {rawOutFileStr}.");
+                TrimCountFile(rawInFileStr, rawOutFileStr, logFileWriter);
+
+                SendOutputText(logFileWriter);
+                SendOutputText(logFileWriter, $"{DateTime.Now}: Marking possible chimera reads in raw data: {rawOutFileStr}.");
+                chimeraCount = FlagPossibleChimeras(rawOutFileStr);
                 SendOutputText(logFileWriter, $"    Number of possible chimera barcodes identified: {chimeraCount:N0}.");
 
                 DateTime endTime = DateTime.Now;
@@ -497,6 +478,43 @@ namespace BarcodeSorter
                 SendOutputText(logFileWriter);
             }
 
+        }
+
+        private void TrimCountFile(string inFileStr, string outFileStr, StreamWriter logFileWriter)
+        {
+            using (StreamWriter outFileWriter = new StreamWriter(outFileStr))
+            using (StreamReader inFileReader = new StreamReader(inFileStr))
+            {
+                string line = inFileReader.ReadLine(); //first line of file is header, so read and write it back out.
+                outFileWriter.WriteLine(line);
+
+                long lineCount = 0;
+                long outputCount = 0;
+                while ((line = inFileReader.ReadLine()) != null)
+                {
+                    string[] splitLine = line.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    splitLine = splitLine.Select(s => s.Trim()).ToArray();
+
+                    //Last column is total counts, so check if it is >= threshold
+                    int totalCounts = 0;
+                    int.TryParse(splitLine.Last(), out totalCounts);
+
+                    if (totalCounts >= sortedBarcodeThreshold)
+                    {
+                        outFileWriter.WriteLine(line);
+                        outputCount++;
+                    }
+
+                    lineCount++;
+                    if (lineCount % 100000 == 0) SendOutputText(".", newLine: false);
+                    if (lineCount % 1000000 == 0 && lineCount > 0) SendOutputText($"{lineCount:N0}", newLine: false);
+                }
+
+                double outPercentage = 100.0 * ((double)outputCount) / ((double)(lineCount));
+                SendOutputText(logFileWriter, "");
+                SendOutputText(logFileWriter, $"        Number of input barcodes: {lineCount}.");
+                SendOutputText(logFileWriter, $"        Number of output barcodes: {outputCount} ({outPercentage:0.##}%).");
+            }
         }
 
         private int FlagPossibleChimeras(string fileStr)
