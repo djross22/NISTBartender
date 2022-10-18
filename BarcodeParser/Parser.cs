@@ -39,6 +39,8 @@ namespace BarcodeParser
         public string forLintagRegexStr, revLintagRegexStr; //Regex's for matching to lineage tag patterns (with flanking sequences)
 
         public Dictionary<string, string> mutiTagIdDict;  //Dictionary for sample IDs, keys are: $"{forwardMultiTag}_{reverseMultiTag}"
+        private Dictionary<string, long> sampleCountDict;  //Dictionary for count of reads for each sample, keys are sample IDs
+        private Dictionary<string, long> sampleQualCountDict;  //Dictionary for count of quality reads for each sample (passing quality checks), keys are sample IDs
 
         public int parsingThreads; //number of threads to use for parsing
 
@@ -95,6 +97,18 @@ namespace BarcodeParser
         private void SendOutputText(string text, bool newLine = true)
         {
             outputReceiver.DisplayOutput(text, newLine);
+        }
+
+        public void SetMultiTagDicts(Dictionary<string, string> inDict)
+        {
+            sampleCountDict = new Dictionary<string, long>();
+            sampleQualCountDict = new Dictionary<string, long>();
+            mutiTagIdDict = inDict;
+            foreach (string val in inDict.Values)
+            {
+                sampleCountDict[val] = 0;
+                sampleQualCountDict[val] = 0;
+            }
         }
 
         public void ParseDoubleBarcodes(Int64 num_reads = Int64.MaxValue)
@@ -350,9 +364,25 @@ namespace BarcodeParser
 
             percentStr = $"{(double)validSampleReads / multiTagMatchingReads * 100:0.##}";
             SendOutputText(logFileWriter, $"{validSampleReads} of the multi-tag matching reads mapped to a valid/defined sample ID ({percentStr}%).");
+            foreach (var item in sampleCountDict)
+            {
+                string key = item.Key;
+                long count = item.Value;
+                percentStr = $"{(double)count / validSampleReads * 100:0.##}";
+                SendOutputText(logFileWriter, $"    {key}: {count} reads ({percentStr}% of total valid reads).");
+            }
+            SendOutputText(logFileWriter, "");
 
             percentStr = $"{(double)qualityReads / multiTagMatchingReads * 100:0.##}";
             SendOutputText(logFileWriter, $"{qualityReads} of the multi-tag matching reads passed the quality filter ({percentStr}%).");
+            foreach (var item in sampleQualCountDict)
+            {
+                string key = item.Key;
+                long count = item.Value;
+                long sampleCount = sampleCountDict[key];
+                percentStr = $"{(double)count / sampleCount * 100:0.##}";
+                SendOutputText(logFileWriter, $"    {key}: {count} reads passed the quality filter ({percentStr}% of reads for that sample).");
+            }
 
             percentStr = $"{(double)lineageTagReads / totalReads * 100:0.##}";
             SendOutputText(logFileWriter, $"{lineageTagReads} of the total reads passed all the quality and matching checks and counted as valid barcode reads ({percentStr}%).");
@@ -630,7 +660,8 @@ namespace BarcodeParser
                 string forMultiActual = ""; //actual sequence matched to multi-tag
                 string revMultiActual = ""; //actual sequence matched to multi-tag
                 string forUmi, revUmi; //UMI tag sequences
-                string sampleId; //Identifier for sample (forward x reverse multi-tag pairs)
+                string sampleIdPlusUMI; //Identifier for sample (forward x reverse multi-tag pairs) with UMIs added
+                string sampleId = "none"; //Identifier for sample (forward x reverse multi-tag pairs)
 
 
                 //To make things run faster, work with just the substring of length maxForSeqLength/maxRevSeqLength
@@ -720,8 +751,14 @@ namespace BarcodeParser
                         //Look up sample ID, and label accordingly
                         string keys = $"{forMultiMatch}_{revMultiMatch}";
                         validSampleFound = mutiTagIdDict.TryGetValue(keys, out sampleId);
-                        if (validSampleFound) sampleId += $"_{forUmi}_{revUmi}";
-                        else sampleId = $"unexpected-F{forMultiMatch}-R{revMultiMatch}_{forUmi}_{revUmi}";
+                        if (validSampleFound)
+                        {
+                            sampleIdPlusUMI = sampleId + $"_{forUmi}_{revUmi}";
+                        }
+                        else
+                        {
+                            sampleIdPlusUMI = $"unexpected-F{forMultiMatch}-R{revMultiMatch}_{forUmi}_{revUmi}";
+                        }
 
                         //Check mean quality score for potential forward lin-tag sequence
                         string linTagQualStr = forQual.Substring(minForPreLinFlankLength);
@@ -753,8 +790,8 @@ namespace BarcodeParser
                                         lock (fileLock)
                                         {
                                             //TODO: checked if clustering tool cares whether or not there is a space after the comma:
-                                            forwardWriter.Write($"{forLinTag},{sampleId}\n");
-                                            reverseWriter.Write($"{revLinTag},{sampleId}\n");
+                                            forwardWriter.Write($"{forLinTag},{sampleIdPlusUMI}\n");
+                                            reverseWriter.Write($"{revLinTag},{sampleIdPlusUMI}\n");
 
                                             multiTagWriter.Write($"{forMultiMatch}, {forMultiActual}\n{revMultiMatch}, {revMultiActual}\n\n");
                                         }
@@ -809,9 +846,11 @@ namespace BarcodeParser
                         if (validSampleFound)
                         {
                             validSampleReads += 1;
+                            sampleCountDict[sampleId] += 1;
                             if (meanQualOk)
                             {
                                 qualityReads += 1;
+                                sampleQualCountDict[sampleId] += 1;
                                 if (revLinTagMatchFound)
                                 {
                                     lineageTagReads += 1;

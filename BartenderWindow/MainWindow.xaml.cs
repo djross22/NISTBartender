@@ -2224,7 +2224,8 @@ namespace BartenderWindow
             parser.forMultiTagLen = forMultiTagLen;
             parser.revMultiTagLen = revMultiTagLen;
 
-            parser.mutiTagIdDict = mutiTagIdDict;
+            //parser.mutiTagIdDict = mutiTagIdDict;
+            parser.SetMultiTagDicts(mutiTagIdDict);
 
             parser.forSpacerLength = forwardSpacerLength;
             parser.revSpacerLength = reverseSpacerLength;
