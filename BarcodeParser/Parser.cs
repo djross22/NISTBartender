@@ -7,6 +7,8 @@ using System.IO;
 using System.IO.Compression;
 using System.Threading.Tasks;
 
+using PairwiseAligner;
+
 namespace BarcodeParser
 {
     public class Parser

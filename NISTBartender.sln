@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29326.143
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32407.343
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BartenderWindow", "BartenderWindow\BartenderWindow.csproj", "{9D16C880-255D-45F0-B22D-0167BE5FE804}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -15,7 +15,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BarcodeClusterer", "Barcode
 		{87D64CBE-79CA-4360-9922-AC6C40B05528} = {87D64CBE-79CA-4360-9922-AC6C40B05528}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BarcodeSorter", "BarcodeSorter\BarcodeSorter.csproj", "{8E33F0A7-3D8F-4CD2-9C70-51AC6BF22EFB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BarcodeSorter", "BarcodeSorter\BarcodeSorter.csproj", "{8E33F0A7-3D8F-4CD2-9C70-51AC6BF22EFB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PairwiseAligner", "PairwiseAligner\PairwiseAligner.csproj", "{90767F8E-1018-4018-A52B-686BCFADD41A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{8E33F0A7-3D8F-4CD2-9C70-51AC6BF22EFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8E33F0A7-3D8F-4CD2-9C70-51AC6BF22EFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E33F0A7-3D8F-4CD2-9C70-51AC6BF22EFB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{90767F8E-1018-4018-A52B-686BCFADD41A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{90767F8E-1018-4018-A52B-686BCFADD41A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{90767F8E-1018-4018-A52B-686BCFADD41A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{90767F8E-1018-4018-A52B-686BCFADD41A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
