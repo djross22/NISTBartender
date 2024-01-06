@@ -968,6 +968,8 @@ namespace BartenderWindow
 
             inputControlsList.Add(linTagFlankErrTextBox);
             inputControlsList.Add(multiTagFlankErrTextBox);
+
+            inputControlsList.Add(minAlignmentMatchTextBox);
         }
 
         private void CreateParamsList()
@@ -1020,6 +1022,8 @@ namespace BartenderWindow
             paramsList.Add("MaxParseStr");
 
             paramsList.Add("ParsingThreadsStr");
+
+            paramsList.Add("MinAlignmentMatchStr");
 
             paramsList.Add("ForClusterInputPath");
             paramsList.Add("RevClusterInputPath");
