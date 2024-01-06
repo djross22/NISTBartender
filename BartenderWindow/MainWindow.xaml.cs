@@ -130,6 +130,8 @@ namespace BartenderWindow
         private bool autoMergeSubstrings;
         private string spikeinMergeThresholdStr, spikeinMergeDistanceStr;
         private int spikeinMergeThreshold, spikeinMergeDistance;
+        private string minAlignmentMatchStr;
+        private int minAlignmentMatch;
 
         //Parameters/fields for barcode sorting
         private Sorter sorter;
@@ -140,6 +142,20 @@ namespace BartenderWindow
         private List<Control> inputControlsList;
 
         #region Properties Getters and Setters
+
+        public string MinAlignmentMatchStr
+        {
+            get { return this.minAlignmentMatchStr; }
+            set
+            {
+                if (this.minAlignmentMatchStr != value)
+                {
+                    this.minAlignmentMatchStr = value;
+                    OnPropertyChanged("MinAlignmentMatchStr");
+                    int.TryParse(minAlignmentMatchStr, out minAlignmentMatch);
+                }
+            }
+        }
 
         public string SpikeinMergeDistanceStr
         {

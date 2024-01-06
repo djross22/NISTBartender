@@ -77,9 +77,9 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="16"/>
                     <RowDefinition Height="18"/>
-                    <RowDefinition Height="80"/>
+                    <RowDefinition Height="60"/>
                     <RowDefinition Height="18"/>
-                    <RowDefinition Height="80"/>
+                    <RowDefinition Height="60"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
@@ -121,7 +121,7 @@
                 <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Reverse Read Sequence:" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="White" Grid.Row="3" ToolTip="Use 'Z' for UMI tag bases, 'X' for sample multiplex tag bases, and 'N' for random bases in lineage tags." Height="16" Width="128"/>
                 <Grid Grid.Row="5">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="18"/>
+                        <RowDefinition Height="25"/>
                         <RowDefinition Height="25"/>
                         <RowDefinition Height="25"/>
                         <RowDefinition Height="25"/>
@@ -131,6 +131,16 @@
                         <ColumnDefinition Width="150"/>
                         <ColumnDefinition Width="1*"/>
                     </Grid.ColumnDefinitions>
+                    <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Min F-R match:" VerticalAlignment="Center" Foreground="White" Grid.Row="0" ToolTip="Minimum number of matching bases between forward and reverse reads"/>
+                    <TextBox x:Name="minAlignmentMatchTextBox" HorizontalAlignment="Stretch" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="100,0,10,0" Grid.Row="0" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" KeyUp="forUmiTagLenTextBox_KeyUp">
+                        <TextBox.Text>
+                            <Binding Path="MinAlignmentMatchStr" UpdateSourceTrigger="PropertyChanged">
+                                <Binding.ValidationRules>
+                                    <local:RegexValidationRule RegexText = "^[0-9]+$" ErrorMessage="Minimum number of matching bases must be an integer." ValidationOptions="None"/>
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </TextBox.Text>
+                    </TextBox>
                     <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Parsing threads:" VerticalAlignment="Center" Foreground="White" Grid.Row="1" ToolTip="Number of processor threads to use for parsing input fastq files"/>
                     <TextBox x:Name="parsingThreadsTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Center" Width="40" Margin="100,0,0,0" Grid.Row="1" FontFamily="Courier New" FontSize="14" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" KeyUp="forUmiTagLenTextBox_KeyUp">
                         <TextBox.Text>
@@ -162,7 +172,7 @@
                             </Binding>
                         </TextBox.Text>
                     </TextBox>
-                    <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Lineage tag Regex:" VerticalAlignment="Center" Foreground="White" Grid.Column="1"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Text="Lineage tag Regex:" VerticalAlignment="Bottom" Foreground="White" Grid.Column="1"/>
                     <TextBlock HorizontalAlignment="Left" Margin="30,0,0,0" Text="Forward:" VerticalAlignment="Center" Foreground="White" Grid.Row="1" Grid.Column="1" Grid.RowSpan="2"/>
                     <TextBox x:Name="forRegExTextBox" HorizontalAlignment="Stretch" Height="40" TextWrapping="Wrap"  VerticalAlignment="Center" Margin="80,0,10,0" Grid.Row="1" FontFamily="Courier New" MaxLines="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" KeyUp="forRegExTextBox_KeyUp" Grid.Column="1" Text="{Binding ForLintagRegexStr, Mode=TwoWay}" Grid.RowSpan="2"/>
                     <TextBlock HorizontalAlignment="Left" Margin="30,0,0,0" Text="Reverse:" VerticalAlignment="Center" Foreground="White" Grid.Row="3" Grid.Column="1" Grid.RowSpan="2"/>
