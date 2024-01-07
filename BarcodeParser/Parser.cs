@@ -119,7 +119,7 @@ namespace BarcodeParser
         public void ParseDoubleBarcodes(Int64 num_reads = Int64.MaxValue)
         {
             //temp ********************** for testing: 
-            parsingThreads = 36;
+            parsingThreads = 108;
 
             //Set up log file to keep record of output text from parsing
             TextWriter logFileWriter = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\{outputFileLabel}.parsing.log"));
@@ -341,9 +341,7 @@ namespace BarcodeParser
                 revFilePaths[i] = $"{read_directory}\\{revFiles[i]}";
             }
 
-            //Set up PairwiseAligner to compare forward and reverse reads
-            var aligner = new PairwiseAligner.PairwiseAligner(); //using the default parameters
-            bool outputAlignmentStrings = false;
+            //bool outputAlignmentStrings = false;
             //Dictionary to build histogram of alignment matches:
             var alignmentMatchCounts = new Dictionary<int, long>();
 
@@ -585,6 +583,7 @@ namespace BarcodeParser
                         else sampleId = $"unexpected-F{forMultiMatch}-R{revMultiMatch}_{forUmi}_{revUmi}";
 
                         //Check alignment of forward and reverse reads
+                        var aligner = new PairwiseAligner.PairwiseAligner(); //using the default parameters
                         string rcRevRead = ReverseComplement(revRead);
                         var alignment = aligner.Align(refSeq: rcRevRead, querySeq: forRead);
                         /*
@@ -846,6 +845,7 @@ namespace BarcodeParser
                         }
 
                         //Check alignment of forward and reverse reads
+                        var aligner = new PairwiseAligner.PairwiseAligner(); //using the default parameters
                         string rcRevRead = ReverseComplement(revRead);
                         var alignment = aligner.Align(refSeq: rcRevRead, querySeq: forRead);
                         /*
