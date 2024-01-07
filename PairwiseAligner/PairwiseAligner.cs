@@ -639,16 +639,23 @@ namespace PairwiseAligner
             }
         }
 
-        public void print_alignment_strings()
+        public string PrintAlignmentStrings(bool toConsole=false)
         {
-            Console.Write(Environment.NewLine);
-            Console.WriteLine(q_align_str);
-            Console.WriteLine(m_align_str);
-            Console.WriteLine(r_align_str);
-            Console.WriteLine($"matches: {matches}");
-            Console.WriteLine($"identity: {identity:f3}");
+            string out_str = q_align_str + Environment.NewLine + m_align_str + Environment.NewLine + r_align_str;
+            out_str += Environment.NewLine + Environment.NewLine;
 
-            Console.ReadLine();
+            if (toConsole)
+            {
+                Console.WriteLine(out_str);
+                Console.WriteLine($"matches: {matches}; identity: {identity:f3}");
+            }
+
+            return out_str;
+        }
+
+        public int GetMatches()
+        {
+            return matches;
         }
     }
 }

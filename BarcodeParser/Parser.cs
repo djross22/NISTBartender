@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Threading.Tasks;
+using System.Threading;
 
 using PairwiseAligner;
 
@@ -37,6 +38,7 @@ namespace BarcodeParser
         public int multiFlankLength; //length of flanking regions around multi-tags
         public int linTagFlankLength; //length of flanking regions around lineage tags
         public int multiTagFlankErr; // number of allowed errors in multi-tag flanking sequence (zero or one)
+        public int minAlignmentMatch; // minimum number of matches in alignment between the forward and reverse reads
 
         public string forLintagRegexStr, revLintagRegexStr; //Regex's for matching to lineage tag patterns (with flanking sequences)
 
@@ -73,6 +75,7 @@ namespace BarcodeParser
         private static readonly Object fileLock = new Object(); //lock for multi-thread file writing
         private static readonly Object unmatchedFileLock = new Object(); //lock for multi-thread file writing
         private static readonly Object counterLock = new Object(); //lock for multi-thread counter updates
+        private static readonly Object alignHistLock = new Object(); //lock for F-R alignment histogram updates
 
         public Parser(IDisplaysOutputText receiver)
         {
@@ -116,7 +119,8 @@ namespace BarcodeParser
         public void ParseDoubleBarcodes(Int64 num_reads = Int64.MaxValue)
         {
             //temp ********************** for testing: 
-            parsingThreads = 12;
+            parsingThreads = 36;
+
             //Set up log file to keep record of output text from parsing
             TextWriter logFileWriter = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\{outputFileLabel}.parsing.log"));
 
@@ -315,7 +319,8 @@ namespace BarcodeParser
             long totalReads = 0;
             long multiTagMatchingReads = 0; //reads that match to both forward and reverse multi-tags, bool revMatchFound
             long validSampleReads = 0; //reads with multi-tags that mapped to a valid/defined sample ID (out of multi_tag_matching_reads), bool validSampleFound
-            long qualityReads = 0; //reads that passed the quality check (out of valid_sample_reads), bool meanQualOk
+            long matchedReads = 0; //reads that have >= the min number of matches in the F-R alignment  (out of valid_sample_reads), bool matchedReadsOk
+            long qualityReads = 0; //reads that passed the quality check (out of matchedReads), bool meanQualOk
             long lineageTagReads = 0; //reads that match lin-tag pattern (out of quality_reads), bool revLinTagMatchFound
 
             string[] forFiles = forFastqFileList.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
@@ -335,6 +340,12 @@ namespace BarcodeParser
                 forFilePaths[i] = $"{read_directory}\\{forFiles[i]}";
                 revFilePaths[i] = $"{read_directory}\\{revFiles[i]}";
             }
+
+            //Set up PairwiseAligner to compare forward and reverse reads
+            var aligner = new PairwiseAligner.PairwiseAligner(); //using the default parameters
+            bool outputAlignmentStrings = false;
+            //Dictionary to build histogram of alignment matches:
+            var alignmentMatchCounts = new Dictionary<int, long>();
 
             //while ( ((f_id = f_file.ReadLine()) != null) & ((r_id = r_file.ReadLine()) != null) )
             //foreach (string[] stringArr in GetNextSequences(f_fastqfile, r_fastqfile))
@@ -375,17 +386,52 @@ namespace BarcodeParser
             }
             SendOutputText(logFileWriter, "");
 
-            percentStr = $"{(double)qualityReads / multiTagMatchingReads * 100:0.##}";
-            SendOutputText(logFileWriter, $"{qualityReads} of the multi-tag matching reads passed the quality filter ({percentStr}%).");
+            SendOutputText(logFileWriter, "F-R Alignment Matches Histogram:");
+            int minKey = 1000000;
+            int maxKey = 0;
+            lock (alignHistLock)
+            {
+                foreach (var item in alignmentMatchCounts)
+                {
+                    int i = item.Key;
+                    //string i_str = i.ToString("000");
+                    //long v = item.Value;
+                    //SendOutputText(logFileWriter, $"{i}: {v}");
+                    if (i < minKey) minKey = i;
+                    if (i > maxKey) maxKey = i;
+                }
+                for (int i = minKey; i <= maxKey; i++)
+                {
+                    string i_str = i.ToString("000");
+                    long v;
+                    if (!alignmentMatchCounts.TryGetValue(i, out v))
+                    {
+                        v = 0;
+                    }
+                    if (i == minAlignmentMatch)
+                    {
+                        SendOutputText(logFileWriter, "------------------------------------");
+                    }
+                    SendOutputText(logFileWriter, $"    {i_str}: {v}");
+                }
+            }
+            SendOutputText(logFileWriter, "");
+            percentStr = $"{(double)matchedReads / validSampleReads * 100:0.##}";
+            SendOutputText(logFileWriter, $"{matchedReads} of the valid-sample reads had a F-R alignment with at least {minAlignmentMatch} matches ({percentStr}%).");
+            SendOutputText(logFileWriter, "");
+
+            percentStr = $"{(double)qualityReads / matchedReads * 100:0.##}";
+            SendOutputText(logFileWriter, $"{qualityReads} of the reads with good F-R alignment passed the quality filter ({percentStr}%).");
             foreach (var item in sampleQualCountDict)
             {
                 string key = item.Key;
                 long count = item.Value;
                 long sampleCount = sampleCountDict[key];
                 percentStr = $"{(double)count / sampleCount * 100:0.##}";
-                SendOutputText(logFileWriter, $"    {key}: {count} reads passed the quality filter ({percentStr}% of reads for that sample).");
+                SendOutputText(logFileWriter, $"    {key}: {count} reads passed the quality and F-R alignment filters ({percentStr}% of reads for that sample).");
             }
 
+            SendOutputText(logFileWriter, "");
             percentStr = $"{(double)lineageTagReads / totalReads * 100:0.##}";
             SendOutputText(logFileWriter, $"{lineageTagReads} of the total reads passed all the quality and matching checks and counted as valid barcode reads ({percentStr}%).");
 
@@ -428,6 +474,7 @@ namespace BarcodeParser
                 bool forMatchFound = false;
                 bool revMatchFound = false;
                 bool validSampleFound = false;
+                bool matchedReadsOk = false;
                 bool meanQualOk = false;
                 bool forLinTagMatchFound = false;
                 bool revLinTagMatchFound = false;
@@ -537,52 +584,83 @@ namespace BarcodeParser
                         if (validSampleFound) sampleId += $"_{forUmi}_{revUmi}";
                         else sampleId = $"unexpected-F{forMultiMatch}-R{revMultiMatch}_{forUmi}_{revUmi}";
 
-                        //Check mean quality score for potential forward lin-tag sequence
-                        string linTagQualStr = forQual.Substring(minForPreLinFlankLength);
-                        meanForQuality = MeanQuality(linTagQualStr);
-                        meanQualOk = meanForQuality > min_qs;
-                        if (meanQualOk)
+                        //Check alignment of forward and reverse reads
+                        string rcRevRead = ReverseComplement(revRead);
+                        var alignment = aligner.Align(refSeq: rcRevRead, querySeq: forRead);
+                        /*
+                        if (outputAlignmentStrings)
                         {
-                            //If quality good on forward read, check reverse read
-                            linTagQualStr = revQual.Substring(minRevPreLinFlankLength);
-                            meanRevQuality = MeanQuality(linTagQualStr);
-                            meanQualOk = meanRevQuality > min_qs;
+                            string aln_str = alignment.PrintAlignmentStrings();
+                            SendOutputText(logFileWriter, aln_str);
+                        }
+                        */
+                        int matches = alignment.GetMatches();
+                        matchedReadsOk = (matches >= minAlignmentMatch);
+                        lock (alignHistLock)
+                        {
+                            if (alignmentMatchCounts.ContainsKey(matches))
+                            {
+                                alignmentMatchCounts[matches]++;
+                            }
+                            else
+                            {
+                                alignmentMatchCounts[matches] = 1;
+                            }
+                        }
+
+                        if (matchedReadsOk)
+                        {
+                            //Check mean quality score for potential forward lin-tag sequence
+                            string linTagQualStr = forQual.Substring(minForPreLinFlankLength);
+                            meanForQuality = MeanQuality(linTagQualStr);
+                            meanQualOk = meanForQuality > min_qs;
                             if (meanQualOk)
                             {
-                                //if quality good, find match to lin-tag pattern, forwardLinTagRegex/reverseLinTagRegex
-                                Match forLinTagMatch = forLinTagRegex.Match(forSeq.Substring(minForPreLinFlankLength));
-                                forLinTagMatchFound = forLinTagMatch.Success;
-                                if (forLinTagMatchFound)
+                                //If quality good on forward read, check reverse read
+                                linTagQualStr = revQual.Substring(minRevPreLinFlankLength);
+                                meanRevQuality = MeanQuality(linTagQualStr);
+                                meanQualOk = meanRevQuality > min_qs;
+                                if (meanQualOk)
                                 {
-                                    Match revLinTagMatch = revLinTagRegex.Match(revSeq.Substring(minRevPreLinFlankLength));
-                                    revLinTagMatchFound = revLinTagMatch.Success;
-                                    if (revLinTagMatchFound)
+                                    //if quality good, find match to lin-tag pattern, forwardLinTagRegex/reverseLinTagRegex
+                                    Match forLinTagMatch = forLinTagRegex.Match(forSeq.Substring(minForPreLinFlankLength));
+                                    forLinTagMatchFound = forLinTagMatch.Success;
+                                    if (forLinTagMatchFound)
                                     {
-                                        //If a match is found to both lin-tag patterns, then call it a lineage tag and write it to the output files
-                                        string forLinTag = forLinTagMatch.Value;
-                                        forLinTag = forLinTag.Substring(linTagFlankLength, forLinTag.Length - 2 * linTagFlankLength);
-                                        string revLinTag = revLinTagMatch.Value;
-                                        revLinTag = revLinTag.Substring(linTagFlankLength, revLinTag.Length - 2 * linTagFlankLength);
-
-                                        lock (fileLock)
+                                        Match revLinTagMatch = revLinTagRegex.Match(revSeq.Substring(minRevPreLinFlankLength));
+                                        revLinTagMatchFound = revLinTagMatch.Success;
+                                        if (revLinTagMatchFound)
                                         {
-                                            //TODO: checked if clustering tool cares whether or not there is a space after the comma:
-                                            forwardWriter.Write($"{forLinTag},{sampleId}\n");
-                                            reverseWriter.Write($"{revLinTag},{sampleId}\n");
+                                            //If a match is found to both lin-tag patterns, then call it a lineage tag and write it to the output files
+                                            string forLinTag = forLinTagMatch.Value;
+                                            forLinTag = forLinTag.Substring(linTagFlankLength, forLinTag.Length - 2 * linTagFlankLength);
+                                            string revLinTag = revLinTagMatch.Value;
+                                            revLinTag = revLinTag.Substring(linTagFlankLength, revLinTag.Length - 2 * linTagFlankLength);
 
-                                            multiTagWriter.Write($"{forMultiMatch}, {forMultiActual}\n{revMultiMatch}, {revMultiActual}\n\n");
+                                            lock (fileLock)
+                                            {
+                                                //TODO: checked if clustering tool cares whether or not there is a space after the comma:
+                                                forwardWriter.Write($"{forLinTag},{sampleId}\n");
+                                                reverseWriter.Write($"{revLinTag},{sampleId}\n");
+
+                                                multiTagWriter.Write($"{forMultiMatch}, {forMultiActual}\n{revMultiMatch}, {revMultiActual}\n\n");
+                                            }
+                                        }
+                                        else
+                                        {
+                                            //TODO: failed to find a lin-tag match
                                         }
                                     }
                                     else
                                     {
                                         //TODO: failed to find a lin-tag match
                                     }
+
                                 }
                                 else
                                 {
-                                    //TODO: failed to find a lin-tag match
+                                    //TODO: fail quality check
                                 }
-
                             }
                             else
                             {
@@ -591,7 +669,7 @@ namespace BarcodeParser
                         }
                         else
                         {
-                            //TODO: fail quality check
+                            //TODO: fail alignment check
                         }
 
                     }
@@ -623,12 +701,16 @@ namespace BarcodeParser
                         if (validSampleFound)
                         {
                             validSampleReads += 1;
-                            if (meanQualOk)
+                            if (matchedReadsOk)
                             {
-                                qualityReads += 1;
-                                if (revLinTagMatchFound)
+                                matchedReads += 1;
+                                if (meanQualOk)
                                 {
-                                    lineageTagReads += 1;
+                                    qualityReads += 1;
+                                    if (revLinTagMatchFound)
+                                    {
+                                        lineageTagReads += 1;
+                                    }
                                 }
                             }
                         }
@@ -636,7 +718,7 @@ namespace BarcodeParser
                 }
             }
 
-            //If UMItags and multi-tags are constant length, then multi-tag position us constant, so loop can run faster with theis code:
+            //If UMItags and multi-tags are constant length, then multi-tag position is constant, so loop can run faster with theis code:
             void LoopBodyConstantMultiTag(string[] stringArr)
             {
                 string counter = stringArr[4]; //TODO: use this to display progress
@@ -653,6 +735,7 @@ namespace BarcodeParser
                 bool forMatchFound = false;
                 bool revMatchFound = false;
                 bool validSampleFound = false;
+                bool matchedReadsOk = false;
                 bool meanQualOk = false;
                 bool forLinTagMatchFound = false;
                 bool revLinTagMatchFound = false;
@@ -762,52 +845,83 @@ namespace BarcodeParser
                             sampleIdPlusUMI = $"unexpected-F{forMultiMatch}-R{revMultiMatch}_{forUmi}_{revUmi}";
                         }
 
-                        //Check mean quality score for potential forward lin-tag sequence
-                        string linTagQualStr = forQual.Substring(minForPreLinFlankLength);
-                        meanForQuality = MeanQuality(linTagQualStr);
-                        meanQualOk = meanForQuality > min_qs;
-                        if (meanQualOk)
+                        //Check alignment of forward and reverse reads
+                        string rcRevRead = ReverseComplement(revRead);
+                        var alignment = aligner.Align(refSeq: rcRevRead, querySeq: forRead);
+                        /*
+                        if (outputAlignmentStrings)
                         {
-                            //If quality good on forward read, check reverse read
-                            linTagQualStr = revQual.Substring(minRevPreLinFlankLength);
-                            meanRevQuality = MeanQuality(linTagQualStr);
-                            meanQualOk = meanRevQuality > min_qs;
+                            string aln_str = alignment.PrintAlignmentStrings();
+                            SendOutputText(logFileWriter, aln_str);
+                        }
+                        */
+                        int matches = alignment.GetMatches();
+                        matchedReadsOk = (matches >= minAlignmentMatch);
+                        lock (alignHistLock)
+                        {
+                            if (alignmentMatchCounts.ContainsKey(matches))
+                            {
+                                alignmentMatchCounts[matches]++;
+                            }
+                            else
+                            {
+                                alignmentMatchCounts[matches] = 1;
+                            }
+                        }
+
+                        if (matchedReadsOk)
+                        {
+                            //Check mean quality score for potential forward lin-tag sequence
+                            string linTagQualStr = forQual.Substring(minForPreLinFlankLength);
+                            meanForQuality = MeanQuality(linTagQualStr);
+                            meanQualOk = meanForQuality > min_qs;
                             if (meanQualOk)
                             {
-                                //if quality good, find match to lin-tag pattern, forwardLinTagRegex/reverseLinTagRegex
-                                Match forLinTagMatch = forLinTagRegex.Match(forSeq.Substring(minForPreLinFlankLength));
-                                forLinTagMatchFound = forLinTagMatch.Success;
-                                if (forLinTagMatchFound)
+                                //If quality good on forward read, check reverse read
+                                linTagQualStr = revQual.Substring(minRevPreLinFlankLength);
+                                meanRevQuality = MeanQuality(linTagQualStr);
+                                meanQualOk = meanRevQuality > min_qs;
+                                if (meanQualOk)
                                 {
-                                    Match revLinTagMatch = revLinTagRegex.Match(revSeq.Substring(minRevPreLinFlankLength));
-                                    revLinTagMatchFound = revLinTagMatch.Success;
-                                    if (revLinTagMatchFound)
+                                    //if quality good, find match to lin-tag pattern, forwardLinTagRegex/reverseLinTagRegex
+                                    Match forLinTagMatch = forLinTagRegex.Match(forSeq.Substring(minForPreLinFlankLength));
+                                    forLinTagMatchFound = forLinTagMatch.Success;
+                                    if (forLinTagMatchFound)
                                     {
-                                        //If a match is found to both lin-tag patterns, then call it a lineage tag and write it to the output files
-                                        string forLinTag = forLinTagMatch.Value;
-                                        forLinTag = forLinTag.Substring(linTagFlankLength, forLinTag.Length - 2 * linTagFlankLength);
-                                        string revLinTag = revLinTagMatch.Value;
-                                        revLinTag = revLinTag.Substring(linTagFlankLength, revLinTag.Length - 2 * linTagFlankLength);
-
-                                        lock (fileLock)
+                                        Match revLinTagMatch = revLinTagRegex.Match(revSeq.Substring(minRevPreLinFlankLength));
+                                        revLinTagMatchFound = revLinTagMatch.Success;
+                                        if (revLinTagMatchFound)
                                         {
-                                            //TODO: checked if clustering tool cares whether or not there is a space after the comma:
-                                            forwardWriter.Write($"{forLinTag},{sampleIdPlusUMI}\n");
-                                            reverseWriter.Write($"{revLinTag},{sampleIdPlusUMI}\n");
+                                            //If a match is found to both lin-tag patterns, then call it a lineage tag and write it to the output files
+                                            string forLinTag = forLinTagMatch.Value;
+                                            forLinTag = forLinTag.Substring(linTagFlankLength, forLinTag.Length - 2 * linTagFlankLength);
+                                            string revLinTag = revLinTagMatch.Value;
+                                            revLinTag = revLinTag.Substring(linTagFlankLength, revLinTag.Length - 2 * linTagFlankLength);
 
-                                            multiTagWriter.Write($"{forMultiMatch}, {forMultiActual}\n{revMultiMatch}, {revMultiActual}\n\n");
+                                            lock (fileLock)
+                                            {
+                                                //TODO: checked if clustering tool cares whether or not there is a space after the comma:
+                                                forwardWriter.Write($"{forLinTag},{sampleIdPlusUMI}\n");
+                                                reverseWriter.Write($"{revLinTag},{sampleIdPlusUMI}\n");
+
+                                                multiTagWriter.Write($"{forMultiMatch}, {forMultiActual}\n{revMultiMatch}, {revMultiActual}\n\n");
+                                            }
+                                        }
+                                        else
+                                        {
+                                            //TODO: failed to find a lin-tag match
                                         }
                                     }
                                     else
                                     {
                                         //TODO: failed to find a lin-tag match
                                     }
+
                                 }
                                 else
                                 {
-                                    //TODO: failed to find a lin-tag match
+                                    //TODO: fail quality check
                                 }
-
                             }
                             else
                             {
@@ -816,7 +930,7 @@ namespace BarcodeParser
                         }
                         else
                         {
-                            //TODO: fail quality check
+                            //TODO: fail F-R alignment
                         }
 
                     }
@@ -849,13 +963,17 @@ namespace BarcodeParser
                         {
                             validSampleReads += 1;
                             sampleCountDict[sampleId] += 1;
-                            if (meanQualOk)
+                            if (matchedReadsOk)
                             {
-                                qualityReads += 1;
-                                sampleQualCountDict[sampleId] += 1;
-                                if (revLinTagMatchFound)
+                                matchedReads += 1;
+                                if (meanQualOk)
                                 {
-                                    lineageTagReads += 1;
+                                    qualityReads += 1;
+                                    sampleQualCountDict[sampleId] += 1;
+                                    if (revLinTagMatchFound)
+                                    {
+                                        lineageTagReads += 1;
+                                    }
                                 }
                             }
                         }

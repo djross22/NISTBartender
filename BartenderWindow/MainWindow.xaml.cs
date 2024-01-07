@@ -2236,6 +2236,8 @@ namespace BartenderWindow
             parser.forFastqFileList = ForwardGzFastQ;
             parser.revFastqFileList = ReverseGzFastQ;
 
+            parser.minAlignmentMatch = minAlignmentMatch;
+
             parser.forUmiTagLen = forUmiTagLen;
             parser.revUmiTagLen = revUmiTagLen;
 
