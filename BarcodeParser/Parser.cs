@@ -123,7 +123,7 @@ namespace BarcodeParser
         public void ParseDoubleBarcodes(Int64 num_reads = Int64.MaxValue)
         {
             //temp ********************** for testing: 
-            parsingThreads = 108;
+            parsingThreads = 7;
 
             //Set up log file to keep record of output text from parsing
             TextWriter logFileWriter = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\{outputFileLabel}.parsing.log"));
@@ -345,6 +345,7 @@ namespace BarcodeParser
                 revFilePaths[i] = $"{read_directory}\\{revFiles[i]}";
             }
             // Check file lengths
+            long totalSequenceCount = 0;
             for (int i = 0; i < forFiles.Length; i++)
             {
                 string file = forFilePaths[i];
@@ -373,10 +374,24 @@ namespace BarcodeParser
                 }
 
                 long seqCount = forFileLines / 4;
+                totalSequenceCount += seqCount;
 
                 SendOutputText(logFileWriter, $"Number of sequencse in {forFilePaths[i]} and {revFilePaths[i]}: {seqCount:n0}");
             }
             SendOutputText(logFileWriter, "");
+
+            // Split files into parsingThreads parts
+            SendOutputText(logFileWriter, $"Splitting input files into {parsingThreads} batches");
+            long maxCountPerBatch = (totalSequenceCount / parsingThreads) + (totalSequenceCount % parsingThreads);
+            long maxLinesPerBatch = maxCountPerBatch * 4;
+            SendOutputText(logFileWriter, $"Maximum number of sequencses per batch: {maxCountPerBatch:n0}");
+
+            string splitFilesDirectory = $"{write_directory}\\split_parsing_files";
+            Directory.CreateDirectory( splitFilesDirectory );
+            SplitInputFiles(forFilePaths, revFilePaths, maxLinesPerBatch, parsingThreads, splitFilesDirectory, logFileWriter);
+            
+            Thread.Sleep( 1000 );
+            return;
 
             //bool outputAlignmentStrings = false;
             //Dictionary to build histogram of alignment matches:
@@ -1487,5 +1502,85 @@ namespace BarcodeParser
              */
         }
 
+        void SplitInputFiles(string[] forwardFileList, string[] reverseFileList, long maxLines, int batches, string saveDirectory, TextWriter logFileWriter)
+        {
+            SendOutputText(logFileWriter, $"Starting SplitInputFiles method");
+            int forFileListLength = forwardFileList.Length;
+
+            var enumerator = GetNextLinesFromGZip(forwardFileList, reverseFileList).GetEnumerator();
+
+            string[] stringArr;
+            string f_str, r_str;
+
+            int part = 1;
+            bool notfinished = true;
+
+            while (notfinished)
+            {
+                SendOutputText(logFileWriter, $"    batch: {part}");
+
+                string f_save = $"{saveDirectory}\\forward_{part}.fq";
+                string r_save = $"{saveDirectory}\\reverse_{part}.fq";
+
+                using (FileStream f_part = File.Create(f_save), r_part = File.Create(r_save))
+                using (StreamWriter f_writer = new StreamWriter(f_part), r_writer = new StreamWriter(r_part))
+                {
+                    for (int i = 0; i < maxLines; i++)
+                    {
+                        if (enumerator.MoveNext())
+                        {
+                            stringArr = enumerator.Current;
+
+                            f_str = stringArr[0];
+                            r_str = stringArr[1];
+
+                            f_writer.WriteLine(f_str);
+                            r_writer.WriteLine(r_str);
+                        }
+                        else
+                        {
+                            notfinished = false;
+                            break;
+                        }
+                    }
+                }
+                part++;
+            }
+            SendOutputText(logFileWriter, $"    done");
+
+        }
+
+        public static IEnumerable<string[]> GetNextLinesFromGZip(string[] forwardFileList, string[] reverseFileList)
+        {
+            int forFileListLength = forwardFileList.Length;
+            int revFileListLength = reverseFileList.Length;
+            if (forFileListLength != revFileListLength)
+            {
+                throw new ArgumentException("Forward and Reverse input file lists are not the same length");
+            }
+
+            for (int i = 0; i < forFileListLength; i++)
+            {
+                FileInfo f_fileToDecompress = new FileInfo(forwardFileList[i]);
+                FileInfo r_fileToDecompress = new FileInfo(reverseFileList[i]);
+
+                //Create StreamReaders from both forward and reverse read files
+                using (FileStream forwardFileStream = f_fileToDecompress.OpenRead(), reverseFileStream = r_fileToDecompress.OpenRead())
+                using (GZipStream f_gzip = new GZipStream(forwardFileStream, CompressionMode.Decompress), r_gzip = new GZipStream(reverseFileStream, CompressionMode.Decompress))
+                using (StreamReader f_file = new StreamReader(f_gzip), r_file = new StreamReader(r_gzip))
+                {
+                    //check to be sure there are more lines first
+                    string f_ret, r_ret;
+                    while (((f_ret = f_file.ReadLine()) != null) & ((r_ret = r_file.ReadLine()) != null))
+                    {
+                        //Returns an array of 2 strings: f_ret, r_ret
+                        string[] retString = new string[2] { f_ret, r_ret };
+
+                        yield return retString;
+                    }
+                }
+            }
+
+        }
     }
 }
