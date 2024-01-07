@@ -14,6 +14,10 @@ namespace BarcodeParser
 {
     public class Parser
     {
+        private const char CR = '\r';
+        private const char LF = '\n';
+        private const char NULL = (char)0;
+
         //***********************************************************************************************
         //All public fields need to be set by controlling app before ParseDoubleBarcodes() is called
         public string write_directory; //directory where files are read and saved
@@ -340,6 +344,39 @@ namespace BarcodeParser
                 forFilePaths[i] = $"{read_directory}\\{forFiles[i]}";
                 revFilePaths[i] = $"{read_directory}\\{revFiles[i]}";
             }
+            // Check file lengths
+            for (int i = 0; i < forFiles.Length; i++)
+            {
+                string file = forFilePaths[i];
+                long forFileLines = CountLinesFromGzippedFile(file);
+
+                file = revFilePaths[i];
+                long revFileLines = CountLinesFromGzippedFile(file);
+
+                if (forFileLines != revFileLines)
+                {
+                    string msg = "Forward and Reverse input files are not the same length\n";
+                    msg += $"    forward file: {forFilePaths[i]}\n";
+                    msg += $"    reverse file: {revFilePaths[i]}\n";
+                    throw new ArgumentException(msg);
+                }
+
+                long lineCountMod = forFileLines % 4;
+                if (lineCountMod != 0)
+                {
+                    string msg = "Number of lines in file is not divisible by 4\n";
+                    msg += $"    forward file: {forFilePaths[i]}\n";
+                    msg += $"    reverse file: {revFilePaths[i]}\n";
+                    msg += $"    number of lines: {forFileLines}\n";
+                    throw new ArgumentException(msg);
+
+                }
+
+                long seqCount = forFileLines / 4;
+
+                SendOutputText(logFileWriter, $"Number of sequencse in {forFilePaths[i]} and {revFilePaths[i]}: {seqCount:n0}");
+            }
+            SendOutputText(logFileWriter, "");
 
             //bool outputAlignmentStrings = false;
             //Dictionary to build histogram of alignment matches:
@@ -1364,6 +1401,91 @@ namespace BarcodeParser
             return new string(charArray);
         }
 
+        static long CountLinesFromGzippedFile(string file)
+        {
+            FileInfo fileToDecompress = new FileInfo(file);
+
+            long file_length;
+
+            using (FileStream FileStream = fileToDecompress.OpenRead())
+            using (GZipStream gzip_stream = new GZipStream(FileStream, CompressionMode.Decompress))
+            using (StreamReader unzipped_reader = new StreamReader(gzip_stream))
+            {
+                file_length = CountLinesSmarter(unzipped_reader);
+            }
+
+            return file_length;
+        }
+
+        static long CountLinesSmarter(StreamReader stream)
+        {
+            /* This method was copied from: 
+             * https://nimaara.com/2018/03/20/counting-lines-of-a-text-file-in-csharp.html
+             * and https://github.com/NimaAra/Easy.Common/blob/768133ecf2257e0750a3d8998cb729d01c957927/Easy.Common/Extensions/StreamExtensions.cs
+             * A copy of the LICENSE from that github repository is included at the end of this method definition
+             * The method was modified to use a StreamReader object as input instead of a Stream object 
+             *     (byteBuffer is a char array instead of a byte array).
+             */
+            long lineCount = 0L;
+
+            char[] byteBuffer = new char[1024 * 1024];
+            char detectedEOL = NULL;
+            char currentChar = NULL;
+
+            int bytesRead;
+            while ((bytesRead = stream.Read(byteBuffer, 0, byteBuffer.Length)) > 0)
+            {
+                for (int i = 0; i < bytesRead; i++)
+                {
+                    currentChar = (char)byteBuffer[i];
+
+                    if (detectedEOL != NULL)
+                    {
+                        if (currentChar == detectedEOL)
+                        {
+                            lineCount++;
+                        }
+                    }
+                    else if (currentChar == LF || currentChar == CR)
+                    {
+                        detectedEOL = currentChar;
+                        lineCount++;
+                    }
+                }
+            }
+
+            // We had a NON-EOL character at the end without a new line
+            if (currentChar != LF && currentChar != CR && currentChar != NULL)
+            {
+                lineCount++;
+            }
+            return lineCount;
+
+            /*
+            Copy of LICENSE from https://github.com/NimaAra/Easy.Common:
+            MIT License
+
+            Copyright (c) 2017 Nima Ara
+
+            Permission is hereby granted, free of charge, to any person obtaining a copy
+            of this software and associated documentation files (the "Software"), to deal
+            in the Software without restriction, including without limitation the rights
+            to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+            copies of the Software, and to permit persons to whom the Software is
+            furnished to do so, subject to the following conditions:
+
+            The above copyright notice and this permission notice shall be included in all
+            copies or substantial portions of the Software.
+
+            THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+            IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+            FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+            AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+            LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+            OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+            SOFTWARE.
+             */
+        }
 
     }
 }
