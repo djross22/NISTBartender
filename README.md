@@ -1,25 +1,28 @@
 # NISTBartender
 
-Windows GUI interface for dual barcode parsing and automating calls to bartender-1.1. NISTBartender is written in C#.
+NISTBartender is a Windows GUI interface for dual barcode parsing to prep files for input to bartender-1.1. NISTBartender is written in C#.
 
 This software works in conjunction with the bartender-1.1 barcode clustering algorithm (Zhao, L., Liu, Z., Levy, S. F. & Wu, S. Bartender: a fast and accurate clustering algorithm to count barcode reads. Bioinformatics 34, 739–747 (2018)). 
+
+In a typical workflow, the barcode parsing is run in the NISTBartender Windows GUI, and then clustering is run on a Linux system with bartender-1.1. Then, some additional barcode merging, cleanup, and sorting steps are run via the Windows GUI.
 
 # Prerequisites
 
 To install and run NISTBartender requires the following additional software:
 
-- Visual Studio (C# editor and compiler): https://visualstudio.microsoft.com/
+- Visual Studio (C# editor and compiler): https://visualstudio.microsoft.com/, installed on a Windows computer
 
-- bartender-1.1: https://github.com/LaoZZZZZ/bartender-1.1
+- bartender-1.1: https://github.com/LaoZZZZZ/bartender-1.1, installed on a Linux ort Mac system.
+    - For easy access to a stable version of bartender-1.1, I created a fork from the original repository: https://github.com/djross22/bartender-1.1
+    - The developers of bartender-1.1 make occasional changes/updates to the code; I don't think any of them would affect its usability in my workflow, but I use the stable/forked version just in case. 
 
-- Ubuntu on the Windows Subsystem for Linux: https://docs.microsoft.com/en-us/windows/wsl/install-manual. For for information, see the instructions in the file, "Ubuntu and Bartender setup on Windows 10 or AWS computer.docx" - included as part of this repository.
+- With the changes made to the Windows Subsystem for Linux, I can no longer get bartender to run via Ubuntu on a Windows PC. So, the clustering step has to be run outside the GUI, and the "Cluster" and "Parse and Cluster" buttons in the GUI are disabled.
 
 # Installation
 
-1. Install Ubuntu on the Windows Subsystem for Linux (see above)
-2. Install bartender-1.1 (see above)
-3. Use Visual Studio to open the NISTBartender.sln file, and build (i.e. compile) the release configuration of NISTBartender
-4. Run the NISTBartender GUI by double clicking on the BartenderWindow.exe executable in the folder \NISTBartender\BartenderWindow\bin\Release\netcoreapp3.0
+1. Install bartender-1.1 (see instructions in the document, "bartender-1.1 installation and use on AWS.txt" - in this repository)
+2. Use Visual Studio to open the NISTBartender.sln file, and build (i.e. compile) the release configuration of NISTBartender
+3. Run the NISTBartender GUI by double clicking on the BartenderWindow.exe executable in the folder \NISTBartender\BartenderWindow\bin\Release\net6.0-windows
 
 
 
