@@ -1,0 +1,78 @@
+
+With large data files (e.g., one or more lanes of NovaSeq), bartender-1.1 can require a lot of memory. So, I typically run it on a high-memory EC2 instance on AWS, for example, x1.16xlarge, 64 cores, 1,952 GB memory.
+
+
+
+With a newly started EC2 instance, you first have to set up the non-root drive for data storage.
+There are probably better ways to do this, but this is the only way that I could get to work consistently with NIST security policies (which don't permit most methods to set up the non-root drive that I found via internet searches).
+
+	Log into the Linux system. Then, to list the available block/storage devices, enter the command:
+		lsblk
+
+	Next, make the file system on the appropriate storage block (the one with a lot oc capacity, but no mounted file system). For an x1.16xlarge instance, that block is named "xvdb", so the command is:
+		sudo mkfs -t xfs /dev/xvdb
+
+	Next, create a directory to use as a mount point (on an AWS Ubuntu instance, I do this as a sub folder of the home folder, ubuntu@ip-X-X-X-X:~):
+		sudo mkdir data
+
+	Then, mount the volume to that directory:
+		sudo mount /dev/xvdb data
+
+	Finally, change the owner of 'data' so that you can use it without using "sudo" all the time:
+		sudo chown ubuntu data
+	
+	
+
+Then install bartender-1.1 in the Linux machine:
+First, copy the bartennder repository to the Linux machine as a sub-folder in the home folder.
+For a stable version of bartender-1.1 that works with the NISTBartender workflow, use the main branch of the forked repository at: https://github.com/djross22/bartender-1.1.
+
+On the Linux machine, run the following commmands to install Python 2.7 and bartender-1.1:
+	sudo apt-get update 
+	sudo apt-get install python 
+
+	sudo apt install g++
+	
+	cd bartender-1.1 
+	sudo apt install make
+	make all
+	sudo make install
+	
+The "sudo apt install g++" and "sudo apt install make" will probably result in a message like, "newest version already installed." That's ok.
+
+
+Copy the files needed as input to bartender-1.1 to the data directory Linux machine.
+Example:
+	scp -r -i "location of PEM file.pem" identifier_HiSeq_T1234_forward_lintags.txt ubuntu@X.X.X.X:~/data
+	scp -r -i "location of PEM file.pem" identifier_HiSeq_T1234_reverse_lintags.txt ubuntu@X.X.X.X:~/data
+	
+Then, on the Linux machine, run the bartender clustering (in screen on Linux, since it can take a long time; for help/instructions on screen, see: https://help.ubuntu.com/community/Screen). See the README at the bartender-1.1 repository for explanations of the input arguments, but as an example:
+    screen
+
+    sudo python ~/bartender-1.1/bartender_single_com -f identifier_HiSeq_T1234_forward_lintags.txt -o identifier_HiSeq_T1234_forward -c 100 -z 5 -l 5 -s 1 -t 64 -d 3 &> identifier_HiSeq_T1234_forward.clustering.aws.log
+
+Then wait until that bartender process finishes. For the example data, that shold only take a couple of minutes, but for a full dataset, it could take more than an hour or two.
+If you periodically check on the resulting log file, you can stop the bartender process when the last line of the log file reads, "Start to remove pcr effects" and when these three output files have been written:
+	identifier_HiSeq_T1234_forward_barcode.csv
+	identifier_HiSeq_T1234_forward_cluster.csv
+	identifier_HiSeq_T1234_forward_quality.csv
+At that point that, bartender is done with clustering, and is attempting to remove PCR jackpot effects. But in the NIST workflow, we correct for PCR jackpots in a different way, so we don't need any of the other files that get produced by bartender-1.1.
+
+And, after the forward lintag file is clustered, run the reverse lintag file, example:
+    sudo python ~/bartender-1.1/bartender_single_com -f identifier_HiSeq_T1234_reverse_lintags.txt -o identifier_HiSeq_T1234_reverse -c 100 -z 5 -l 5 -s 1 -t 64 -d 3 &> identifier_HiSeq_T1234_reverse.clustering.aws.log
+	
+	
+Then copy these resulting files back to the barcode_analysis directory on the Windows machine for additional steps in the NISTBartender GUI:
+
+	identifier_HiSeq_T1234_forward_barcode.csv
+	identifier_HiSeq_T1234_forward_cluster.csv
+	identifier_HiSeq_T1234_forward_quality.csv
+	identifier_HiSeq_T1234_forward.clustering.aws.log
+	identifier_HiSeq_T1234_reverse_barcode.csv
+	identifier_HiSeq_T1234_reverse_cluster.csv
+	identifier_HiSeq_T1234_reverse_quality.csv
+	identifier_HiSeq_T1234_reverse.clustering.aws.log
+
+
+
+
