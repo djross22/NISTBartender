@@ -1768,7 +1768,7 @@ namespace BartenderWindow
 
         private void clusterButton_Click(object sender, RoutedEventArgs e)
         {
-            RunClusterer();
+            //RunClusterer();
         }
 
         private void clusterDefaultButton_Click(object sender, RoutedEventArgs e)
@@ -1778,9 +1778,10 @@ namespace BartenderWindow
 
         private void parseAndClusterButton_Click(object sender, RoutedEventArgs e)
         {
-            RunParserThenClusterer();
+            //RunParserThenClusterer();
         }
 
+        /*
         private void RunParserThenClusterer()
         {
             if (string.IsNullOrEmpty(OutputDirectory))
@@ -1804,6 +1805,7 @@ namespace BartenderWindow
 
             worker.RunWorkerAsync();
         }
+        */
 
         void parserAndClusterWorker_DoWork(object sender, DoWorkEventArgs e)
         {
@@ -2022,6 +2024,7 @@ namespace BartenderWindow
             }
         }
 
+        /*
         private void RunClusterer()
         {
 
@@ -2056,7 +2059,8 @@ namespace BartenderWindow
 
             }
         }
-
+        */
+        
         private void RunMergeLengths()
         {
 
