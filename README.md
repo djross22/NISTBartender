@@ -13,6 +13,8 @@ To install and run NISTBartender requires the following additional software:
 - Visual Studio (C# editor and compiler): https://visualstudio.microsoft.com/, installed on a Windows computer
 
 - bartender-1.1: https://github.com/LaoZZZZZ/bartender-1.1, installed on a Linux ort Mac system.
+    - For easy access to a stable version of bartender-1.1, I created a fork from the original repository: https://github.com/djross22/bartender-1.1
+    - The developers of bartender-1.1 make occasional changes/updates to the code; I don't think any of them would affect its usability in my workflow, but I use the stable/forked version just in case. 
 
 - With the changes made to the Windows Subsystem for Linux, I can no longer get bartender to run via Ubuntu on a Windows PC. So, the clustering step has to be run outside the GUI, and the "Cluster" and "Parse and Cluster" buttons in the GUI are disabled.
 
