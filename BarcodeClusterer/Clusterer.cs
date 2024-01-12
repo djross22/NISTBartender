@@ -384,14 +384,14 @@ namespace BarcodeClusterer
                             {
                                 int bcId = entry.Key;
                                 string bcCenter = entry.Value;
-
-                                if ((bcId != spikeinId) && (Parser.LevenshteinDistance(bcCenter, spikeinCenter) <= spikeinMergeDistance))
+                                int levDist = Parser.LevenshteinDistance(bcCenter, spikeinCenter);
+                                if ((bcId != spikeinId) && (levDist <= spikeinMergeDistance))
                                 {
                                     //If cluster center is within threshold Levenshtein distance, merge it with spike-in cluster
                                     int n1 = clusterCountDict[bcId]; //counts for cluster getting merged into spike-in cluster
                                     int n2 = clusterCountDict[spikeinId]; //counts for spike-in cluster
 
-                                    SendOutputText(logFileWriter, $"    Spike-In Merge: {bcId}, {bcCenter} -> {spikeinId}, {spikeinCenter}");
+                                    SendOutputText(logFileWriter, $"    Spike-In Merge: levDist: {levDist}; {bcId}, {bcCenter} -> {spikeinId}, {spikeinCenter}");
                                     SendOutputText(logFileWriter, $"        {n1:N0} + {n2:N0} = {n1 + n2:N0}");
 
                                     //add clusterCount to merge target in clusterCountDict
