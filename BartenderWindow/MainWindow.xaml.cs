@@ -2098,27 +2098,20 @@ namespace BartenderWindow
 
         void mergeWorker_DoWork(object sender, DoWorkEventArgs e)
         {
+            string direction = "";
             try
             {
+                direction = "forward";
                 forwardClusterer.MergeDifferentLengths();
-            }
-            catch (Exception ex)
-            {
-                //this has to be delegated becasue it interacts with the GUI by sending text to the outputTextBox
-                this.Dispatcher.Invoke(() => {
-                    AddOutputText($"Exception in Clusterer.MergeDifferentLengths() while attempting to merge forward barcodes: {ex})");
-                });
-            }
 
-            try
-            {
+                direction = "reverse";
                 reverseClusterer.MergeDifferentLengths();
             }
             catch (Exception ex)
             {
                 //this has to be delegated becasue it interacts with the GUI by sending text to the outputTextBox
                 this.Dispatcher.Invoke(() => {
-                    AddOutputText($"Exception in Clusterer.MergeDifferentLengths() while attempting to merge reverse barcodes: {ex})");
+                    AddOutputText($"Exception in Clusterer.MergeDifferentLengths() while attempting to merge {direction} barcodes: {ex})");
                 });
             }
         }
