@@ -69,7 +69,7 @@ namespace BarcodeParser
 
         //Locks used for synchronization of writing output to files from multiple parsing threads
         private static readonly Object fileLock = new Object(); //lock for multi-thread file writing
-        private static readonly Object unmatchedFileLock = new Object(); //lock for multi-thread file writing
+        //private static readonly Object unmatchedFileLock = new Object(); //lock for multi-thread file writing
         private static readonly Object counterLock = new Object(); //lock for multi-thread counter updates
 
         public Parser(IDisplaysOutputText receiver)
@@ -156,7 +156,7 @@ namespace BarcodeParser
             TextWriter multiTagWriter = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\{outputFileLabel}_multiplexing_tags.txt"));
 
             //  reads that don't sort to a multiplexing tag or don't match the lineage tag RegEx, this file for debugging 
-            TextWriter unmatchedWriter = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\{outputFileLabel}_unmatched_sequences.txt"));
+            //TextWriter unmatchedWriter = TextWriter.Synchronized(new StreamWriter($"{write_directory}\\{outputFileLabel}_unmatched_sequences.txt"));
 
             //Maximum useful sequence read length based on input settings
             int maxForSeqLength = forUmiTagLen.Last() + forMultiTagLen.Last() + forSpacerLength.Last() + forLinTagLength.Last() + linTagFlankLength;
@@ -391,7 +391,7 @@ namespace BarcodeParser
             forwardWriter.Close();
             reverseWriter.Close();
             multiTagWriter.Close();
-            unmatchedWriter.Close();
+            //unmatchedWriter.Close();
 
 
             DateTime endTime = DateTime.Now;
@@ -606,10 +606,10 @@ namespace BarcodeParser
 
                 if (!revLinTagMatchFound)
                 {
-                    lock (unmatchedFileLock)
-                    {
-                        unmatchedWriter.Write($"{forRead}, {meanForQuality}\n{revRead}, {meanRevQuality}\n\n");
-                    }
+                    //lock (unmatchedFileLock)
+                    //{
+                    //    unmatchedWriter.Write($"{forRead}, {meanForQuality}\n{revRead}, {meanRevQuality}\n\n");
+                    //}
                 }
 
                 lock (counterLock)
@@ -831,10 +831,10 @@ namespace BarcodeParser
 
                 if (!revLinTagMatchFound)
                 {
-                    lock (unmatchedFileLock)
-                    {
-                        unmatchedWriter.Write($"{forRead}, {meanForQuality}\n{revRead}, {meanRevQuality}\n\n");
-                    }
+                    //lock (unmatchedFileLock)
+                    //{
+                    //    unmatchedWriter.Write($"{forRead}, {meanForQuality}\n{revRead}, {meanRevQuality}\n\n");
+                    //}
                 }
 
                 lock (counterLock)
