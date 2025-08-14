@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Analysis" Version="0.22.2" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\BarcodeClusterer\BarcodeClusterer.csproj" />
     <ProjectReference Include="..\BarcodeParser\BarcodeParser.csproj" />
     <ProjectReference Include="..\BarcodeSorter\BarcodeSorter.csproj" />
