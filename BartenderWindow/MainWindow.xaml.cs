@@ -2078,14 +2078,6 @@ namespace BartenderWindow
                 try
                 {
                     InitClusterers();
-
-                    //Run cluster merging as background worker
-                    BackgroundWorker mergeWorker = new BackgroundWorker();
-                    mergeWorker.WorkerReportsProgress = false;
-                    mergeWorker.DoWork += mergeWorker_DoWork;
-                    mergeWorker.RunWorkerCompleted += mergeWorker_RunWorkerCompleted;
-
-                    mergeWorker.RunWorkerAsync();
                 }
                 catch (Exception ex)
                 {
@@ -2093,18 +2085,62 @@ namespace BartenderWindow
                     EnableInputControls();
                 }
 
+                try
+                {
+                    //Run forward cluster merging as background worker
+                    BackgroundWorker forwardMergeWorker = new BackgroundWorker();
+                    forwardMergeWorker.WorkerReportsProgress = false;
+                    forwardMergeWorker.DoWork += forwardMergeWorker_DoWork;
+                    forwardMergeWorker.RunWorkerCompleted += mergeWorker_RunWorkerCompleted;
+
+                    forwardMergeWorker.RunWorkerAsync();
+                }
+                catch (Exception ex)
+                {
+                    AddOutputText($"Exception in RunMergeLengths() during forward cluster merging: {ex})");
+                    EnableInputControls();
+                }
+
+                try
+                {
+                    //Run reverse cluster merging as background worker
+                    BackgroundWorker reverseMergeWorker = new BackgroundWorker();
+                    reverseMergeWorker.WorkerReportsProgress = false;
+                    reverseMergeWorker.DoWork += reverseMergeWorker_DoWork;
+                    reverseMergeWorker.RunWorkerCompleted += mergeWorker_RunWorkerCompleted;
+
+                    reverseMergeWorker.RunWorkerAsync();
+                }
+                catch (Exception ex)
+                {
+                    AddOutputText($"Exception in RunMergeLengths() during reverse cluster merging: {ex})");
+                    EnableInputControls();
+                }
+
             }
         }
 
-        void mergeWorker_DoWork(object sender, DoWorkEventArgs e)
+        void forwardMergeWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            string direction = "";
+            string direction = "forward";
             try
             {
-                direction = "forward";
                 forwardClusterer.MergeDifferentLengths();
+            }
+            catch (Exception ex)
+            {
+                //this has to be delegated becasue it interacts with the GUI by sending text to the outputTextBox
+                this.Dispatcher.Invoke(() => {
+                    AddOutputText($"Exception in Clusterer.MergeDifferentLengths() while attempting to merge {direction} barcodes: {ex})");
+                });
+            }
+        }
 
-                direction = "reverse";
+        void reverseMergeWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            string direction = "reverse";
+            try
+            {
                 reverseClusterer.MergeDifferentLengths();
             }
             catch (Exception ex)
