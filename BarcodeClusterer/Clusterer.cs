@@ -348,7 +348,7 @@ namespace BarcodeClusterer
                                     changeBcId(barcodeDF, id1, id2);
 
                                     numMerged++;
-                                    countsMerged += N2;
+                                    countsMerged += n1;
                                     break; // Only allow merge into one target cluster
                                 }
 
