@@ -7,12 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Data.Analysis;
 using static BarcodeParser.Parser;
-using System.Collections;
-using System.Collections.Frozen;
 using System.Data;
-using System.Xml;
-using System.Diagnostics.Metrics;
-using System.Security.Cryptography;
 
 namespace BarcodeClusterer
 {
