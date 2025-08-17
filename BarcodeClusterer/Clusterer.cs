@@ -176,7 +176,6 @@ namespace BarcodeClusterer
                 //        
                 string clusterFile = $"{outputPrefix}_cluster.csv";
                 SendOutputText(logFileWriter, $"{DateTime.Now}: Loading cluster file: {clusterFile}");
-                //Type[] columnTypes = new Type[] { typeof(long), typeof(string), typeof(float), typeof(long) };
                 Type[] columnTypes = new Type[] { typeof(long), typeof(string), typeof(string), typeof(long) };
                 DataFrame clusterDF = DataFrame.LoadCsv(clusterFile, dataTypes: columnTypes); // DataFrame with all barcode centers
 
@@ -239,9 +238,6 @@ namespace BarcodeClusterer
                     {
                         SendOutputText(logFileWriter);
                         SendOutputText(logFileWriter, $"{DateTime.Now}: Testing barcodes with length {barcodeLength} for merging with barcodes in cluster list");
-
-                        //copy of the current outputClusterDF to use for iteration while adding new elements to outputClusterDF
-                        //var compDF = outputClusterDF.Clone();
 
                         DataFrame df = clusterCenterDfDict[barcodeLength]; //dataframe of cluster centers with length = barcodeLength
                         SendOutputText(logFileWriter, $"    Comparing {df.Rows.Count:N0} x {outputClusterDF.Rows.Count:N0} = {df.Rows.Count * outputClusterDF.Rows.Count:N0} barcode pairs");
