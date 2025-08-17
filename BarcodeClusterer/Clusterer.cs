@@ -250,6 +250,7 @@ namespace BarcodeClusterer
                         int numMerged = 0;
                         int numAdded = 0;
 
+                        // Each row will possibly get merged into a row that is already in outputClusterDF
                         foreach (var row in df.Rows)
                         {
                             // colums in the dataframe: Cluster.ID, Center, Cluster.Score, time_point_1, barcodeLength
@@ -257,24 +258,14 @@ namespace BarcodeClusterer
                             long n1 = (long)row["time_point_1"];
                             long id1 = (long)row["Cluster.ID"];
                             bool shouldMerge = false;
+                            // Each compRow already exists in outputClusterDF
                             foreach (var compRow in outputClusterDF.Rows)
                             {
                                 string s2 = (string)compRow["Center"];
                                 long n2 = (long)compRow["time_point_1"];
                                 long id2 = (long)compRow["Cluster.ID"];
 
-                                long N1, N2;
-                                if (n1 > n2)
-                                {
-                                    N1 = n1;
-                                    N2 = n2;
-                                }
-                                else
-                                {
-                                    N1 = n2;
-                                    N2 = n1;
-                                }
-
+                                // First compare for sub-string merging
                                 if (autoMergeSubstrings)
                                 {
                                     //Test if one sequence is a substring of the other
@@ -298,29 +289,53 @@ namespace BarcodeClusterer
                                     }
                                 }
 
+                                // If the clusters weren't merged because of sub-string,
+                                //    then check count ratio and LevenshteinDistance to see if they should be merged
                                 if (!shouldMerge)
                                 {
-                                    int distance = Parser.LevenshteinDistance(s1, s2);
-                                    distance = Math.Abs(distance);
-                                    //SendOutputText(logFileWriter, $"distance: {distance}");
-                                    double indelProb;
-                                    //If there is not an entry in the inDelProbArr that corresponds to this Levenschtein difference,
-                                    //    then don't consider merging.
-                                    if (inDelProbArr.Length >= distance)
+                                    // These new long variables, N1, N2, are used to allow for merging
+                                    //     of a larger cluster into a small one if the smaller has
+                                    //     length closer to the nominal length
+                                    long N1, N2;
+                                    if (n1 > n2)
                                     {
-                                        indelProb = inDelProbArr[distance - 1];
+                                        N1 = n1;
+                                        N2 = n2;
+                                    }
+                                    else
+                                    {
+                                        N1 = n2;
+                                        N2 = n1;
+                                    }
 
-
-                                        //Test ratio vs. expected probability for merge criteria
-                                        SendOutputText(logFileWriter, $"    Distance {distance}: {id1}, {s1} -> {id2}, {s2}, count ratio: {N2:N0}/{N1 + N2:N0} = {(double)N2 / (N1 + N2)}, expected error probability: {indelProb}");
-                                        if ((double)N2 / (N1 + N2) <= indelProb)
+                                    double countRatio = (double)N2 / (N1 + N2);
+                                    double maxIndelProb = inDelProbArr.Max();
+                                    // The (countRatio <= maxIndelProb) in the next line is to avoid calculating
+                                    //     the LevenshteinDistance unless there is a chance for merging
+                                    if (countRatio <= maxIndelProb)
+                                    {
+                                        int distance = Parser.LevenshteinDistance(s1, s2);
+                                        distance = Math.Abs(distance);
+                                        //SendOutputText(logFileWriter, $"distance: {distance}");
+                                        double indelProb;
+                                        //If there is not an entry in the inDelProbArr that corresponds to this Levenschtein difference,
+                                        //    then don't consider merging.
+                                        if (inDelProbArr.Length >= distance)
                                         {
-                                            SendOutputText(logFileWriter, $"        Merging, {n1:N0} + {n2:N0} = {n1 + n2:N0}");
+                                            indelProb = inDelProbArr[distance - 1];
 
-                                            shouldMerge = true;
+                                            //Test ratio vs. expected probability for merge criteria
+                                            SendOutputText(logFileWriter, $"    Distance {distance}: {id1}, {s1} -> {id2}, {s2}, count ratio: {N2:N0}/{N1 + N2:N0} = {(double)N2 / (N1 + N2)}, expected error probability: {indelProb}");
+                                            if (countRatio <= indelProb)
+                                            {
+                                                SendOutputText(logFileWriter, $"        Merging, {n1:N0} + {n2:N0} = {n1 + n2:N0}");
+
+                                                shouldMerge = true;
+                                            }
                                         }
                                     }
                                 }
+                                
 
                                 //Note: do NOT replace next line with else:
                                 if (shouldMerge)
