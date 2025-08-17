@@ -441,10 +441,18 @@ namespace BarcodeClusterer
                 }
                 DataFrame saveClusterDF = new DataFrame(selectedColumns);
 
+                // Re-order DataFrame before saving
+                saveClusterDF = saveClusterDF.OrderBy("Center");
+                saveClusterDF = saveClusterDF.OrderBy("Cluster.ID");
+                saveClusterDF = saveClusterDF.OrderByDescending("time_point_1");
+
                 string mergedClusterFile = $"{outputPrefix}_merged_cluster.csv";
                 DataFrame.SaveCsv(saveClusterDF, mergedClusterFile);
 
                 //Save barcodeDF -> "_merged_barcode.csv"
+                // Re-order DataFrame before saving
+                barcodeDF = barcodeDF.OrderBy("Unique.reads");
+                barcodeDF = barcodeDF.OrderBy("Cluster.ID");
                 string mergedBarcodeFile = $"{outputPrefix}_merged_barcode.csv";
                 DataFrame.SaveCsv(barcodeDF, mergedBarcodeFile);
 
