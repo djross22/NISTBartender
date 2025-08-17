@@ -179,6 +179,12 @@ namespace BarcodeClusterer
                 Type[] columnTypes = new Type[] { typeof(long), typeof(string), typeof(string), typeof(long) };
                 DataFrame clusterDF = DataFrame.LoadCsv(clusterFile, dataTypes: columnTypes); // DataFrame with all barcode centers
 
+                // Re-order DataFrame before using it
+                //     Most important is re-ordering by the barcode counts (time_point_1) from highest to lowest
+                clusterDF = clusterDF.OrderBy("Center");
+                clusterDF = clusterDF.OrderBy("Cluster.ID");
+                clusterDF = clusterDF.OrderByDescending("time_point_1");
+
                 List<int> barcodeLengths = new List<int>();
                 foreach (string? entry in clusterDF["Center"])
                 {
