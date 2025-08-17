@@ -12,6 +12,7 @@ using System.Collections.Frozen;
 using System.Data;
 using System.Xml;
 using System.Diagnostics.Metrics;
+using System.Security.Cryptography;
 
 namespace BarcodeClusterer
 {
@@ -150,6 +151,17 @@ namespace BarcodeClusterer
             else if (foundIdCount < 1)
             {
                 throw new Exception($"editDF has zero rows with Cluster.ID {bcId}");
+            }
+        }
+
+        private void changeBcId(DataFrame editDF, long oldId, long newId)
+        {
+            foreach (var changeRow in editDF.Rows)
+            {
+                if ((long)changeRow["Cluster.ID"] == oldId)
+                {
+                    changeRow["Cluster.ID"] = newId;
+                }
             }
         }
         public void MergeDifferentLengths()
@@ -321,11 +333,8 @@ namespace BarcodeClusterer
                                     //    change clusterIds in barcodeDF
                                     AddClusterCountForId(outputClusterDF, id2, n1);
 
-                                    var changebarcodeIDRows = barcodeDF.Filter(barcodeDF["Cluster.ID"].ElementwiseEquals(id1));
-                                    foreach (var changeRow in changebarcodeIDRows.Rows)
-                                    {
-                                        changeRow["Cluster.ID"] = id2;
-                                    }
+                                    changeBcId(barcodeDF, id1, id2);
+
                                     numMerged++;
                                     countsMerged += N2;
                                     break; // Only allow merge into one target cluster
@@ -335,7 +344,7 @@ namespace BarcodeClusterer
                             if (!shouldMerge)
                             {
                                 //If the cluster doesn't get merged, then add its row to outputClusterDF
-                                outputClusterDF.Append(row);
+                                outputClusterDF.Append(row, inPlace:true);
                                 numAdded++;
                             }
                         }
@@ -349,6 +358,7 @@ namespace BarcodeClusterer
                 SendOutputText(logFileWriter);
                 SendOutputText(logFileWriter, $"A total of {totalNumMerged:N0} barcode clusters with {countsMerged:N0} read counts were merged into larger clusters.");
 
+                DataFrame newOutputClusterDF = outputClusterDF.Clone();
                 //Next, identify spike-in barcode clusters and merge clusters that are near them
                 if (spikeinMergeDistance>0)
                 {
@@ -359,82 +369,80 @@ namespace BarcodeClusterer
                     var spikeInDF = outputClusterDF.Filter(outputClusterDF["time_point_1"].ElementwiseGreaterThan(spikeinMergeThreshold));
                     var nonSpikeInDF = outputClusterDF.Filter(outputClusterDF["time_point_1"].ElementwiseLessThanOrEqual(spikeinMergeThreshold));
 
-                    //if (spikeInDF.Rows.Count>0)
-                    //{
-                    //    // TODO: re-code this section to be more like the previous merging;
-                    //    //     or just move the spike-in merging into that section
-                    //    foreach (var spikeinRow in spikeInDF.Rows)
-                    //    {
-                    //        // Output the set of spike-ins that were found.
-                    //        string spikeinCenter = (string)spikeinRow["Center"];
-                    //        long spikeinId = (long)spikeinRow["Cluster.ID"];
-                    //        SendOutputText(logFileWriter, $"{DateTime.Now}: Spike-In ID: {spikeinId}; Spike-In Center: {spikeinCenter}");
-                    //    }
+                    if (spikeInDF.Rows.Count > 0)
+                    {
+                        // TODO: re-code this section to be more like the previous merging;
+                        //     or just move the spike-in merging into that section
+                        foreach (var spikeinRow in spikeInDF.Rows)
+                        {
+                            // Output the set of spike-ins that were found.
+                            string spikeinCenter = (string)spikeinRow["Center"];
+                            long spikeinId = (long)spikeinRow["Cluster.ID"];
+                            SendOutputText(logFileWriter, $"{DateTime.Now}: Spike-In ID: {spikeinId}; Spike-In Center: {spikeinCenter}");
+                        }
 
-                    //    //Make new DataFrame to add clusters to if they don't get merged into a spike-in cluster
-                    //    // Start with spike-ins already included
-                    //    DataFrame newOutputClusterDF = spikeInDF.Clone();
+                        //Make new DataFrame to add clusters to if they don't get merged into a spike-in cluster
+                        // Start with spike-ins already included
+                        newOutputClusterDF = spikeInDF.Clone();
 
-                    //    int numMerged = 0;
-                    //    countsMerged = 0;
-                    //    foreach (var row in nonSpikeInDF.Rows)
-                    //    {
-                    //        long bcId = (long)row["Cluster.ID"];
-                    //        string bcCenter = (string)row["Center"];
-                    //        long bcCount = (long)row["time_point_1"]; //counts for cluster that might be merged into spike-in cluster
+                        int numMerged = 0;
+                        countsMerged = 0;
+                        foreach (var row in nonSpikeInDF.Rows)
+                        {
+                            long bcId = (long)row["Cluster.ID"];
+                            string bcCenter = (string)row["Center"];
+                            long bcCount = (long)row["time_point_1"]; //counts for cluster that might be merged into spike-in cluster
+                            bool wasMerged = false;
 
-                    //        foreach (var spikeinRow in spikeInDF.Rows)
-                    //        {
-                    //            string spikeinCenter = (string)spikeinRow["Center"];
-                    //            long spikeinCount = (long)spikeinRow["time_point_1"];
-                    //            long spikeinId = (long)spikeinRow["Cluster.ID"];
+                            foreach (var spikeinRow in spikeInDF.Rows)
+                            {
+                                string spikeinCenter = (string)spikeinRow["Center"];
+                                long spikeinCount = (long)spikeinRow["time_point_1"];
+                                long spikeinId = (long)spikeinRow["Cluster.ID"];
 
-                    //            int levDist = Parser.LevenshteinDistance(bcCenter, spikeinCenter);
-                    //            if ((bcId != spikeinId) && (levDist <= spikeinMergeDistance))
-                    //            {
-                    //                //If cluster center is within threshold Levenshtein distance, merge it with spike-in cluster
+                                int levDist = Parser.LevenshteinDistance(bcCenter, spikeinCenter);
+                                if ((bcId != spikeinId) && (levDist <= spikeinMergeDistance))
+                                {
+                                    //If cluster center is within threshold Levenshtein distance, merge it with spike-in cluster
 
-                    //                SendOutputText(logFileWriter, $"    Spike-In Merge: levDist: {levDist}; {bcId}, {bcCenter} -> {spikeinId}, {spikeinCenter}");
-                    //                SendOutputText(logFileWriter, $"        {bcCount:N0} + {spikeinCount:N0} = {bcCount + spikeinCount:N0}");
+                                    SendOutputText(logFileWriter, $"    Spike-In Merge: levDist: {levDist}; {bcId}, {bcCenter} -> {spikeinId}, {spikeinCenter}");
+                                    SendOutputText(logFileWriter, $"        {bcCount:N0} + {spikeinCount:N0} = {bcCount + spikeinCount:N0}");
 
-                    //                //add time_point_1 to merge target in outputClusterDF
-                    //                AddClusterCountForId(newOutputClusterDF, spikeinId, bcCount);
+                                    //add time_point_1 to merge target in outputClusterDF
+                                    AddClusterCountForId(newOutputClusterDF, spikeinId, bcCount);
+                                    // also add to target in spikeInDF, since that is a partial copy of newOutputClusterDF
+                                    AddClusterCountForId(spikeInDF, spikeinId, bcCount);
 
-                    //                //change clusterIds in barcodeDF
-                    //                var changebarcodeIDRows = barcodeDF.Filter(barcodeDF["Cluster.ID"].ElementwiseEquals(bcId));
-                    //                foreach (var changeRow in changebarcodeIDRows.Rows)
-                    //                {
-                    //                    changeRow["Cluster.ID"] = spikeinId;
-                    //                }
+                                    //change clusterIds in barcodeDF
+                                    changeBcId(barcodeDF, bcId, spikeinId);
 
-                    //                numMerged++;
-                    //                countsMerged += bcCount;
-                    //            }
-                    //            else
-                    //            {
-                    //                //If not merged, add the cluster to the newOutputClusterDF
-                    //                newOutputClusterDF.Append(row);
-                    //            }
-                    //        }
-
-                    //    }
-
-                    //    outputClusterDF = newOutputClusterDF;
-                    //}
-                    //else
-                    //{
-                    //    SendOutputText(logFileWriter, $"{DateTime.Now}: No spike-in barcodes found with count greater than merge threshold ({spikeinMergeThreshold})");
-                    //}
+                                    numMerged++;
+                                    countsMerged += bcCount;
+                                    wasMerged = true;
+                                    break; //Only merge into the first matching spike-in
+                                }
+                            }
+                            if (!wasMerged)
+                            {
+                                //If not merged, add the cluster to the newOutputClusterDF
+                                newOutputClusterDF.Append(row, inPlace: true);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        SendOutputText(logFileWriter, $"{DateTime.Now}: No spike-in barcodes found with count greater than merge threshold ({spikeinMergeThreshold})");
+                    }
                 }
 
-                //Save outputClusterDF -> "_merged_cluster.csv"
+                //Save newOutputClusterDF -> "_merged_cluster.csv"
                 //    only save with original columns: Cluster.ID, Center, Cluster.Score, time_point_1
                 List<DataFrameColumn> selectedColumns = new List<DataFrameColumn>();
                 List<string> columnNamesToSelect = new List<string> { "Cluster.ID", "Center", "Cluster.Score", "time_point_1" }; // Replace with your desired column names
 
                 foreach (string columnName in columnNamesToSelect)
                 {
-                    selectedColumns.Add(outputClusterDF.Columns[columnName]);
+                    selectedColumns.Add(newOutputClusterDF.Columns[columnName]);
                 }
                 DataFrame saveClusterDF = new DataFrame(selectedColumns);
 
