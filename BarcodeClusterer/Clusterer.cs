@@ -33,6 +33,8 @@ namespace BarcodeClusterer
 
         public int spikeinMergeThreshold, spikeinMergeDistance;
 
+        public List<string> spikeInBarcodes;
+
         //********************************************************************************
 
         //private Process clusterProcess;

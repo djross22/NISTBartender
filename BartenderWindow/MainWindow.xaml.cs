@@ -61,6 +61,8 @@ namespace BartenderWindow
         //Multiplexing tags
         private string fowardMultiTagText, reverseMultiTagText, extraMultiTagText;
         private List<string> forwardMultiTagList, reverseMultiTagList;
+        private string fowardSpikeInText, reverseSpikeInText;
+        private List<string> forwardSpikeInList, reverseSpikeInList;
         private Dictionary<string, string> fowardIdDict, reverseIdDict;
         private Dictionary<string, string> mutiTagIdDict; //Dictionary for sample IDs, keys are: $"{forwardMultiTag}_{reverseMultiTag}"
         private int[] forMultiTagLen, revMultiTagLen;
@@ -724,6 +726,32 @@ namespace BartenderWindow
             }
         }
 
+        public string FowardSpikeInText
+        {
+            get { return this.fowardSpikeInText; }
+            set
+            {
+                if (this.fowardSpikeInText != value)
+                {
+                    this.fowardSpikeInText = value;
+                    OnPropertyChanged("FowardSpikeInText");
+                }
+            }
+        }
+
+        public string ReverseSpikeInText
+        {
+            get { return this.reverseSpikeInText; }
+            set
+            {
+                if (this.reverseSpikeInText != value)
+                {
+                    this.reverseSpikeInText = value;
+                    OnPropertyChanged("ReverseSpikeInText");
+                }
+            }
+        }
+
         public string ReadLengthStr
         {
             get { return this.readLengthStr; }
@@ -983,6 +1011,9 @@ namespace BartenderWindow
             paramsList.Add("ReverseMultiTagText");
             paramsList.Add("FowardMultiTagText");
 
+            paramsList.Add("FowardSpikeInText");
+            paramsList.Add("ReverseSpikeInText");
+
             paramsList.Add("ReadLengthStr");
 
             paramsList.Add("RevUmiTagLenStr");
@@ -1200,6 +1231,36 @@ namespace BartenderWindow
                 }
                 AddOutputText($"");
             }
+        }
+
+        private void MakeSpikeInLists(bool printOutput = true)
+        {
+            forwardSpikeInList = new List<string>();
+            reverseSpikeInList = new List<string>();
+            if (!String.IsNullOrEmpty(FowardSpikeInText))
+            {
+                // Set up the forwardSpikeInList if fowardSpikeInText is not empty
+                AddOutputText($"Adding forward read sequences for spike-ins: ");
+                string[] forwardSpikeInArr = FowardSpikeInText.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (var bc in forwardSpikeInArr)
+                {
+                    forwardSpikeInList.Add(bc);
+                    AddOutputText($"    {bc}");
+                }
+            }
+
+            if (!String.IsNullOrEmpty(ReverseSpikeInText))
+            {
+                // Set up the reverseSpikeInList if reverseSpikeInText is not empty
+                AddOutputText($"Adding reverse read sequences for spike-ins: ");
+                string[] reverseSpikeInArr = ReverseSpikeInText.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (var bc in reverseSpikeInArr)
+                {
+                    reverseSpikeInList.Add(bc);
+                    AddOutputText($"    {bc}");
+                }
+            }
+            AddOutputText("");
         }
 
         private void SetReadLength()
@@ -2167,11 +2228,13 @@ namespace BartenderWindow
             //Set clusterer parameters
             forwardClusterer.lintagLength = forwardLinTag.Length;
             forwardClusterer.inputFile = ForClusterInputPath;
+            forwardClusterer.spikeInBarcodes = forwardSpikeInList;
             forwardClusterer.outputPrefix = $"{OutputDirectory}\\{OutputFileLabel}_forward";
 
 
             reverseClusterer.lintagLength = reverseLinTag.Length;
             reverseClusterer.inputFile = RevClusterInputPath;
+            reverseClusterer.spikeInBarcodes = reverseSpikeInList;
             reverseClusterer.outputPrefix = $"{OutputDirectory}\\{OutputFileLabel}_reverse";
             foreach (Clusterer clust in new Clusterer[] { forwardClusterer, reverseClusterer })
             {
@@ -2577,6 +2640,8 @@ namespace BartenderWindow
             HighlightUmiTag();
 
             MakeMultiTagLists();
+
+            MakeSpikeInLists();
 
             HighlightMultiTag();
 
