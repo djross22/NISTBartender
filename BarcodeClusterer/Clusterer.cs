@@ -374,25 +374,32 @@ namespace BarcodeClusterer
 
                 DataFrame newOutputClusterDF = outputClusterDF.Clone();
                 //Next, identify spike-in barcode clusters and merge clusters that are near them
+                // This can't be done in the previous loop, since that that loop only considers merging clusters without the nonminal barcode length
                 if (spikeinMergeDistance>0)
                 {
                     SendOutputText(logFileWriter);
                     SendOutputText(logFileWriter, $"{DateTime.Now}: Testing all barcodes for merging with spike-in barcodes in cluster list");
 
-                    //Get rows of outputClusterDF with spike-in barcodes: with time_point_1 > spikeinMergeThreshold
-                    var spikeInDF = outputClusterDF.Filter(outputClusterDF["time_point_1"].ElementwiseGreaterThan(spikeinMergeThreshold));
-                    var nonSpikeInDF = outputClusterDF.Filter(outputClusterDF["time_point_1"].ElementwiseLessThanOrEqual(spikeinMergeThreshold));
+                    // Find the spike-ins in clusterDF
+                    DataFrame spikeInDF = clusterDF.Clone();
+                    List<bool> isSpikeIn = new List<bool>();
+                    foreach (string bc in spikeInDF["Center"])
+                    {
+                        isSpikeIn.Add(spikeInBarcodes.Contains(bc));
+                    }
+                    PrimitiveDataFrameColumn<bool> newCol = new("isSpikeIn", isSpikeIn);
+                    var nonSpikeInDF = spikeInDF.Filter(newCol.ElementwiseEquals(false));
+                    spikeInDF = spikeInDF.Filter(newCol);
 
+                    SendOutputText(logFileWriter, $"{DateTime.Now}: Found {spikeInDF.Rows.Count} matching spike-in barcodes:");
                     if (spikeInDF.Rows.Count > 0)
                     {
-                        // TODO: re-code this section to be more like the previous merging;
-                        //     or just move the spike-in merging into that section
                         foreach (var spikeinRow in spikeInDF.Rows)
                         {
                             // Output the set of spike-ins that were found.
                             string spikeinCenter = (string)spikeinRow["Center"];
                             long spikeinId = (long)spikeinRow["Cluster.ID"];
-                            SendOutputText(logFileWriter, $"{DateTime.Now}: Spike-In ID: {spikeinId}; Spike-In Center: {spikeinCenter}");
+                            SendOutputText(logFileWriter, $"    Spike-In ID: {spikeinId}; Spike-In Center: {spikeinCenter}");
                         }
 
                         //Make new DataFrame to add clusters to if they don't get merged into a spike-in cluster
